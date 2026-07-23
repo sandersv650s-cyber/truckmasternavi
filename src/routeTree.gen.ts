@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VoertuigRouteImport } from './routes/voertuig'
 import { Route as RittenRouteImport } from './routes/ritten'
+import { Route as ProfielRouteImport } from './routes/profiel'
 import { Route as NavigatieRouteImport } from './routes/navigatie'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as IndexRouteImport } from './routes/index'
@@ -24,6 +25,11 @@ const VoertuigRoute = VoertuigRouteImport.update({
 const RittenRoute = RittenRouteImport.update({
   id: '/ritten',
   path: '/ritten',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfielRoute = ProfielRouteImport.update({
+  id: '/profiel',
+  path: '/profiel',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NavigatieRoute = NavigatieRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/community': typeof CommunityRoute
   '/navigatie': typeof NavigatieRoute
+  '/profiel': typeof ProfielRoute
   '/ritten': typeof RittenRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/community': typeof CommunityRoute
   '/navigatie': typeof NavigatieRoute
+  '/profiel': typeof ProfielRoute
   '/ritten': typeof RittenRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/community': typeof CommunityRoute
   '/navigatie': typeof NavigatieRoute
+  '/profiel': typeof ProfielRoute
   '/ritten': typeof RittenRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/community'
     | '/navigatie'
+    | '/profiel'
     | '/ritten'
     | '/voertuig'
     | '/ritten/$rideId'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/community'
     | '/navigatie'
+    | '/profiel'
     | '/ritten'
     | '/voertuig'
     | '/ritten/$rideId'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/community'
     | '/navigatie'
+    | '/profiel'
     | '/ritten'
     | '/voertuig'
     | '/ritten/$rideId'
@@ -103,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CommunityRoute: typeof CommunityRoute
   NavigatieRoute: typeof NavigatieRoute
+  ProfielRoute: typeof ProfielRoute
   RittenRoute: typeof RittenRouteWithChildren
   VoertuigRoute: typeof VoertuigRoute
 }
@@ -121,6 +134,13 @@ declare module '@tanstack/react-router' {
       path: '/ritten'
       fullPath: '/ritten'
       preLoaderRoute: typeof RittenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profiel': {
+      id: '/profiel'
+      path: '/profiel'
+      fullPath: '/profiel'
+      preLoaderRoute: typeof ProfielRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/navigatie': {
@@ -169,6 +189,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CommunityRoute: CommunityRoute,
   NavigatieRoute: NavigatieRoute,
+  ProfielRoute: ProfielRoute,
   RittenRoute: RittenRouteWithChildren,
   VoertuigRoute: VoertuigRoute,
 }
