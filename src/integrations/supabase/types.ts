@@ -14,7 +14,184 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      post_comments: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          text: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          text: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          text?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_likes: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          likes_count: number
+          text: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          likes_count?: number
+          text: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          likes_count?: number
+          text?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          truck: string | null
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          truck?: string | null
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          truck?: string | null
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      rides: {
+        Row: {
+          avg_speed: number | null
+          created_at: string
+          duration_min: number
+          ended_at: string | null
+          from_location: string
+          id: string
+          km: number
+          l100: number | null
+          liters: number | null
+          max_speed: number | null
+          notes: string | null
+          started_at: string
+          status: string
+          to_location: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avg_speed?: number | null
+          created_at?: string
+          duration_min?: number
+          ended_at?: string | null
+          from_location: string
+          id?: string
+          km?: number
+          l100?: number | null
+          liters?: number | null
+          max_speed?: number | null
+          notes?: string | null
+          started_at?: string
+          status?: string
+          to_location: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avg_speed?: number | null
+          created_at?: string
+          duration_min?: number
+          ended_at?: string | null
+          from_location?: string
+          id?: string
+          km?: number
+          l100?: number | null
+          liters?: number | null
+          max_speed?: number | null
+          notes?: string | null
+          started_at?: string
+          status?: string
+          to_location?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
