@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ZoekenRouteImport } from './routes/zoeken'
 import { Route as VoorzieningenRouteImport } from './routes/voorzieningen'
+import { Route as VoorwaardenRouteImport } from './routes/voorwaarden'
 import { Route as VoertuigRouteImport } from './routes/voertuig'
 import { Route as TruckstopsRouteImport } from './routes/truckstops'
 import { Route as RittenRouteImport } from './routes/ritten'
@@ -57,6 +58,11 @@ const ZoekenRoute = ZoekenRouteImport.update({
 const VoorzieningenRoute = VoorzieningenRouteImport.update({
   id: '/voorzieningen',
   path: '/voorzieningen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VoorwaardenRoute = VoorwaardenRouteImport.update({
+  id: '/voorwaarden',
+  path: '/voorwaarden',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VoertuigRoute = VoertuigRouteImport.update({
@@ -278,6 +284,7 @@ export interface FileRoutesByFullPath {
   '/ritten': typeof RittenRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
+  '/voorwaarden': typeof VoorwaardenRoute
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
@@ -319,6 +326,7 @@ export interface FileRoutesByTo {
   '/ritten': typeof RittenRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
+  '/voorwaarden': typeof VoorwaardenRoute
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
@@ -361,6 +369,7 @@ export interface FileRoutesById {
   '/ritten': typeof RittenRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
+  '/voorwaarden': typeof VoorwaardenRoute
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
@@ -404,6 +413,7 @@ export interface FileRouteTypes {
     | '/ritten'
     | '/truckstops'
     | '/voertuig'
+    | '/voorwaarden'
     | '/voorzieningen'
     | '/zoeken'
     | '/chat/$chatId'
@@ -445,6 +455,7 @@ export interface FileRouteTypes {
     | '/ritten'
     | '/truckstops'
     | '/voertuig'
+    | '/voorwaarden'
     | '/voorzieningen'
     | '/zoeken'
     | '/chat/$chatId'
@@ -486,6 +497,7 @@ export interface FileRouteTypes {
     | '/ritten'
     | '/truckstops'
     | '/voertuig'
+    | '/voorwaarden'
     | '/voorzieningen'
     | '/zoeken'
     | '/chat/$chatId'
@@ -528,6 +540,7 @@ export interface RootRouteChildren {
   RittenRoute: typeof RittenRouteWithChildren
   TruckstopsRoute: typeof TruckstopsRouteWithChildren
   VoertuigRoute: typeof VoertuigRoute
+  VoorwaardenRoute: typeof VoorwaardenRoute
   VoorzieningenRoute: typeof VoorzieningenRoute
   ZoekenRoute: typeof ZoekenRoute
 }
@@ -546,6 +559,13 @@ declare module '@tanstack/react-router' {
       path: '/voorzieningen'
       fullPath: '/voorzieningen'
       preLoaderRoute: typeof VoorzieningenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/voorwaarden': {
+      id: '/voorwaarden'
+      path: '/voorwaarden'
+      fullPath: '/voorwaarden'
+      preLoaderRoute: typeof VoorwaardenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/voertuig': {
@@ -898,6 +918,7 @@ const rootRouteChildren: RootRouteChildren = {
   RittenRoute: RittenRouteWithChildren,
   TruckstopsRoute: TruckstopsRouteWithChildren,
   VoertuigRoute: VoertuigRoute,
+  VoorwaardenRoute: VoorwaardenRoute,
   VoorzieningenRoute: VoorzieningenRoute,
   ZoekenRoute: ZoekenRoute,
 }
