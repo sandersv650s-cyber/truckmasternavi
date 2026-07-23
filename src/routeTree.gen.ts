@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ZoekenRouteImport } from './routes/zoeken'
 import { Route as VoorzieningenRouteImport } from './routes/voorzieningen'
 import { Route as VoertuigRouteImport } from './routes/voertuig'
 import { Route as TruckstopsRouteImport } from './routes/truckstops'
@@ -29,6 +30,11 @@ import { Route as RittenRideIdRouteImport } from './routes/ritten.$rideId'
 import { Route as ProfielUserIdRouteImport } from './routes/profiel.$userId'
 import { Route as ChatChatIdRouteImport } from './routes/chat.$chatId'
 
+const ZoekenRoute = ZoekenRouteImport.update({
+  id: '/zoeken',
+  path: '/zoeken',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VoorzieningenRoute = VoorzieningenRouteImport.update({
   id: '/voorzieningen',
   path: '/voorzieningen',
@@ -141,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/voorzieningen': typeof VoorzieningenRoute
+  '/zoeken': typeof ZoekenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
@@ -162,6 +169,7 @@ export interface FileRoutesByTo {
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/voorzieningen': typeof VoorzieningenRoute
+  '/zoeken': typeof ZoekenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
@@ -184,6 +192,7 @@ export interface FileRoutesById {
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/voorzieningen': typeof VoorzieningenRoute
+  '/zoeken': typeof ZoekenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
@@ -207,6 +216,7 @@ export interface FileRouteTypes {
     | '/truckstops'
     | '/voertuig'
     | '/voorzieningen'
+    | '/zoeken'
     | '/chat/$chatId'
     | '/profiel/$userId'
     | '/ritten/$rideId'
@@ -228,6 +238,7 @@ export interface FileRouteTypes {
     | '/truckstops'
     | '/voertuig'
     | '/voorzieningen'
+    | '/zoeken'
     | '/chat/$chatId'
     | '/profiel/$userId'
     | '/ritten/$rideId'
@@ -249,6 +260,7 @@ export interface FileRouteTypes {
     | '/truckstops'
     | '/voertuig'
     | '/voorzieningen'
+    | '/zoeken'
     | '/chat/$chatId'
     | '/profiel/$userId'
     | '/ritten/$rideId'
@@ -271,10 +283,18 @@ export interface RootRouteChildren {
   TruckstopsRoute: typeof TruckstopsRouteWithChildren
   VoertuigRoute: typeof VoertuigRoute
   VoorzieningenRoute: typeof VoorzieningenRoute
+  ZoekenRoute: typeof ZoekenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/zoeken': {
+      id: '/zoeken'
+      path: '/zoeken'
+      fullPath: '/zoeken'
+      preLoaderRoute: typeof ZoekenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/voorzieningen': {
       id: '/voorzieningen'
       path: '/voorzieningen'
@@ -471,6 +491,7 @@ const rootRouteChildren: RootRouteChildren = {
   TruckstopsRoute: TruckstopsRouteWithChildren,
   VoertuigRoute: VoertuigRoute,
   VoorzieningenRoute: VoorzieningenRoute,
+  ZoekenRoute: ZoekenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
