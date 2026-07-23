@@ -21,6 +21,7 @@ import { Route as InstellingenRouteImport } from './routes/instellingen'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as BrandstofRouteImport } from './routes/brandstof'
+import { Route as BeloningenRouteImport } from './routes/beloningen'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TruckstopsIdRouteImport } from './routes/truckstops.$id'
 import { Route as RittenRideIdRouteImport } from './routes/ritten.$rideId'
@@ -87,6 +88,11 @@ const BrandstofRoute = BrandstofRouteImport.update({
   path: '/brandstof',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BeloningenRoute = BeloningenRouteImport.update({
+  id: '/beloningen',
+  path: '/beloningen',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -115,6 +121,7 @@ const ChatChatIdRoute = ChatChatIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/beloningen': typeof BeloningenRoute
   '/brandstof': typeof BrandstofRoute
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/beloningen': typeof BeloningenRoute
   '/brandstof': typeof BrandstofRoute
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
@@ -154,6 +162,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/beloningen': typeof BeloningenRoute
   '/brandstof': typeof BrandstofRoute
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/beloningen'
     | '/brandstof'
     | '/chat'
     | '/community'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/beloningen'
     | '/brandstof'
     | '/chat'
     | '/community'
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/beloningen'
     | '/brandstof'
     | '/chat'
     | '/community'
@@ -233,6 +245,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BeloningenRoute: typeof BeloningenRoute
   BrandstofRoute: typeof BrandstofRoute
   ChatRoute: typeof ChatRouteWithChildren
   CommunityRoute: typeof CommunityRoute
@@ -333,6 +346,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BrandstofRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/beloningen': {
+      id: '/beloningen'
+      path: '/beloningen'
+      fullPath: '/beloningen'
+      preLoaderRoute: typeof BeloningenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -417,6 +437,7 @@ const TruckstopsRouteWithChildren = TruckstopsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BeloningenRoute: BeloningenRoute,
   BrandstofRoute: BrandstofRoute,
   ChatRoute: ChatRouteWithChildren,
   CommunityRoute: CommunityRoute,
