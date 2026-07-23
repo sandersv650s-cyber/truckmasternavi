@@ -449,3 +449,55 @@ export function countryLabel(c: "NL" | "BE" | "DE"): string {
 export function flag(c: "NL" | "BE" | "DE"): string {
   return c === "NL" ? "🇳🇱" : c === "BE" ? "🇧🇪" : "🇩🇪";
 }
+
+export type ParkingPredictionLevel = "waarschijnlijk" | "mogelijk" | "onzeker" | "vol";
+
+export type ParkingPrediction = {
+  level: ParkingPredictionLevel;
+  label: string;
+  color: string;
+  explanation: string;
+  asOf: string;
+};
+
+export function parkingPrediction(t: Truckstop): ParkingPrediction {
+  const ratio = t.totalSpots > 0 ? t.freeSpots / t.totalSpots : 0;
+  // Deterministic pseudo tijd-van-dag op basis van id-hash, zodat SSR en client identiek renderen.
+  const seed = t.id.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  const rushHour = seed % 3 === 0;
+  const asOf = minAgoLabel(t.occupancyUpdatedMinAgo);
+  if (t.freeSpots === 0) {
+    return {
+      level: "vol",
+      label: "Waarschijnlijk vol",
+      color: "bg-red-500/20 text-red-300 border-red-500/40",
+      explanation: "Nu 0 plekken vrij en piekuren op deze route — grote kans dat het vol blijft.",
+      asOf,
+    };
+  }
+  if (ratio < 0.12 || (rushHour && ratio < 0.22)) {
+    return {
+      level: "mogelijk",
+      label: "Mogelijk vol",
+      color: "bg-orange-500/20 text-orange-300 border-orange-500/40",
+      explanation: "Weinig marge en de laatste meldingen wijzen op oplopende drukte.",
+      asOf,
+    };
+  }
+  if (ratio > 0.35 && !rushHour) {
+    return {
+      level: "waarschijnlijk",
+      label: "Waarschijnlijk plek",
+      color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+      explanation: "Ruim aanbod nu en gemiddelde drukte voor dit tijdvenster.",
+      asOf,
+    };
+  }
+  return {
+    level: "onzeker",
+    label: "Onzeker",
+    color: "bg-yellow-500/20 text-yellow-300 border-yellow-500/40",
+    explanation: "Bezetting schommelt op dit tijdstip; check opnieuw dichter bij aankomst.",
+    asOf,
+  };
+}
