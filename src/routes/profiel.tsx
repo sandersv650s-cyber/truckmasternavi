@@ -60,6 +60,10 @@ function MyProfile() {
         vehicle_width_cm: (form as any).vehicle_width_cm ?? null,
         vehicle_length_cm: (form as any).vehicle_length_cm ?? null,
         vehicle_weight_kg: (form as any).vehicle_weight_kg ?? null,
+        vehicle_axle_count: (form as any).vehicle_axle_count ?? null,
+        vehicle_axle_weight_kg: (form as any).vehicle_axle_weight_kg ?? null,
+        vehicle_trailer_count: (form as any).vehicle_trailer_count ?? null,
+        vehicle_hazardous: Boolean((form as any).vehicle_hazardous),
       };
       const { error } = await supabase.from("profiles").upsert(patch as any);
       if (error) throw error;
@@ -172,9 +176,30 @@ function MyProfile() {
                     <Label htmlFor="vwt">Gewicht (kg)</Label>
                     <Input id="vwt" type="number" inputMode="numeric" value={(form as any).vehicle_weight_kg ?? ""} onChange={(e) => setForm({ ...(form as any), vehicle_weight_kg: e.target.value ? Number(e.target.value) : null })} />
                   </div>
+                  <div>
+                    <Label htmlFor="vac">Aantal assen</Label>
+                    <Input id="vac" type="number" inputMode="numeric" value={(form as any).vehicle_axle_count ?? ""} onChange={(e) => setForm({ ...(form as any), vehicle_axle_count: e.target.value ? Number(e.target.value) : null })} />
+                  </div>
+                  <div>
+                    <Label htmlFor="vawt">Aslast (kg)</Label>
+                    <Input id="vawt" type="number" inputMode="numeric" value={(form as any).vehicle_axle_weight_kg ?? ""} onChange={(e) => setForm({ ...(form as any), vehicle_axle_weight_kg: e.target.value ? Number(e.target.value) : null })} />
+                  </div>
+                  <div>
+                    <Label htmlFor="vtc">Aanhangers</Label>
+                    <Input id="vtc" type="number" inputMode="numeric" value={(form as any).vehicle_trailer_count ?? ""} onChange={(e) => setForm({ ...(form as any), vehicle_trailer_count: e.target.value ? Number(e.target.value) : null })} />
+                  </div>
                 </div>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4"
+                    checked={Boolean((form as any).vehicle_hazardous)}
+                    onChange={(e) => setForm({ ...(form as any), vehicle_hazardous: e.target.checked })}
+                  />
+                  Gevaarlijke lading (ADR)
+                </label>
                 <p className="text-[11px] text-muted-foreground">
-                  Opgeslagen in je profiel. De huidige gratis routeprovider past deze beperkingen nog niet toe.
+                  Wordt door de HERE-routeplanner toegepast voor truck-veilige routes en waarschuwingen.
                 </p>
               </div>
             </div>

@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowUpDown,
@@ -18,28 +19,37 @@ import {
   Search,
   Trash2,
   X,
-  ExternalLink,
   ChevronUp,
   ChevronDown,
+  AlertTriangle,
+  Truck,
+  Settings2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import {
-  computeRoute,
-  externalNavUrl,
+  autosuggest,
+  computeRoutes,
+  etaString,
   formatDistance,
   formatDuration,
-  geocode,
+  hasHereKey,
+  lookupSuggestion,
   reverseGeocode,
-  routingProvider,
-  type GeocodeHit,
-  type RouteResult,
-  type Waypoint,
-} from "@/lib/routing";
+  type AvoidFeature,
+  type HereRoute,
+  type HereSuggestion,
+  type LatLng,
+  type TransportMode,
+  type TruckProfile,
+} from "@/lib/here";
 
-const PlannerMap = lazy(() =>
-  import("@/components/planner-map").then((m) => ({ default: m.PlannerMap })),
+const HereMap = lazy(() =>
+  import("@/components/here-map").then((m) => ({ default: m.HereMap })),
+);
+const HereNavMode = lazy(() =>
+  import("@/components/here-nav-mode").then((m) => ({ default: m.HereNavMode })),
 );
 
 export const Route = createFileRoute("/routeplanner")({
@@ -49,42 +59,91 @@ export const Route = createFileRoute("/routeplanner")({
       {
         name: "description",
         content:
-          "Plan een route met tussenstops, bereken afstand en aankomsttijd en sla routes op in je TruckMate-account.",
+          "Truck-veilige routes met HERE Technologies: hoogte, gewicht, ADR, tolwegen en alternatieven — allemaal in de app.",
       },
       { property: "og:title", content: "Routeplanner — TruckMate" },
       {
         property: "og:description",
-        content: "Interactieve kaart, adreszoekfunctie en opgeslagen routes voor chauffeurs.",
+        content: "In-app truck-navigatie op basis van HERE Maps en HERE Routing.",
       },
     ],
   }),
   component: RoutePlannerPage,
 });
 
-type WP = Waypoint & { key: string };
+type WP = { key: string; label: string; lat: number; lng: number };
 const newKey = () => Math.random().toString(36).slice(2, 9);
+const emptyWP = (): WP => ({ key: newKey(), label: "", lat: 0, lng: 0 });
 
 type SavedRoute = {
   id: string;
   name: string;
-  waypoints: Waypoint[];
+  waypoints: { label: string; lat: number; lng: number }[];
   distance_m: number | null;
   duration_s: number | null;
+  truck_profile: TruckProfile | null;
+  avoid_features: string[] | null;
+  completed: boolean;
+  completed_at: string | null;
   updated_at: string;
+};
+
+const AVOID_LABELS: Record<AvoidFeature, string> = {
+  tollRoad: "Tolwegen",
+  controlledAccessHighway: "Snelwegen",
+  ferry: "Veerboten",
+  tunnel: "Tunnels",
+  dirtRoad: "Onverharde wegen",
+  difficultTurns: "Moeilijke bochten",
+  uTurns: "U-bochten",
 };
 
 function RoutePlannerPage() {
   const { user } = useAuth();
   const qc = useQueryClient();
 
-  const [waypoints, setWaypoints] = useState<WP[]>([
-    { key: newKey(), label: "", lat: 0, lng: 0 },
-    { key: newKey(), label: "", lat: 0, lng: 0 },
-  ]);
-  const [route, setRoute] = useState<RouteResult | null>(null);
-  const [currentLoc, setCurrentLoc] = useState<{ lat: number; lng: number } | null>(null);
+  const [waypoints, setWaypoints] = useState<WP[]>([emptyWP(), emptyWP()]);
+  const [routes, setRoutes] = useState<HereRoute[]>([]);
+  const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
+  const [currentLoc, setCurrentLoc] = useState<LatLng | null>(null);
   const [computing, setComputing] = useState(false);
+  const [computeError, setComputeError] = useState<string | null>(null);
   const [saveName, setSaveName] = useState("");
+  const [navMode, setNavMode] = useState(false);
+  const [showProfilePanel, setShowProfilePanel] = useState(false);
+  const [transportMode, setTransportMode] = useState<TransportMode>("truck");
+  const [avoid, setAvoid] = useState<AvoidFeature[]>(["dirtRoad"]);
+
+  const profileQ = useQuery({
+    queryKey: ["profile", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data as any;
+    },
+  });
+
+  const [truck, setTruck] = useState<TruckProfile>({});
+  useEffect(() => {
+    if (!profileQ.data) return;
+    const p = profileQ.data;
+    setTruck({
+      height_cm: p.vehicle_height_cm,
+      width_cm: p.vehicle_width_cm,
+      length_cm: p.vehicle_length_cm,
+      weight_kg: p.vehicle_weight_kg,
+      axle_weight_kg: p.vehicle_axle_weight_kg,
+      axle_count: p.vehicle_axle_count,
+      trailer_count: p.vehicle_trailer_count,
+      hazardous: p.vehicle_hazardous,
+    });
+    if (p.vehicle_type && p.vehicle_type !== "truck") setTransportMode("car");
+  }, [profileQ.data]);
 
   const savedQ = useQuery({
     queryKey: ["saved_routes", user?.id],
@@ -92,10 +151,12 @@ function RoutePlannerPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("saved_routes" as any)
-        .select("id,name,waypoints,distance_m,duration_s,updated_at")
+        .select(
+          "id,name,waypoints,distance_m,duration_s,truck_profile,avoid_features,completed,completed_at,updated_at",
+        )
         .order("updated_at", { ascending: false });
       if (error) throw error;
-      return ((data ?? []) as unknown) as SavedRoute[];
+      return (data ?? []) as unknown as SavedRoute[];
     },
   });
 
@@ -105,7 +166,7 @@ function RoutePlannerPage() {
   const addWP = () =>
     setWaypoints((prev) => {
       const copy = [...prev];
-      copy.splice(copy.length - 1, 0, { key: newKey(), label: "", lat: 0, lng: 0 });
+      copy.splice(copy.length - 1, 0, emptyWP());
       return copy;
     });
   const removeWP = (i: number) =>
@@ -120,11 +181,10 @@ function RoutePlannerPage() {
     });
   const reverseAll = () => setWaypoints((prev) => [...prev].reverse());
   const clearAll = () => {
-    setWaypoints([
-      { key: newKey(), label: "", lat: 0, lng: 0 },
-      { key: newKey(), label: "", lat: 0, lng: 0 },
-    ]);
-    setRoute(null);
+    setWaypoints([emptyWP(), emptyWP()]);
+    setRoutes([]);
+    setSelectedRouteId(null);
+    setComputeError(null);
   };
 
   // --- Current location ---
@@ -138,10 +198,8 @@ function RoutePlannerPage() {
         const { latitude, longitude } = pos.coords;
         setCurrentLoc({ lat: latitude, lng: longitude });
         let label = `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
-        try {
-          label = await reverseGeocode(latitude, longitude);
-        } catch {
-          /* fallback ok */
+        if (hasHereKey()) {
+          try { label = await reverseGeocode({ lat: latitude, lng: longitude }); } catch { /* keep coords */ }
         }
         setWaypoints((prev) => {
           const copy = [...prev];
@@ -151,34 +209,83 @@ function RoutePlannerPage() {
         toast.success("Huidige locatie ingesteld als vertrek");
       },
       (err) => {
-        const msg =
+        toast.error(
           err.code === err.PERMISSION_DENIED
-            ? "Locatie geweigerd — sta locatie toe in je browserinstellingen."
-            : "Locatie kon niet worden bepaald.";
-        toast.error(msg);
+            ? "Locatietoegang geweigerd — sta locatie toe in je browser."
+            : "Locatie kon niet worden bepaald.",
+        );
       },
       { enableHighAccuracy: true, timeout: 10_000, maximumAge: 60_000 },
     );
   };
 
-  // --- Compute route ---
   const filled = waypoints.filter((w) => w.lat !== 0 || w.lng !== 0);
-  const canRoute = filled.length >= 2 && filled.length === waypoints.length;
+  const canRoute = filled.length >= 2 && filled.length === waypoints.length && hasHereKey();
+  const selectedRoute =
+    routes.find((r) => r.id === selectedRouteId) ?? routes[0] ?? null;
 
-  const doCompute = async () => {
+  const doCompute = async (opts?: { alternatives?: number }) => {
+    if (!hasHereKey()) {
+      toast.error("HERE API-sleutel ontbreekt");
+      return;
+    }
     if (!canRoute) {
       toast.error("Vul minstens vertrek en bestemming in");
       return;
     }
     setComputing(true);
+    setComputeError(null);
+    if (!navigator.onLine) {
+      setComputing(false);
+      setComputeError("Geen internetverbinding — routes vereisen HERE online.");
+      return;
+    }
     try {
-      const res = await computeRoute(waypoints);
-      setRoute(res);
+      const via = waypoints.slice(1, -1).map((w) => ({ lat: w.lat, lng: w.lng }));
+      const res = await computeRoutes({
+        origin: { lat: waypoints[0].lat, lng: waypoints[0].lng },
+        destination: {
+          lat: waypoints[waypoints.length - 1].lat,
+          lng: waypoints[waypoints.length - 1].lng,
+        },
+        via,
+        transportMode,
+        truck: transportMode === "truck" ? truck : undefined,
+        avoid,
+        alternatives: opts?.alternatives ?? 2,
+      });
+      setRoutes(res);
+      setSelectedRouteId(res[0]?.id ?? null);
     } catch (e) {
-      setRoute(null);
-      toast.error(e instanceof Error ? e.message : "Route kon niet worden berekend");
+      setRoutes([]);
+      setSelectedRouteId(null);
+      setComputeError(e instanceof Error ? e.message : "Route kon niet worden berekend");
     } finally {
       setComputing(false);
+    }
+  };
+
+  // Reroute from a live position (used by nav mode)
+  const rerouteFrom = async (from: LatLng): Promise<HereRoute | null> => {
+    if (waypoints.length < 2) return null;
+    try {
+      const via = waypoints.slice(1, -1).map((w) => ({ lat: w.lat, lng: w.lng }));
+      const res = await computeRoutes({
+        origin: from,
+        destination: {
+          lat: waypoints[waypoints.length - 1].lat,
+          lng: waypoints[waypoints.length - 1].lng,
+        },
+        via,
+        transportMode,
+        truck: transportMode === "truck" ? truck : undefined,
+        avoid,
+        alternatives: 0,
+      });
+      return res[0] ?? null;
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Herberekenen mislukt");
+      return null;
     }
   };
 
@@ -187,13 +294,16 @@ function RoutePlannerPage() {
     mutationFn: async () => {
       if (!user) throw new Error("Niet ingelogd");
       if (!canRoute) throw new Error("Onvolledige route");
-      const name = saveName.trim() || `${waypoints[0].label} → ${waypoints[waypoints.length - 1].label}`;
+      const name =
+        saveName.trim() || `${waypoints[0].label} → ${waypoints[waypoints.length - 1].label}`;
       const payload = {
         user_id: user.id,
         name,
         waypoints: waypoints.map(({ label, lat, lng }) => ({ label, lat, lng })),
-        distance_m: route?.distance_m ? Math.round(route.distance_m) : null,
-        duration_s: route?.duration_s ? Math.round(route.duration_s) : null,
+        distance_m: selectedRoute ? Math.round(selectedRoute.distance_m) : null,
+        duration_s: selectedRoute ? Math.round(selectedRoute.duration_s) : null,
+        truck_profile: transportMode === "truck" ? truck : null,
+        avoid_features: avoid,
       };
       const { error } = await supabase.from("saved_routes" as any).insert(payload);
       if (error) throw error;
@@ -204,6 +314,17 @@ function RoutePlannerPage() {
       toast.success("Route opgeslagen");
     },
     onError: (e: Error) => toast.error(e.message),
+  });
+
+  const completeMut = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("saved_routes" as any)
+        .update({ completed: true, completed_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["saved_routes"] }),
   });
 
   const renameMut = useMutation({
@@ -227,31 +348,52 @@ function RoutePlannerPage() {
 
   const loadRoute = (r: SavedRoute) => {
     setWaypoints(r.waypoints.map((w) => ({ ...w, key: newKey() })));
-    setRoute(null);
-    toast.success(`"${r.name}" geladen — druk op Bereken om opnieuw te berekenen`);
+    if (r.truck_profile) setTruck(r.truck_profile);
+    if (r.avoid_features && r.avoid_features.length) setAvoid(r.avoid_features as AvoidFeature[]);
+    setRoutes([]);
+    setSelectedRouteId(null);
+    toast.success(`"${r.name}" geladen — druk op Bereken`);
   };
 
-  // --- ETA ---
-  const eta =
-    route
-      ? new Date(Date.now() + route.duration_s * 1000).toLocaleTimeString("nl-NL", {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : null;
+  const startNav = async () => {
+    if (!selectedRoute) return;
+    if (typeof navigator !== "undefined" && !navigator.geolocation) {
+      toast.error("Geolocatie niet ondersteund");
+      return;
+    }
+    setNavMode(true);
+  };
+
+  // Warnings summary
+  const warnings = useMemo(() => {
+    const w = selectedRoute?.notices ?? [];
+    return w.slice(0, 8);
+  }, [selectedRoute]);
+
+  const toggleAvoid = (f: AvoidFeature) =>
+    setAvoid((prev) => (prev.includes(f) ? prev.filter((x) => x !== f) : [...prev, f]));
 
   return (
-    <AppShell
-      title="Routeplanner"
-      demoBanner={
-        !routingProvider.supportsTruckProfile
-          ? "Route berekend met OpenStreetMap (auto-profiel). Truckbeperkingen (hoogte/gewicht) worden nog niet toegepast."
-          : undefined
-      }
-    >
+    <AppShell title="Routeplanner">
+      {!hasHereKey() && (
+        <Card className="mb-3 border-yellow-500/40 bg-yellow-500/10">
+          <CardContent className="flex items-start gap-2 p-3 text-xs text-yellow-100">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <div>
+              <p className="font-semibold">HERE Maps setup vereist (admin)</p>
+              <p>
+                Voeg de omgevingsvariabele <code>VITE_HERE_API_KEY</code> toe in
+                Project Settings → Secrets en publiceer de app opnieuw. Zonder
+                sleutel werken kaart, adreszoeken en routing niet.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Map */}
       <Card className="mb-3 overflow-hidden">
-        <div className="h-72 w-full sm:h-96 bg-muted">
+        <div className="h-72 w-full bg-muted sm:h-96">
           <Suspense
             fallback={
               <div className="grid h-full place-items-center text-sm text-muted-foreground">
@@ -259,9 +401,13 @@ function RoutePlannerPage() {
               </div>
             }
           >
-            <PlannerMap
-              waypoints={waypoints.filter((w) => w.lat !== 0 || w.lng !== 0)}
-              geometry={route?.geometry ?? null}
+            <HereMap
+              waypoints={waypoints
+                .filter((w) => w.lat !== 0 || w.lng !== 0)
+                .map((w) => ({ lat: w.lat, lng: w.lng, label: w.label }))}
+              routes={routes}
+              selectedRouteId={selectedRouteId ?? undefined}
+              onSelectRoute={setSelectedRouteId}
               currentLocation={currentLoc}
             />
           </Suspense>
@@ -277,9 +423,8 @@ function RoutePlannerPage() {
               index={i}
               total={waypoints.length}
               value={w.label}
-              onPick={(hit) =>
-                setWP(i, { label: hit.display_name, lat: hit.lat, lng: hit.lng })
-              }
+              biasAt={currentLoc}
+              onPick={(pt, label) => setWP(i, { label, lat: pt.lat, lng: pt.lng })}
               onChangeLabel={(v) => setWP(i, { label: v })}
               onRemove={() => removeWP(i)}
               onMoveUp={() => moveWP(i, -1)}
@@ -303,50 +448,200 @@ function RoutePlannerPage() {
         </CardContent>
       </Card>
 
+      {/* Truck profile + avoid */}
+      <Card className="mb-3">
+        <CardContent className="p-4">
+          <button
+            className="flex w-full items-center justify-between text-left text-sm font-semibold"
+            onClick={() => setShowProfilePanel((v) => !v)}
+          >
+            <span className="flex items-center gap-2">
+              <Truck className="h-4 w-4" />
+              Voertuigprofiel & voorkeuren
+              <Badge variant={transportMode === "truck" ? "default" : "secondary"} className="text-[10px]">
+                {transportMode === "truck" ? "Vrachtwagen" : "Auto"}
+              </Badge>
+            </span>
+            <Settings2 className="h-4 w-4 text-muted-foreground" />
+          </button>
+          {showProfilePanel && (
+            <div className="mt-3 space-y-3">
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant={transportMode === "truck" ? "default" : "outline"}
+                  onClick={() => setTransportMode("truck")}
+                >
+                  Vrachtwagen
+                </Button>
+                <Button
+                  size="sm"
+                  variant={transportMode === "car" ? "default" : "outline"}
+                  onClick={() => setTransportMode("car")}
+                >
+                  Auto/bestelwagen
+                </Button>
+              </div>
+              {transportMode === "truck" && (
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  <NumField label="Hoogte (cm)" v={truck.height_cm} on={(n) => setTruck({ ...truck, height_cm: n })} />
+                  <NumField label="Breedte (cm)" v={truck.width_cm} on={(n) => setTruck({ ...truck, width_cm: n })} />
+                  <NumField label="Lengte (cm)" v={truck.length_cm} on={(n) => setTruck({ ...truck, length_cm: n })} />
+                  <NumField label="Gewicht (kg)" v={truck.weight_kg} on={(n) => setTruck({ ...truck, weight_kg: n })} />
+                  <NumField label="Aslast (kg)" v={truck.axle_weight_kg} on={(n) => setTruck({ ...truck, axle_weight_kg: n })} />
+                  <NumField label="Assen" v={truck.axle_count} on={(n) => setTruck({ ...truck, axle_count: n })} />
+                  <NumField label="Aanhangers" v={truck.trailer_count} on={(n) => setTruck({ ...truck, trailer_count: n })} />
+                  <div>
+                    <Label className="text-xs">Tunnelcategorie</Label>
+                    <select
+                      className="mt-1 block h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+                      value={truck.tunnel_category ?? ""}
+                      onChange={(e) =>
+                        setTruck({ ...truck, tunnel_category: (e.target.value || null) as any })
+                      }
+                    >
+                      <option value="">—</option>
+                      <option value="B">B</option>
+                      <option value="C">C</option>
+                      <option value="D">D</option>
+                      <option value="E">E</option>
+                    </select>
+                  </div>
+                  <label className="col-span-2 flex items-center gap-2 text-sm sm:col-span-3">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4"
+                      checked={Boolean(truck.hazardous)}
+                      onChange={(e) => setTruck({ ...truck, hazardous: e.target.checked })}
+                    />
+                    Gevaarlijke lading (ADR)
+                  </label>
+                </div>
+              )}
+              <div>
+                <p className="mb-1 text-xs font-semibold text-muted-foreground">Vermijden</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {(Object.keys(AVOID_LABELS) as AvoidFeature[]).map((f) => (
+                    <button
+                      key={f}
+                      type="button"
+                      onClick={() => toggleAvoid(f)}
+                      className={`rounded-full border px-3 py-1 text-xs transition ${
+                        avoid.includes(f)
+                          ? "border-primary bg-primary/15 text-primary"
+                          : "border-border text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {AVOID_LABELS[f]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Route actions */}
       <div className="mb-3 flex flex-wrap gap-2">
-        <Button onClick={doCompute} disabled={computing || !canRoute} className="flex-1 min-w-[140px]">
+        <Button
+          onClick={() => doCompute()}
+          disabled={computing || !canRoute}
+          className="min-w-[140px] flex-1"
+        >
           {computing ? (
             <Loader2 className="mr-1 h-4 w-4 animate-spin" />
           ) : (
             <RefreshCw className="mr-1 h-4 w-4" />
           )}
-          {route ? "Opnieuw berekenen" : "Bereken route"}
+          {routes.length ? "Opnieuw berekenen" : "Bereken route"}
         </Button>
         <Button
-          variant="outline"
-          asChild
-          disabled={!canRoute}
+          variant="default"
+          disabled={!selectedRoute}
+          onClick={startNav}
+          className="min-w-[140px] flex-1"
         >
-          <a
-            href={externalNavUrl(waypoints)}
-            target="_blank"
-            rel="noreferrer"
-            aria-disabled={!canRoute}
-            className={!canRoute ? "pointer-events-none opacity-50" : ""}
-          >
-            <Navigation className="mr-1 h-4 w-4" /> Start in Maps
-            <ExternalLink className="ml-1 h-3 w-3" />
-          </a>
+          <Navigation className="mr-1 h-4 w-4" /> Start navigatie
         </Button>
       </div>
 
+      {computeError && (
+        <Card className="mb-3 border-destructive/40 bg-destructive/10">
+          <CardContent className="flex items-start gap-2 p-3 text-xs text-destructive-foreground">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{computeError}</span>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Alternatives */}
+      {routes.length > 1 && (
+        <Card className="mb-3">
+          <CardContent className="p-3">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Alternatieven ({routes.length})
+            </p>
+            <div className="flex gap-2 overflow-x-auto">
+              {routes.map((r, i) => {
+                const active = r.id === (selectedRouteId ?? routes[0].id);
+                return (
+                  <button
+                    key={r.id}
+                    onClick={() => setSelectedRouteId(r.id)}
+                    className={`min-w-[130px] rounded-lg border p-2 text-left text-xs ${
+                      active ? "border-primary bg-primary/10" : "border-border"
+                    }`}
+                  >
+                    <p className="font-semibold">Route {i + 1}{i === 0 ? " (snelste)" : ""}</p>
+                    <p>{formatDistance(r.distance_m)} · {formatDuration(r.duration_s)}</p>
+                    {r.traffic_delay_s > 60 && (
+                      <p className="text-yellow-400">+{formatDuration(r.traffic_delay_s)} verkeer</p>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Summary */}
-      {route && (
+      {selectedRoute && (
         <Card className="mb-3">
           <CardContent className="p-4">
-            <div className="mb-3 grid grid-cols-3 gap-2 text-center">
-              <Stat label="Afstand" value={formatDistance(route.distance_m)} />
-              <Stat label="Duur" value={formatDuration(route.duration_s)} />
-              <Stat label="ETA" value={eta ?? "—"} />
+            <div className="mb-3 grid grid-cols-4 gap-2 text-center">
+              <Stat label="Afstand" value={formatDistance(selectedRoute.distance_m)} />
+              <Stat label="Duur" value={formatDuration(selectedRoute.duration_s)} />
+              <Stat label="ETA" value={etaString(selectedRoute.duration_s)} />
+              <Stat
+                label="Verkeer"
+                value={
+                  selectedRoute.traffic_delay_s > 60
+                    ? `+${formatDuration(selectedRoute.traffic_delay_s)}`
+                    : "0 min"
+                }
+              />
             </div>
+            {warnings.length > 0 && (
+              <div className="mb-3 rounded-md border border-yellow-500/30 bg-yellow-500/10 p-2 text-xs text-yellow-100">
+                <p className="mb-1 flex items-center gap-1 font-semibold">
+                  <AlertTriangle className="h-3.5 w-3.5" /> Waarschuwingen ({warnings.length})
+                </p>
+                <ul className="list-inside list-disc space-y-0.5">
+                  {warnings.map((n, i) => (
+                    <li key={i}>{n.title}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input
                 placeholder="Naam voor deze route"
                 value={saveName}
                 onChange={(e) => setSaveName(e.target.value)}
               />
-              <Button onClick={() => saveMut.mutate()} disabled={saveMut.isPending}>
+              <Button onClick={() => saveMut.mutate()} disabled={saveMut.isPending || !user}>
                 {saveMut.isPending ? (
                   <Loader2 className="mr-1 h-4 w-4 animate-spin" />
                 ) : (
@@ -360,20 +655,20 @@ function RoutePlannerPage() {
       )}
 
       {/* Steps */}
-      {route && route.steps.length > 0 && (
+      {selectedRoute && selectedRoute.maneuvers.length > 0 && (
         <Card className="mb-3">
           <CardContent className="p-0">
             <div className="border-b px-4 py-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Route-instructies ({route.steps.length})
+              Route-instructies ({selectedRoute.maneuvers.length})
             </div>
             <ol className="max-h-80 divide-y overflow-y-auto">
-              {route.steps.map((s, i) => (
+              {selectedRoute.maneuvers.map((s, i) => (
                 <li key={i} className="flex items-start gap-3 px-4 py-2 text-sm">
                   <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary/15 text-xs font-bold text-primary">
                     {i + 1}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate">{s.instruction}</p>
+                    <p>{s.instruction}</p>
                     <p className="text-xs text-muted-foreground">
                       {formatDistance(s.distance_m)} · {formatDuration(s.duration_s)}
                     </p>
@@ -406,16 +701,29 @@ function RoutePlannerPage() {
                   onLoad={() => loadRoute(r)}
                   onRename={(name) => renameMut.mutate({ id: r.id, name })}
                   onDelete={() => deleteMut.mutate(r.id)}
+                  onComplete={() => completeMut.mutate(r.id)}
                 />
               ))}
             </ul>
           )}
           <p className="mt-3 text-[11px] text-muted-foreground">
-            Aanbieder: {routingProvider.name}. Adressen via Nominatim (fair-use). Gebruik voor
-            productie een dedicated truck-routingprovider.
+            Aanbieder: HERE Technologies (Maps + Routing v8). Truck-parameters worden meegestuurd.
           </p>
         </CardContent>
       </Card>
+
+      {navMode && selectedRoute && (
+        <Suspense fallback={null}>
+          <HereNavMode
+            route={selectedRoute}
+            waypoints={waypoints
+              .filter((w) => w.lat !== 0 || w.lng !== 0)
+              .map((w) => ({ lat: w.lat, lng: w.lng, label: w.label }))}
+            onStop={() => setNavMode(false)}
+            onReroute={rerouteFrom}
+          />
+        </Suspense>
+      )}
     </AppShell>
   );
 }
@@ -429,10 +737,34 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
+function NumField({
+  label,
+  v,
+  on,
+}: {
+  label: string;
+  v: number | null | undefined;
+  on: (n: number | null) => void;
+}) {
+  return (
+    <div>
+      <Label className="text-xs">{label}</Label>
+      <Input
+        type="number"
+        inputMode="numeric"
+        className="mt-1 h-9"
+        value={v ?? ""}
+        onChange={(e) => on(e.target.value ? Number(e.target.value) : null)}
+      />
+    </div>
+  );
+}
+
 function AddressRow({
   index,
   total,
   value,
+  biasAt,
   onPick,
   onChangeLabel,
   onRemove,
@@ -442,27 +774,25 @@ function AddressRow({
   index: number;
   total: number;
   value: string;
-  onPick: (hit: GeocodeHit) => void;
+  biasAt: LatLng | null;
+  onPick: (pt: LatLng, label: string) => void;
   onChangeLabel: (v: string) => void;
   onRemove: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
 }) {
-  const [hits, setHits] = useState<GeocodeHit[]>([]);
+  const [hits, setHits] = useState<HereSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const isStart = index === 0;
   const isEnd = index === total - 1;
   const badge = isStart ? "A" : isEnd ? "B" : String(index);
-  const color = isStart
-    ? "bg-green-500"
-    : isEnd
-      ? "bg-red-500"
-      : "bg-blue-500";
+  const color = isStart ? "bg-green-500" : isEnd ? "bg-red-500" : "bg-blue-500";
 
   useEffect(() => {
-    if (!value || value.length < 3) {
+    if (!hasHereKey()) return;
+    if (!value || value.length < 2) {
       setHits([]);
       return;
     }
@@ -471,18 +801,29 @@ function AddressRow({
     abortRef.current = ac;
     setLoading(true);
     const t = setTimeout(() => {
-      geocode(value, ac.signal)
+      autosuggest(value, biasAt ?? undefined, ac.signal)
         .then((r) => setHits(r))
         .catch((e) => {
           if ((e as Error).name !== "AbortError") setHits([]);
         })
         .finally(() => setLoading(false));
-    }, 350);
+    }, 300);
     return () => {
       clearTimeout(t);
       ac.abort();
     };
-  }, [value]);
+  }, [value, biasAt]);
+
+  const pick = async (h: HereSuggestion) => {
+    let pos = h.position ?? null;
+    if (!pos) pos = await lookupSuggestion(h);
+    if (!pos) {
+      toast.error("Locatie niet gevonden");
+      return;
+    }
+    onPick(pos, h.address ?? h.title);
+    setOpen(false);
+  };
 
   return (
     <div className="relative">
@@ -533,19 +874,23 @@ function AddressRow({
               <Loader2 className="h-3 w-3 animate-spin" /> Zoeken…
             </div>
           )}
-          {hits.map((h, i) => (
+          {hits.map((h) => (
             <button
-              key={i}
+              key={h.id}
               type="button"
               className="flex w-full items-start gap-2 px-3 py-2 text-left text-sm hover:bg-accent"
               onMouseDown={(e) => {
                 e.preventDefault();
-                onPick(h);
-                setOpen(false);
+                void pick(h);
               }}
             >
               <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-              <span className="line-clamp-2">{h.display_name}</span>
+              <div className="min-w-0">
+                <p className="truncate font-medium">{h.title}</p>
+                {h.address && h.address !== h.title && (
+                  <p className="truncate text-xs text-muted-foreground">{h.address}</p>
+                )}
+              </div>
             </button>
           ))}
         </div>
@@ -559,11 +904,13 @@ function SavedItem({
   onLoad,
   onRename,
   onDelete,
+  onComplete,
 }: {
   route: SavedRoute;
   onLoad: () => void;
   onRename: (name: string) => void;
   onDelete: () => void;
+  onComplete: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(route.name);
@@ -589,30 +936,32 @@ function SavedItem({
         ) : (
           <>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">{route.name}</p>
+              <p className="truncate text-sm font-medium">
+                {route.name}
+                {route.completed && (
+                  <Badge variant="secondary" className="ml-2 text-[10px]">
+                    Voltooid
+                  </Badge>
+                )}
+              </p>
               <p className="truncate text-xs text-muted-foreground">
                 {route.waypoints.length} punten
                 {route.distance_m ? ` · ${formatDistance(route.distance_m)}` : ""}
                 {route.duration_s ? ` · ${formatDuration(route.duration_s)}` : ""}
               </p>
             </div>
-            <Badge variant="secondary" className="hidden sm:inline-flex">
-              {new Date(route.updated_at).toLocaleDateString("nl-NL")}
-            </Badge>
             <Button size="sm" variant="outline" onClick={onLoad}>
               Laden
             </Button>
             <Button size="icon" variant="ghost" onClick={() => setEditing(true)} aria-label="Hernoemen">
               <RefreshCw className="h-4 w-4" />
             </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => {
-                if (confirm(`Route "${route.name}" verwijderen?`)) onDelete();
-              }}
-              aria-label="Verwijderen"
-            >
+            {!route.completed && (
+              <Button size="icon" variant="ghost" onClick={onComplete} aria-label="Markeer voltooid">
+                <Save className="h-4 w-4" />
+              </Button>
+            )}
+            <Button size="icon" variant="ghost" onClick={onDelete} aria-label="Verwijderen">
               <Trash2 className="h-4 w-4" />
             </Button>
           </>
