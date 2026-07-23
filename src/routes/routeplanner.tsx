@@ -95,7 +95,7 @@ function RoutePlannerPage() {
         .select("id,name,waypoints,distance_m,duration_s,updated_at")
         .order("updated_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as SavedRoute[];
+      return ((data ?? []) as unknown) as SavedRoute[];
     },
   });
 
