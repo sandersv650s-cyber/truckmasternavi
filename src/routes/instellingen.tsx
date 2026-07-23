@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Download, Trash2, Shield, Languages, UserCog } from "lucide-react";
+import { Download, Trash2, Shield, Languages, UserCog, RotateCcw, Play } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useI18n, languages, type Lang } from "@/lib/i18n";
 import { useRole, roleMeta, type Role } from "@/lib/role";
@@ -14,6 +14,7 @@ import { Link } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
 import { Info, Mail, ScrollText, ShieldCheck, BookOpen, Bell } from "lucide-react";
 import { APP_VERSION } from "@/lib/app-info";
+import { resetDemoData, useDemoTour } from "@/lib/demo";
 
 export const Route = createFileRoute("/instellingen")({
   head: () => ({
@@ -33,6 +34,7 @@ function Instellingen() {
   const [visibility, setVisibility] = useState("friends");
   const { lang, setLang, t } = useI18n();
   const { role, setRole } = useRole();
+  const { restart: restartTour } = useDemoTour();
 
   return (
     <AppShell title={t("common.settings")}>
@@ -134,6 +136,20 @@ function Instellingen() {
           <CardTitle className="text-base">Data</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
+          <Button variant="secondary" className="w-full justify-start" onClick={restartTour}>
+            <Play className="mr-2 h-4 w-4" /> Demo-rondleiding opnieuw starten
+          </Button>
+          <Button
+            variant="secondary"
+            className="w-full justify-start"
+            onClick={() => {
+              if (confirm("Alle demodata resetten? Voorkeuren, favorieten en notificaties worden hersteld naar de startsituatie.")) {
+                resetDemoData();
+              }
+            }}
+          >
+            <RotateCcw className="mr-2 h-4 w-4" /> Reset demodata
+          </Button>
           <Button variant="secondary" className="w-full justify-start">
             <Download className="mr-2 h-4 w-4" /> Exporteer mijn data
           </Button>
