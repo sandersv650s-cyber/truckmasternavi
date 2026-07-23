@@ -1,22 +1,22 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Truck, Play, ArrowRight, LogIn } from "lucide-react";
-
-const DEMO_EMAIL = "demo@truckmate.nl";
-const DEMO_PASS = "demo1234";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Truck, ArrowRight, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Demo-login — TruckMate" },
-      { name: "description", content: "Log in met een vooraf ingevuld demo-account en verken TruckMate." },
-      { property: "og:title", content: "Demo-login — TruckMate" },
-      { property: "og:description", content: "Start de TruckMate demo in enkele seconden." },
+      { title: "Inloggen — TruckMate Connect" },
+      { name: "description", content: "Log in of maak een gratis TruckMate-account aan." },
+      { property: "og:title", content: "Inloggen — TruckMate Connect" },
+      { property: "og:description", content: "Log in of registreer voor TruckMate Connect." },
     ],
   }),
   component: LoginPage,
@@ -24,24 +24,11 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState(DEMO_EMAIL);
-  const [pass, setPass] = useState(DEMO_PASS);
-  const [error, setError] = useState<string | null>(null);
+  const { user, loading } = useAuth();
 
-  const enter = () => {
-    if (typeof window !== "undefined") window.localStorage.setItem("truckmate.login.v1", "1");
-    navigate({ to: "/" });
-  };
-
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email.trim().toLowerCase() === DEMO_EMAIL && pass === DEMO_PASS) {
-      setError(null);
-      enter();
-    } else {
-      setError("Onjuiste gegevens. Gebruik de demo-knop hieronder.");
-    }
-  };
+  useEffect(() => {
+    if (!loading && user) navigate({ to: "/" });
+  }, [loading, user, navigate]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -50,59 +37,28 @@ function LoginPage() {
           <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary/20 text-primary">
             <Truck className="h-4 w-4" />
           </div>
-          <span className="text-base font-bold">TruckMate</span>
-          <Badge variant="outline" className="ml-auto border-amber-500/50 bg-amber-500/10 text-[9px] font-semibold uppercase tracking-wider text-amber-300">
-            Demo
-          </Badge>
+          <span className="text-base font-bold">TruckMate Connect</span>
         </div>
       </header>
 
       <main className="mx-auto max-w-md px-4 py-6">
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-black">Welkom bij TruckMate</h1>
+          <h1 className="text-2xl font-black">Welkom</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Investeerdersdemo · alle gegevens en koppelingen zijn gesimuleerd.
+            Log in of maak in 30 seconden een account.
           </p>
         </div>
 
-        <Card className="mb-4 overflow-hidden border-primary/40 bg-gradient-to-br from-primary/15 via-card to-card">
-          <CardContent className="p-5">
-            <p className="text-xs uppercase tracking-widest text-primary">Snelste weg naar binnen</p>
-            <h2 className="mt-1 text-lg font-bold">Start direct de demo</h2>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Zonder account, zonder wachtwoord. Meteen alle schermen bekijken als Jan de Vries.
-            </p>
-            <Button size="lg" className="mt-4 h-14 w-full text-base font-bold" onClick={enter}>
-              <Play className="mr-2 h-5 w-5 fill-current" /> Start demo
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-5">
-            <div className="mb-3 flex items-center gap-2">
-              <LogIn className="h-4 w-4 text-primary" />
-              <p className="text-sm font-semibold">Of log in met het demo-account</p>
-            </div>
-            <form onSubmit={submit} className="space-y-3">
-              <div>
-                <Label htmlFor="email" className="text-xs">E-mail</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-              </div>
-              <div>
-                <Label htmlFor="pass" className="text-xs">Wachtwoord</Label>
-                <Input id="pass" type="password" value={pass} onChange={(e) => setPass(e.target.value)} />
-              </div>
-              {error && <p className="text-xs text-destructive">{error}</p>}
-              <Button type="submit" variant="secondary" className="w-full">
-                Inloggen <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-              <p className="text-center text-[11px] text-muted-foreground">
-                Vooringevuld: <span className="font-medium">{DEMO_EMAIL}</span> / <span className="font-medium">{DEMO_PASS}</span>
-              </p>
-            </form>
-          </CardContent>
-        </Card>
+        <Tabs defaultValue="signin">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="signin">Inloggen</TabsTrigger>
+            <TabsTrigger value="signup">Registreren</TabsTrigger>
+            <TabsTrigger value="reset">Reset</TabsTrigger>
+          </TabsList>
+          <TabsContent value="signin"><SignInForm /></TabsContent>
+          <TabsContent value="signup"><SignUpForm /></TabsContent>
+          <TabsContent value="reset"><ResetForm /></TabsContent>
+        </Tabs>
 
         <div className="mt-6 flex items-center justify-center gap-3 text-[11px] text-muted-foreground">
           <Link to="/over" className="hover:text-foreground">Over</Link>
@@ -113,5 +69,149 @@ function LoginPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+function SignInForm() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    setBusy(false);
+    if (error) {
+      toast.error(error.message === "Invalid login credentials" ? "Onjuiste e-mail of wachtwoord." : error.message);
+      return;
+    }
+    toast.success("Ingelogd");
+    navigate({ to: "/" });
+  };
+
+  return (
+    <Card className="mt-3">
+      <CardContent className="p-5">
+        <form onSubmit={submit} className="space-y-3">
+          <div>
+            <Label htmlFor="si-email" className="text-xs">E-mail</Label>
+            <Input id="si-email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <div>
+            <Label htmlFor="si-pass" className="text-xs">Wachtwoord</Label>
+            <Input id="si-pass" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+          </div>
+          <Button type="submit" className="h-12 w-full font-bold" disabled={busy}>
+            {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}
+            Inloggen <ArrowRight className="ml-1 h-4 w-4" />
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SignUpForm() {
+  const navigate = useNavigate();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password.length < 6) {
+      toast.error("Wachtwoord moet minimaal 6 tekens zijn.");
+      return;
+    }
+    setBusy(true);
+    const redirect = typeof window !== "undefined" ? window.location.origin : undefined;
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: {
+        emailRedirectTo: redirect,
+        data: { full_name: name.trim() || email.split("@")[0] },
+      },
+    });
+    setBusy(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    if (data.session) {
+      toast.success("Account aangemaakt");
+      navigate({ to: "/" });
+    } else {
+      toast.success("Bevestig je e-mail om in te loggen.");
+    }
+  };
+
+  return (
+    <Card className="mt-3">
+      <CardContent className="p-5">
+        <form onSubmit={submit} className="space-y-3">
+          <div>
+            <Label htmlFor="su-name" className="text-xs">Naam</Label>
+            <Input id="su-name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Jan de Vries" />
+          </div>
+          <div>
+            <Label htmlFor="su-email" className="text-xs">E-mail</Label>
+            <Input id="su-email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <div>
+            <Label htmlFor="su-pass" className="text-xs">Wachtwoord (min. 6 tekens)</Label>
+            <Input id="su-pass" type="password" autoComplete="new-password" required value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} />
+          </div>
+          <Button type="submit" className="h-12 w-full font-bold" disabled={busy}>
+            {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}
+            Account aanmaken
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ResetForm() {
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    const redirect = typeof window !== "undefined" ? `${window.location.origin}/reset-password` : undefined;
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: redirect });
+    setBusy(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setSent(true);
+    toast.success("Reset-link verstuurd (check je inbox).");
+  };
+
+  return (
+    <Card className="mt-3">
+      <CardContent className="p-5">
+        {sent ? (
+          <p className="text-sm">We hebben een link gestuurd naar <span className="font-medium">{email}</span>. Klik daarop om je wachtwoord opnieuw in te stellen.</p>
+        ) : (
+          <form onSubmit={submit} className="space-y-3">
+            <div>
+              <Label htmlFor="re-email" className="text-xs">E-mail</Label>
+              <Input id="re-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <Button type="submit" className="h-12 w-full font-bold" disabled={busy}>
+              {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}
+              Stuur reset-link
+            </Button>
+          </form>
+        )}
+      </CardContent>
+    </Card>
   );
 }

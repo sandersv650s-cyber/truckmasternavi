@@ -15,6 +15,7 @@ import { Route as VoorwaardenRouteImport } from './routes/voorwaarden'
 import { Route as VoertuigRouteImport } from './routes/voertuig'
 import { Route as TruckstopsRouteImport } from './routes/truckstops'
 import { Route as RittenRouteImport } from './routes/ritten'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReleaseNotesRouteImport } from './routes/release-notes'
 import { Route as ProfielRouteImport } from './routes/profiel'
 import { Route as PrivacybeleidRouteImport } from './routes/privacybeleid'
@@ -81,6 +82,11 @@ const TruckstopsRoute = TruckstopsRouteImport.update({
 const RittenRoute = RittenRouteImport.update({
   id: '/ritten',
   path: '/ritten',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReleaseNotesRoute = ReleaseNotesRouteImport.update({
@@ -302,6 +308,7 @@ export interface FileRoutesByFullPath {
   '/privacybeleid': typeof PrivacybeleidRoute
   '/profiel': typeof ProfielRouteWithChildren
   '/release-notes': typeof ReleaseNotesRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/ritten': typeof RittenRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
@@ -347,6 +354,7 @@ export interface FileRoutesByTo {
   '/privacybeleid': typeof PrivacybeleidRoute
   '/profiel': typeof ProfielRouteWithChildren
   '/release-notes': typeof ReleaseNotesRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/ritten': typeof RittenRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
@@ -393,6 +401,7 @@ export interface FileRoutesById {
   '/privacybeleid': typeof PrivacybeleidRoute
   '/profiel': typeof ProfielRouteWithChildren
   '/release-notes': typeof ReleaseNotesRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/ritten': typeof RittenRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
@@ -440,6 +449,7 @@ export interface FileRouteTypes {
     | '/privacybeleid'
     | '/profiel'
     | '/release-notes'
+    | '/reset-password'
     | '/ritten'
     | '/truckstops'
     | '/voertuig'
@@ -485,6 +495,7 @@ export interface FileRouteTypes {
     | '/privacybeleid'
     | '/profiel'
     | '/release-notes'
+    | '/reset-password'
     | '/ritten'
     | '/truckstops'
     | '/voertuig'
@@ -530,6 +541,7 @@ export interface FileRouteTypes {
     | '/privacybeleid'
     | '/profiel'
     | '/release-notes'
+    | '/reset-password'
     | '/ritten'
     | '/truckstops'
     | '/voertuig'
@@ -576,6 +588,7 @@ export interface RootRouteChildren {
   PrivacybeleidRoute: typeof PrivacybeleidRoute
   ProfielRoute: typeof ProfielRouteWithChildren
   ReleaseNotesRoute: typeof ReleaseNotesRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   RittenRoute: typeof RittenRouteWithChildren
   TruckstopsRoute: typeof TruckstopsRouteWithChildren
   VoertuigRoute: typeof VoertuigRoute
@@ -626,6 +639,13 @@ declare module '@tanstack/react-router' {
       path: '/ritten'
       fullPath: '/ritten'
       preLoaderRoute: typeof RittenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/release-notes': {
@@ -978,6 +998,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacybeleidRoute: PrivacybeleidRoute,
   ProfielRoute: ProfielRouteWithChildren,
   ReleaseNotesRoute: ReleaseNotesRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   RittenRoute: RittenRouteWithChildren,
   TruckstopsRoute: TruckstopsRouteWithChildren,
   VoertuigRoute: VoertuigRoute,
