@@ -19,7 +19,7 @@ export const Route = createFileRoute("/privacybeleid")({
 
 function PrivacyBeleid() {
   return (
-    <AppShell title="Privacybeleid">
+    <AppShell title="Privacybeleid" requireAuth={false}>
       <Alert className="mb-4">
         <AlertDescription className="text-xs">
           Dit document is onderdeel van de TruckMate 1.0 demo. Voor een productieversie

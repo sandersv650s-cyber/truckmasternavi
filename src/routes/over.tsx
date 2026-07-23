@@ -27,7 +27,7 @@ function OverPage() {
     { icon: <Shield className="h-5 w-5" />, title: "Privacy eerst", desc: "Alle locatie- en voertuigdata staat standaard uit — jij bepaalt." },
   ];
   return (
-    <AppShell title="Over TruckMate">
+    <AppShell title="Over TruckMate" requireAuth={false}>
       <Card className="mb-4 overflow-hidden border-primary/40 bg-gradient-to-br from-primary/15 via-card to-card">
         <CardContent className="p-5 text-center">
           <div className="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-primary/20 text-primary">

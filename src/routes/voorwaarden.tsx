@@ -19,7 +19,7 @@ export const Route = createFileRoute("/voorwaarden")({
 
 function Voorwaarden() {
   return (
-    <AppShell title="Voorwaarden">
+    <AppShell title="Voorwaarden" requireAuth={false}>
       <Alert className="mb-4">
         <AlertDescription className="text-xs">
           TruckMate 1.0 is een prototype voor demo-doeleinden. Deze tekst is een
