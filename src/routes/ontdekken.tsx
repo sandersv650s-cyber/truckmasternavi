@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ParkingSquare, Fuel, Megaphone, Search, Trophy, ChevronRight } from "lucide-react";
+import { ParkingSquare, Fuel, Megaphone, Search, Trophy, ChevronRight, Map as MapIcon } from "lucide-react";
 import { truckstops, fuelStations, initialAlerts, amenityCategoryMeta, type AmenityCategory } from "@/lib/discover-data";
 
 export const Route = createFileRoute("/ontdekken")({
@@ -30,7 +30,7 @@ function OntdekkenPage() {
   const activeAlerts = initialAlerts.length;
 
   const cats: {
-    to: "/truckstops" | "/brandstof" | "/meldingen" | "/voorzieningen" | "/beloningen";
+    to: "/kaart" | "/zoeken" | "/truckstops" | "/brandstof" | "/meldingen" | "/voorzieningen" | "/beloningen";
     icon: React.ReactNode;
     title: string;
     desc: string;
@@ -38,11 +38,27 @@ function OntdekkenPage() {
     hint: string;
   }[] = [
     {
+      to: "/kaart",
+      icon: <MapIcon className="h-6 w-6" />,
+      title: "Interactieve kaart",
+      desc: "Alle parkings, tankstations en meldingen in één kaartweergave.",
+      accent: "from-primary/25 to-primary/5",
+      hint: "Klikbare pins",
+    },
+    {
+      to: "/zoeken",
+      icon: <Search className="h-6 w-6" />,
+      title: "Globaal zoeken",
+      desc: "Zoek in truckstops, tankstations, meldingen en voorzieningen.",
+      accent: "from-slate-500/25 to-slate-500/5",
+      hint: "Alles doorzoekbaar",
+    },
+    {
       to: "/truckstops",
       icon: <ParkingSquare className="h-6 w-6" />,
       title: "Truckstops & parking",
       desc: "Veilige parkings, douches en meer, met live bezetting.",
-      accent: "from-primary/25 to-primary/5",
+      accent: "from-sky-500/25 to-sky-500/5",
       hint: `${totalFree} plekken vrij nu`,
     },
     {

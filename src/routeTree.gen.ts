@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ZoekenRouteImport } from './routes/zoeken'
 import { Route as VoorzieningenRouteImport } from './routes/voorzieningen'
 import { Route as VoertuigRouteImport } from './routes/voertuig'
 import { Route as TruckstopsRouteImport } from './routes/truckstops'
@@ -17,6 +18,7 @@ import { Route as ProfielRouteImport } from './routes/profiel'
 import { Route as OntdekkenRouteImport } from './routes/ontdekken'
 import { Route as NavigatieRouteImport } from './routes/navigatie'
 import { Route as MeldingenRouteImport } from './routes/meldingen'
+import { Route as KaartRouteImport } from './routes/kaart'
 import { Route as InstellingenRouteImport } from './routes/instellingen'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ChatRouteImport } from './routes/chat'
@@ -28,6 +30,11 @@ import { Route as RittenRideIdRouteImport } from './routes/ritten.$rideId'
 import { Route as ProfielUserIdRouteImport } from './routes/profiel.$userId'
 import { Route as ChatChatIdRouteImport } from './routes/chat.$chatId'
 
+const ZoekenRoute = ZoekenRouteImport.update({
+  id: '/zoeken',
+  path: '/zoeken',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VoorzieningenRoute = VoorzieningenRouteImport.update({
   id: '/voorzieningen',
   path: '/voorzieningen',
@@ -66,6 +73,11 @@ const NavigatieRoute = NavigatieRouteImport.update({
 const MeldingenRoute = MeldingenRouteImport.update({
   id: '/meldingen',
   path: '/meldingen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KaartRoute = KaartRouteImport.update({
+  id: '/kaart',
+  path: '/kaart',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InstellingenRoute = InstellingenRouteImport.update({
@@ -126,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
   '/instellingen': typeof InstellingenRoute
+  '/kaart': typeof KaartRoute
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
   '/ontdekken': typeof OntdekkenRoute
@@ -134,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/voorzieningen': typeof VoorzieningenRoute
+  '/zoeken': typeof ZoekenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
@@ -146,6 +160,7 @@ export interface FileRoutesByTo {
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
   '/instellingen': typeof InstellingenRoute
+  '/kaart': typeof KaartRoute
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
   '/ontdekken': typeof OntdekkenRoute
@@ -154,6 +169,7 @@ export interface FileRoutesByTo {
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/voorzieningen': typeof VoorzieningenRoute
+  '/zoeken': typeof ZoekenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
@@ -167,6 +183,7 @@ export interface FileRoutesById {
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
   '/instellingen': typeof InstellingenRoute
+  '/kaart': typeof KaartRoute
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
   '/ontdekken': typeof OntdekkenRoute
@@ -175,6 +192,7 @@ export interface FileRoutesById {
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/voorzieningen': typeof VoorzieningenRoute
+  '/zoeken': typeof ZoekenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
@@ -189,6 +207,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/community'
     | '/instellingen'
+    | '/kaart'
     | '/meldingen'
     | '/navigatie'
     | '/ontdekken'
@@ -197,6 +216,7 @@ export interface FileRouteTypes {
     | '/truckstops'
     | '/voertuig'
     | '/voorzieningen'
+    | '/zoeken'
     | '/chat/$chatId'
     | '/profiel/$userId'
     | '/ritten/$rideId'
@@ -209,6 +229,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/community'
     | '/instellingen'
+    | '/kaart'
     | '/meldingen'
     | '/navigatie'
     | '/ontdekken'
@@ -217,6 +238,7 @@ export interface FileRouteTypes {
     | '/truckstops'
     | '/voertuig'
     | '/voorzieningen'
+    | '/zoeken'
     | '/chat/$chatId'
     | '/profiel/$userId'
     | '/ritten/$rideId'
@@ -229,6 +251,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/community'
     | '/instellingen'
+    | '/kaart'
     | '/meldingen'
     | '/navigatie'
     | '/ontdekken'
@@ -237,6 +260,7 @@ export interface FileRouteTypes {
     | '/truckstops'
     | '/voertuig'
     | '/voorzieningen'
+    | '/zoeken'
     | '/chat/$chatId'
     | '/profiel/$userId'
     | '/ritten/$rideId'
@@ -250,6 +274,7 @@ export interface RootRouteChildren {
   ChatRoute: typeof ChatRouteWithChildren
   CommunityRoute: typeof CommunityRoute
   InstellingenRoute: typeof InstellingenRoute
+  KaartRoute: typeof KaartRoute
   MeldingenRoute: typeof MeldingenRoute
   NavigatieRoute: typeof NavigatieRoute
   OntdekkenRoute: typeof OntdekkenRoute
@@ -258,10 +283,18 @@ export interface RootRouteChildren {
   TruckstopsRoute: typeof TruckstopsRouteWithChildren
   VoertuigRoute: typeof VoertuigRoute
   VoorzieningenRoute: typeof VoorzieningenRoute
+  ZoekenRoute: typeof ZoekenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/zoeken': {
+      id: '/zoeken'
+      path: '/zoeken'
+      fullPath: '/zoeken'
+      preLoaderRoute: typeof ZoekenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/voorzieningen': {
       id: '/voorzieningen'
       path: '/voorzieningen'
@@ -316,6 +349,13 @@ declare module '@tanstack/react-router' {
       path: '/meldingen'
       fullPath: '/meldingen'
       preLoaderRoute: typeof MeldingenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kaart': {
+      id: '/kaart'
+      path: '/kaart'
+      fullPath: '/kaart'
+      preLoaderRoute: typeof KaartRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/instellingen': {
@@ -442,6 +482,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChatRoute: ChatRouteWithChildren,
   CommunityRoute: CommunityRoute,
   InstellingenRoute: InstellingenRoute,
+  KaartRoute: KaartRoute,
   MeldingenRoute: MeldingenRoute,
   NavigatieRoute: NavigatieRoute,
   OntdekkenRoute: OntdekkenRoute,
@@ -450,6 +491,7 @@ const rootRouteChildren: RootRouteChildren = {
   TruckstopsRoute: TruckstopsRouteWithChildren,
   VoertuigRoute: VoertuigRoute,
   VoorzieningenRoute: VoorzieningenRoute,
+  ZoekenRoute: ZoekenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

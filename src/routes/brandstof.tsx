@@ -4,8 +4,9 @@ import { AppShell } from "@/components/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Fuel, Star, Plus, Check, Truck, Droplets } from "lucide-react";
+import { Fuel, Star, Plus, Check, Truck, Droplets, Heart } from "lucide-react";
 import { fuelStations, flag, minAgoLabel } from "@/lib/discover-data";
+import { useFavorites } from "@/lib/favorites";
 
 export const Route = createFileRoute("/brandstof")({
   head: () => ({
@@ -25,17 +26,22 @@ function BrandstofPage() {
   const [sort, setSort] = useState<SortKey>("goedkoop");
   const [truckOnly, setTruckOnly] = useState(true);
   const [adblue, setAdblue] = useState(false);
-  const [favs, setFavs] = useState<string[]>(["f1"]);
+  const [onlyFav, setOnlyFav] = useState(false);
+  const { isFav, toggle: toggleFav } = useFavorites("brandstof");
   const [stops, setStops] = useState<string[]>([]);
 
   const list = useMemo(() => {
-    const f = fuelStations.filter((s) => (!truckOnly || s.truckSuitable) && (!adblue || s.adblue));
+    const f = fuelStations.filter(
+      (s) =>
+        (!truckOnly || s.truckSuitable) &&
+        (!adblue || s.adblue) &&
+        (!onlyFav || isFav(s.id)),
+    );
     return [...f].sort((a, b) =>
       sort === "goedkoop" ? a.dieselPrice - b.dieselPrice :
       sort === "dichtbij" ? a.distanceFromRouteKm - b.distanceFromRouteKm :
       a.updatedMinAgo - b.updatedMinAgo);
-  }, [sort, truckOnly, adblue]);
-  const toggleFav = (id: string) => setFavs((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]);
+  }, [sort, truckOnly, adblue, onlyFav, isFav]);
   const toggleStop = (id: string) => setStops((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]);
   const cheapest = list.length ? Math.min(...list.map((s) => s.dieselPrice)) : 0;
 
@@ -57,12 +63,20 @@ function BrandstofPage() {
         <button onClick={() => setAdblue((v) => !v)} className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium ${adblue?"border-primary bg-primary/20 text-primary":"border-border text-muted-foreground"}`}>
           <Droplets className="h-3.5 w-3.5" /> AdBlue
         </button>
+        <button onClick={() => setOnlyFav((v) => !v)} className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium ${onlyFav?"border-primary bg-primary/20 text-primary":"border-border text-muted-foreground"}`}>
+          <Heart className={`h-3.5 w-3.5 ${onlyFav ? "fill-primary" : ""}`} /> Favorieten
+        </button>
       </div>
 
       <div className="space-y-2">
+        {list.length === 0 && (
+          <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+            Geen tankstations met deze filters.
+          </div>
+        )}
         {list.map((s) => {
           const isCheap = s.dieselPrice === cheapest;
-          const fav = favs.includes(s.id);
+          const fav = isFav(s.id);
           const asStop = stops.includes(s.id);
           return (
             <Card key={s.id} className={isCheap ? "border-primary/60" : ""}><CardContent className="p-3">

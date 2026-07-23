@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, Navigation, ImageIcon, ArrowLeft, MapPin, Clock } from "lucide-react";
+import { Star, Navigation, ImageIcon, ArrowLeft, MapPin, Clock, Heart } from "lucide-react";
 import { truckstopById, amenityLabels, occupancyMeta, flag, countryLabel, minAgoLabel, type Truckstop } from "@/lib/discover-data";
 import { userById, currentUser, formatDate } from "@/lib/mock-data";
+import { useFavorites } from "@/lib/favorites";
 
 export const Route = createFileRoute("/truckstops/$id")({
   loader: ({ params }) => {
@@ -39,6 +40,8 @@ function TruckstopDetail() {
   const [text, setText] = useState("");
   const [attachPhoto, setAttachPhoto] = useState(false);
   const occ = occupancyMeta[stop.occupancy];
+  const { isFav, toggle } = useFavorites("truckstops");
+  const fav = isFav(stop.id);
 
   const submit = () => {
     if (!text.trim()) return;
@@ -57,6 +60,13 @@ function TruckstopDetail() {
         <Link to="/truckstops" className="absolute left-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-background/80 backdrop-blur" aria-label="Terug">
           <ArrowLeft className="h-4 w-4" />
         </Link>
+        <button
+          onClick={() => toggle(stop.id)}
+          className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-background/80 backdrop-blur"
+          aria-label={fav ? "Verwijder uit favorieten" : "Toevoegen aan favorieten"}
+        >
+          <Heart className={`h-4 w-4 ${fav ? "fill-primary text-primary" : ""}`} />
+        </button>
       </div>
       <main className="mx-auto -mt-8 max-w-2xl px-4 pb-8">
         <Card>

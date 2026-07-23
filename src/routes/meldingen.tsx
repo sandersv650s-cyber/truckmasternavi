@@ -23,7 +23,7 @@ export const Route = createFileRoute("/meldingen")({
   component: MeldingenPage,
 });
 
-const cats: AlertCategory[] = ["file","ongeval","werk","controle","vol","vrij","gladheid","gevaar"];
+const cats: AlertCategory[] = ["file","ongeval","werk","controle","vol","vrij","gladheid","gevaar","wegdicht"];
 
 function MeldingenPage() {
   const [alerts, setAlerts] = useState<TrafficAlert[]>(initialAlerts);
