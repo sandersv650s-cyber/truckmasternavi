@@ -17,6 +17,7 @@ import { Route as ProfielRouteImport } from './routes/profiel'
 import { Route as OntdekkenRouteImport } from './routes/ontdekken'
 import { Route as NavigatieRouteImport } from './routes/navigatie'
 import { Route as MeldingenRouteImport } from './routes/meldingen'
+import { Route as KaartRouteImport } from './routes/kaart'
 import { Route as InstellingenRouteImport } from './routes/instellingen'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ChatRouteImport } from './routes/chat'
@@ -66,6 +67,11 @@ const NavigatieRoute = NavigatieRouteImport.update({
 const MeldingenRoute = MeldingenRouteImport.update({
   id: '/meldingen',
   path: '/meldingen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KaartRoute = KaartRouteImport.update({
+  id: '/kaart',
+  path: '/kaart',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InstellingenRoute = InstellingenRouteImport.update({
@@ -126,6 +132,7 @@ export interface FileRoutesByFullPath {
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
   '/instellingen': typeof InstellingenRoute
+  '/kaart': typeof KaartRoute
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
   '/ontdekken': typeof OntdekkenRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
   '/instellingen': typeof InstellingenRoute
+  '/kaart': typeof KaartRoute
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
   '/ontdekken': typeof OntdekkenRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
   '/instellingen': typeof InstellingenRoute
+  '/kaart': typeof KaartRoute
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
   '/ontdekken': typeof OntdekkenRoute
@@ -189,6 +198,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/community'
     | '/instellingen'
+    | '/kaart'
     | '/meldingen'
     | '/navigatie'
     | '/ontdekken'
@@ -209,6 +219,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/community'
     | '/instellingen'
+    | '/kaart'
     | '/meldingen'
     | '/navigatie'
     | '/ontdekken'
@@ -229,6 +240,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/community'
     | '/instellingen'
+    | '/kaart'
     | '/meldingen'
     | '/navigatie'
     | '/ontdekken'
@@ -250,6 +262,7 @@ export interface RootRouteChildren {
   ChatRoute: typeof ChatRouteWithChildren
   CommunityRoute: typeof CommunityRoute
   InstellingenRoute: typeof InstellingenRoute
+  KaartRoute: typeof KaartRoute
   MeldingenRoute: typeof MeldingenRoute
   NavigatieRoute: typeof NavigatieRoute
   OntdekkenRoute: typeof OntdekkenRoute
@@ -316,6 +329,13 @@ declare module '@tanstack/react-router' {
       path: '/meldingen'
       fullPath: '/meldingen'
       preLoaderRoute: typeof MeldingenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kaart': {
+      id: '/kaart'
+      path: '/kaart'
+      fullPath: '/kaart'
+      preLoaderRoute: typeof KaartRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/instellingen': {
@@ -442,6 +462,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChatRoute: ChatRouteWithChildren,
   CommunityRoute: CommunityRoute,
   InstellingenRoute: InstellingenRoute,
+  KaartRoute: KaartRoute,
   MeldingenRoute: MeldingenRoute,
   NavigatieRoute: NavigatieRoute,
   OntdekkenRoute: OntdekkenRoute,
