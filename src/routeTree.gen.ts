@@ -20,6 +20,8 @@ import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as OntdekkenRouteImport } from './routes/ontdekken'
 import { Route as OnderhoudRouteImport } from './routes/onderhoud'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as OfflineKaartenRouteImport } from './routes/offline-kaarten'
+import { Route as NavigatieProviderRouteImport } from './routes/navigatie-provider'
 import { Route as NavigatieRouteImport } from './routes/navigatie'
 import { Route as MeldingenRouteImport } from './routes/meldingen'
 import { Route as MeerRouteImport } from './routes/meer'
@@ -28,9 +30,12 @@ import { Route as KaartRouteImport } from './routes/kaart'
 import { Route as IntegratiesRouteImport } from './routes/integraties'
 import { Route as InstellingenRouteImport } from './routes/instellingen'
 import { Route as GroepenRouteImport } from './routes/groepen'
+import { Route as FleetRouteImport } from './routes/fleet'
 import { Route as DocumentenRouteImport } from './routes/documenten'
+import { Route as DeelEtaRouteImport } from './routes/deel-eta'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ChatRouteImport } from './routes/chat'
+import { Route as CarplayRouteImport } from './routes/carplay'
 import { Route as BrandstofRouteImport } from './routes/brandstof'
 import { Route as BeloningenRouteImport } from './routes/beloningen'
 import { Route as AssistentRouteImport } from './routes/assistent'
@@ -96,6 +101,16 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OfflineKaartenRoute = OfflineKaartenRouteImport.update({
+  id: '/offline-kaarten',
+  path: '/offline-kaarten',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NavigatieProviderRoute = NavigatieProviderRouteImport.update({
+  id: '/navigatie-provider',
+  path: '/navigatie-provider',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NavigatieRoute = NavigatieRouteImport.update({
   id: '/navigatie',
   path: '/navigatie',
@@ -136,9 +151,19 @@ const GroepenRoute = GroepenRouteImport.update({
   path: '/groepen',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FleetRoute = FleetRouteImport.update({
+  id: '/fleet',
+  path: '/fleet',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DocumentenRoute = DocumentenRouteImport.update({
   id: '/documenten',
   path: '/documenten',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeelEtaRoute = DeelEtaRouteImport.update({
+  id: '/deel-eta',
+  path: '/deel-eta',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunityRoute = CommunityRouteImport.update({
@@ -149,6 +174,11 @@ const CommunityRoute = CommunityRouteImport.update({
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
   path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CarplayRoute = CarplayRouteImport.update({
+  id: '/carplay',
+  path: '/carplay',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BrandstofRoute = BrandstofRouteImport.update({
@@ -202,9 +232,12 @@ export interface FileRoutesByFullPath {
   '/assistent': typeof AssistentRoute
   '/beloningen': typeof BeloningenRoute
   '/brandstof': typeof BrandstofRoute
+  '/carplay': typeof CarplayRoute
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
+  '/deel-eta': typeof DeelEtaRoute
   '/documenten': typeof DocumentenRoute
+  '/fleet': typeof FleetRoute
   '/groepen': typeof GroepenRouteWithChildren
   '/instellingen': typeof InstellingenRoute
   '/integraties': typeof IntegratiesRoute
@@ -213,6 +246,8 @@ export interface FileRoutesByFullPath {
   '/meer': typeof MeerRoute
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
+  '/navigatie-provider': typeof NavigatieProviderRoute
+  '/offline-kaarten': typeof OfflineKaartenRoute
   '/onboarding': typeof OnboardingRoute
   '/onderhoud': typeof OnderhoudRoute
   '/ontdekken': typeof OntdekkenRoute
@@ -235,9 +270,12 @@ export interface FileRoutesByTo {
   '/assistent': typeof AssistentRoute
   '/beloningen': typeof BeloningenRoute
   '/brandstof': typeof BrandstofRoute
+  '/carplay': typeof CarplayRoute
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
+  '/deel-eta': typeof DeelEtaRoute
   '/documenten': typeof DocumentenRoute
+  '/fleet': typeof FleetRoute
   '/groepen': typeof GroepenRouteWithChildren
   '/instellingen': typeof InstellingenRoute
   '/integraties': typeof IntegratiesRoute
@@ -246,6 +284,8 @@ export interface FileRoutesByTo {
   '/meer': typeof MeerRoute
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
+  '/navigatie-provider': typeof NavigatieProviderRoute
+  '/offline-kaarten': typeof OfflineKaartenRoute
   '/onboarding': typeof OnboardingRoute
   '/onderhoud': typeof OnderhoudRoute
   '/ontdekken': typeof OntdekkenRoute
@@ -269,9 +309,12 @@ export interface FileRoutesById {
   '/assistent': typeof AssistentRoute
   '/beloningen': typeof BeloningenRoute
   '/brandstof': typeof BrandstofRoute
+  '/carplay': typeof CarplayRoute
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
+  '/deel-eta': typeof DeelEtaRoute
   '/documenten': typeof DocumentenRoute
+  '/fleet': typeof FleetRoute
   '/groepen': typeof GroepenRouteWithChildren
   '/instellingen': typeof InstellingenRoute
   '/integraties': typeof IntegratiesRoute
@@ -280,6 +323,8 @@ export interface FileRoutesById {
   '/meer': typeof MeerRoute
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
+  '/navigatie-provider': typeof NavigatieProviderRoute
+  '/offline-kaarten': typeof OfflineKaartenRoute
   '/onboarding': typeof OnboardingRoute
   '/onderhoud': typeof OnderhoudRoute
   '/ontdekken': typeof OntdekkenRoute
@@ -304,9 +349,12 @@ export interface FileRouteTypes {
     | '/assistent'
     | '/beloningen'
     | '/brandstof'
+    | '/carplay'
     | '/chat'
     | '/community'
+    | '/deel-eta'
     | '/documenten'
+    | '/fleet'
     | '/groepen'
     | '/instellingen'
     | '/integraties'
@@ -315,6 +363,8 @@ export interface FileRouteTypes {
     | '/meer'
     | '/meldingen'
     | '/navigatie'
+    | '/navigatie-provider'
+    | '/offline-kaarten'
     | '/onboarding'
     | '/onderhoud'
     | '/ontdekken'
@@ -337,9 +387,12 @@ export interface FileRouteTypes {
     | '/assistent'
     | '/beloningen'
     | '/brandstof'
+    | '/carplay'
     | '/chat'
     | '/community'
+    | '/deel-eta'
     | '/documenten'
+    | '/fleet'
     | '/groepen'
     | '/instellingen'
     | '/integraties'
@@ -348,6 +401,8 @@ export interface FileRouteTypes {
     | '/meer'
     | '/meldingen'
     | '/navigatie'
+    | '/navigatie-provider'
+    | '/offline-kaarten'
     | '/onboarding'
     | '/onderhoud'
     | '/ontdekken'
@@ -370,9 +425,12 @@ export interface FileRouteTypes {
     | '/assistent'
     | '/beloningen'
     | '/brandstof'
+    | '/carplay'
     | '/chat'
     | '/community'
+    | '/deel-eta'
     | '/documenten'
+    | '/fleet'
     | '/groepen'
     | '/instellingen'
     | '/integraties'
@@ -381,6 +439,8 @@ export interface FileRouteTypes {
     | '/meer'
     | '/meldingen'
     | '/navigatie'
+    | '/navigatie-provider'
+    | '/offline-kaarten'
     | '/onboarding'
     | '/onderhoud'
     | '/ontdekken'
@@ -404,9 +464,12 @@ export interface RootRouteChildren {
   AssistentRoute: typeof AssistentRoute
   BeloningenRoute: typeof BeloningenRoute
   BrandstofRoute: typeof BrandstofRoute
+  CarplayRoute: typeof CarplayRoute
   ChatRoute: typeof ChatRouteWithChildren
   CommunityRoute: typeof CommunityRoute
+  DeelEtaRoute: typeof DeelEtaRoute
   DocumentenRoute: typeof DocumentenRoute
+  FleetRoute: typeof FleetRoute
   GroepenRoute: typeof GroepenRouteWithChildren
   InstellingenRoute: typeof InstellingenRoute
   IntegratiesRoute: typeof IntegratiesRoute
@@ -415,6 +478,8 @@ export interface RootRouteChildren {
   MeerRoute: typeof MeerRoute
   MeldingenRoute: typeof MeldingenRoute
   NavigatieRoute: typeof NavigatieRoute
+  NavigatieProviderRoute: typeof NavigatieProviderRoute
+  OfflineKaartenRoute: typeof OfflineKaartenRoute
   OnboardingRoute: typeof OnboardingRoute
   OnderhoudRoute: typeof OnderhoudRoute
   OntdekkenRoute: typeof OntdekkenRoute
@@ -507,6 +572,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/offline-kaarten': {
+      id: '/offline-kaarten'
+      path: '/offline-kaarten'
+      fullPath: '/offline-kaarten'
+      preLoaderRoute: typeof OfflineKaartenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/navigatie-provider': {
+      id: '/navigatie-provider'
+      path: '/navigatie-provider'
+      fullPath: '/navigatie-provider'
+      preLoaderRoute: typeof NavigatieProviderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/navigatie': {
       id: '/navigatie'
       path: '/navigatie'
@@ -563,11 +642,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GroepenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/fleet': {
+      id: '/fleet'
+      path: '/fleet'
+      fullPath: '/fleet'
+      preLoaderRoute: typeof FleetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/documenten': {
       id: '/documenten'
       path: '/documenten'
       fullPath: '/documenten'
       preLoaderRoute: typeof DocumentenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/deel-eta': {
+      id: '/deel-eta'
+      path: '/deel-eta'
+      fullPath: '/deel-eta'
+      preLoaderRoute: typeof DeelEtaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/community': {
@@ -582,6 +675,13 @@ declare module '@tanstack/react-router' {
       path: '/chat'
       fullPath: '/chat'
       preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/carplay': {
+      id: '/carplay'
+      path: '/carplay'
+      fullPath: '/carplay'
+      preLoaderRoute: typeof CarplayRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/brandstof': {
@@ -710,9 +810,12 @@ const rootRouteChildren: RootRouteChildren = {
   AssistentRoute: AssistentRoute,
   BeloningenRoute: BeloningenRoute,
   BrandstofRoute: BrandstofRoute,
+  CarplayRoute: CarplayRoute,
   ChatRoute: ChatRouteWithChildren,
   CommunityRoute: CommunityRoute,
+  DeelEtaRoute: DeelEtaRoute,
   DocumentenRoute: DocumentenRoute,
+  FleetRoute: FleetRoute,
   GroepenRoute: GroepenRouteWithChildren,
   InstellingenRoute: InstellingenRoute,
   IntegratiesRoute: IntegratiesRoute,
@@ -721,6 +824,8 @@ const rootRouteChildren: RootRouteChildren = {
   MeerRoute: MeerRoute,
   MeldingenRoute: MeldingenRoute,
   NavigatieRoute: NavigatieRoute,
+  NavigatieProviderRoute: NavigatieProviderRoute,
+  OfflineKaartenRoute: OfflineKaartenRoute,
   OnboardingRoute: OnboardingRoute,
   OnderhoudRoute: OnderhoudRoute,
   OntdekkenRoute: OntdekkenRoute,
