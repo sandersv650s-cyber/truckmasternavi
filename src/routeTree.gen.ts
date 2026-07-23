@@ -13,9 +13,13 @@ import { Route as VoertuigRouteImport } from './routes/voertuig'
 import { Route as RittenRouteImport } from './routes/ritten'
 import { Route as ProfielRouteImport } from './routes/profiel'
 import { Route as NavigatieRouteImport } from './routes/navigatie'
+import { Route as InstellingenRouteImport } from './routes/instellingen'
 import { Route as CommunityRouteImport } from './routes/community'
+import { Route as ChatRouteImport } from './routes/chat'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RittenRideIdRouteImport } from './routes/ritten.$rideId'
+import { Route as ProfielUserIdRouteImport } from './routes/profiel.$userId'
+import { Route as ChatChatIdRouteImport } from './routes/chat.$chatId'
 
 const VoertuigRoute = VoertuigRouteImport.update({
   id: '/voertuig',
@@ -37,9 +41,19 @@ const NavigatieRoute = NavigatieRouteImport.update({
   path: '/navigatie',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InstellingenRoute = InstellingenRouteImport.update({
+  id: '/instellingen',
+  path: '/instellingen',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CommunityRoute = CommunityRouteImport.update({
   id: '/community',
   path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -52,70 +66,106 @@ const RittenRideIdRoute = RittenRideIdRouteImport.update({
   path: '/$rideId',
   getParentRoute: () => RittenRoute,
 } as any)
+const ProfielUserIdRoute = ProfielUserIdRouteImport.update({
+  id: '/$userId',
+  path: '/$userId',
+  getParentRoute: () => ProfielRoute,
+} as any)
+const ChatChatIdRoute = ChatChatIdRouteImport.update({
+  id: '/$chatId',
+  path: '/$chatId',
+  getParentRoute: () => ChatRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
+  '/instellingen': typeof InstellingenRoute
   '/navigatie': typeof NavigatieRoute
-  '/profiel': typeof ProfielRoute
+  '/profiel': typeof ProfielRouteWithChildren
   '/ritten': typeof RittenRouteWithChildren
   '/voertuig': typeof VoertuigRoute
+  '/chat/$chatId': typeof ChatChatIdRoute
+  '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
+  '/instellingen': typeof InstellingenRoute
   '/navigatie': typeof NavigatieRoute
-  '/profiel': typeof ProfielRoute
+  '/profiel': typeof ProfielRouteWithChildren
   '/ritten': typeof RittenRouteWithChildren
   '/voertuig': typeof VoertuigRoute
+  '/chat/$chatId': typeof ChatChatIdRoute
+  '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
+  '/instellingen': typeof InstellingenRoute
   '/navigatie': typeof NavigatieRoute
-  '/profiel': typeof ProfielRoute
+  '/profiel': typeof ProfielRouteWithChildren
   '/ritten': typeof RittenRouteWithChildren
   '/voertuig': typeof VoertuigRoute
+  '/chat/$chatId': typeof ChatChatIdRoute
+  '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/chat'
     | '/community'
+    | '/instellingen'
     | '/navigatie'
     | '/profiel'
     | '/ritten'
     | '/voertuig'
+    | '/chat/$chatId'
+    | '/profiel/$userId'
     | '/ritten/$rideId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/chat'
     | '/community'
+    | '/instellingen'
     | '/navigatie'
     | '/profiel'
     | '/ritten'
     | '/voertuig'
+    | '/chat/$chatId'
+    | '/profiel/$userId'
     | '/ritten/$rideId'
   id:
     | '__root__'
     | '/'
+    | '/chat'
     | '/community'
+    | '/instellingen'
     | '/navigatie'
     | '/profiel'
     | '/ritten'
     | '/voertuig'
+    | '/chat/$chatId'
+    | '/profiel/$userId'
     | '/ritten/$rideId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChatRoute: typeof ChatRouteWithChildren
   CommunityRoute: typeof CommunityRoute
+  InstellingenRoute: typeof InstellingenRoute
   NavigatieRoute: typeof NavigatieRoute
-  ProfielRoute: typeof ProfielRoute
+  ProfielRoute: typeof ProfielRouteWithChildren
   RittenRoute: typeof RittenRouteWithChildren
   VoertuigRoute: typeof VoertuigRoute
 }
@@ -150,11 +200,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NavigatieRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/instellingen': {
+      id: '/instellingen'
+      path: '/instellingen'
+      fullPath: '/instellingen'
+      preLoaderRoute: typeof InstellingenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/community': {
       id: '/community'
       path: '/community'
       fullPath: '/community'
       preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -171,8 +235,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RittenRideIdRouteImport
       parentRoute: typeof RittenRoute
     }
+    '/profiel/$userId': {
+      id: '/profiel/$userId'
+      path: '/$userId'
+      fullPath: '/profiel/$userId'
+      preLoaderRoute: typeof ProfielUserIdRouteImport
+      parentRoute: typeof ProfielRoute
+    }
+    '/chat/$chatId': {
+      id: '/chat/$chatId'
+      path: '/$chatId'
+      fullPath: '/chat/$chatId'
+      preLoaderRoute: typeof ChatChatIdRouteImport
+      parentRoute: typeof ChatRoute
+    }
   }
 }
+
+interface ChatRouteChildren {
+  ChatChatIdRoute: typeof ChatChatIdRoute
+}
+
+const ChatRouteChildren: ChatRouteChildren = {
+  ChatChatIdRoute: ChatChatIdRoute,
+}
+
+const ChatRouteWithChildren = ChatRoute._addFileChildren(ChatRouteChildren)
+
+interface ProfielRouteChildren {
+  ProfielUserIdRoute: typeof ProfielUserIdRoute
+}
+
+const ProfielRouteChildren: ProfielRouteChildren = {
+  ProfielUserIdRoute: ProfielUserIdRoute,
+}
+
+const ProfielRouteWithChildren =
+  ProfielRoute._addFileChildren(ProfielRouteChildren)
 
 interface RittenRouteChildren {
   RittenRideIdRoute: typeof RittenRideIdRoute
@@ -187,12 +286,24 @@ const RittenRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChatRoute: ChatRouteWithChildren,
   CommunityRoute: CommunityRoute,
+  InstellingenRoute: InstellingenRoute,
   NavigatieRoute: NavigatieRoute,
-  ProfielRoute: ProfielRoute,
+  ProfielRoute: ProfielRouteWithChildren,
   RittenRoute: RittenRouteWithChildren,
   VoertuigRoute: VoertuigRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
