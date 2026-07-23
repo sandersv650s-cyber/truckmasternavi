@@ -79,7 +79,7 @@ export function AppShell({
         {demoBanner ? <DemoBanner text={demoBanner} /> : null}
         {children}
       </main>
-      <BottomNav />
+      {user ? <BottomNav /> : null}
     </div>
   );
 }
