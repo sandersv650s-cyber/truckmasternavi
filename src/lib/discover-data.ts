@@ -330,7 +330,8 @@ export type AlertCategory =
   | "vol"
   | "vrij"
   | "gladheid"
-  | "gevaar";
+  | "gevaar"
+  | "wegdicht";
 
 export const alertMeta: Record<AlertCategory, { label: string; emoji: string; color: string; ttlMin: number }> = {
   file: { label: "File", emoji: "🚦", color: "bg-orange-500/20 text-orange-300 border-orange-500/40", ttlMin: 60 },
@@ -341,6 +342,7 @@ export const alertMeta: Record<AlertCategory, { label: string; emoji: string; co
   vrij: { label: "Vrije plek", emoji: "✅", color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40", ttlMin: 30 },
   gladheid: { label: "Gladheid", emoji: "❄️", color: "bg-sky-500/20 text-sky-200 border-sky-500/40", ttlMin: 180 },
   gevaar: { label: "Gevaarlijk", emoji: "⚠️", color: "bg-destructive/20 text-destructive border-destructive/40", ttlMin: 240 },
+  wegdicht: { label: "Weg afgesloten", emoji: "⛔", color: "bg-red-500/20 text-red-300 border-red-500/40", ttlMin: 240 },
 };
 
 export type TrafficAlert = {
@@ -364,6 +366,25 @@ export const initialAlerts: TrafficAlert[] = [
   { id: "a7", category: "ongeval", userId: "u4", location: "E19 richting Antwerpen", text: "Aanrijding op vluchtstrook, hulpdiensten aanwezig.", createdMinAgo: 18, confirms: 11, notActual: 0 },
   { id: "a8", category: "gevaar", userId: "u1", location: "A15 Ridderkerk", text: "Verloren lading, houtafval op rechterrijstrook.", createdMinAgo: 6, confirms: 3, notActual: 0 },
 ];
+
+// Extend alerts with a 'wegdicht' example (backwards-compatible push).
+initialAlerts.push({
+  id: "a9",
+  category: "wegdicht",
+  userId: "u3",
+  location: "A16 Moerdijkbrug richting Rotterdam",
+  text: "Weg volledig afgesloten wegens hulpdienstinzet, omleiding via A17.",
+  createdMinAgo: 27,
+  confirms: 8,
+  notActual: 0,
+});
+
+export function trendingAlerts(limit = 3): TrafficAlert[] {
+  return [...initialAlerts]
+    .filter((a) => !isExpired(a))
+    .sort((a, b) => b.confirms - a.confirms || a.createdMinAgo - b.createdMinAgo)
+    .slice(0, limit);
+}
 
 export type AmenityCategory = "douche" | "restaurant" | "supermarkt" | "garage" | "truckwash" | "rustplek";
 
