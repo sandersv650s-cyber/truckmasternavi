@@ -114,8 +114,8 @@ function OnboardingPage() {
               {privacyOptions.map((p) => (
                 <label key={p.key} className="flex items-start justify-between gap-3 rounded-lg border border-border p-3">
                   <div>
-                    <p className="text-sm font-medium">{p.title}</p>
-                    <p className="text-xs text-muted-foreground">{p.desc}</p>
+                    <p className="text-sm font-medium">{p.label}</p>
+                    <p className="text-xs text-muted-foreground">{p.description}</p>
                   </div>
                   <Switch checked={privacy[p.key]} onCheckedChange={(v) => setPrivacy(p.key, v)} />
                 </label>
