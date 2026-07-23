@@ -20,7 +20,13 @@ import {
   Download,
   Map as MapIcon,
   Trophy,
+  Info,
+  Mail,
+  ScrollText,
+  BookOpen,
+  Bell,
 } from "lucide-react";
+import { APP_VERSION } from "@/lib/app-info";
 
 export const Route = createFileRoute("/meer")({
   head: () => ({
@@ -51,7 +57,13 @@ type Tile = {
     | "/carplay"
     | "/offline-kaarten"
     | "/navigatie-provider"
-    | "/beloningen";
+    | "/beloningen"
+    | "/notificaties"
+    | "/over"
+    | "/contact"
+    | "/release-notes"
+    | "/privacybeleid"
+    | "/voorwaarden";
   icon: React.ReactNode;
   title: string;
   desc: string;
@@ -78,6 +90,12 @@ function MeerPage() {
     { to: "/privacy", icon: <ShieldCheck className="h-6 w-6" />, title: "Privacycentrum", desc: "Beheer toestemmingen voor locatie, konvooi, voertuig en data.", accent: "from-teal-500/25 to-teal-500/5" },
     { to: "/voertuig", icon: <Truck className="h-6 w-6" />, title: "Voertuig", desc: "Voertuigkoppeling en Bluetooth — binnenkort beschikbaar.", accent: "from-slate-500/25 to-slate-500/5" },
     { to: "/instellingen", icon: <Settings className="h-6 w-6" />, title: "Instellingen", desc: "Account, meldingen, thema en taal.", accent: "from-neutral-500/25 to-neutral-500/5" },
+    { to: "/notificaties", icon: <Bell className="h-6 w-6" />, title: "Notificaties", desc: "Alle meldingen op één plek.", accent: "from-primary/25 to-primary/5" },
+    { to: "/over", icon: <Info className="h-6 w-6" />, title: "Over TruckMate", desc: "Wat is TruckMate en waar staat de app voor.", accent: "from-neutral-500/25 to-neutral-500/5" },
+    { to: "/release-notes", icon: <BookOpen className="h-6 w-6" />, title: "Release notes", desc: `Wat is er nieuw in versie ${APP_VERSION}.`, accent: "from-neutral-500/25 to-neutral-500/5" },
+    { to: "/contact", icon: <Mail className="h-6 w-6" />, title: "Contact", desc: "Vragen, feedback of samenwerken.", accent: "from-neutral-500/25 to-neutral-500/5" },
+    { to: "/privacybeleid", icon: <ShieldCheck className="h-6 w-6" />, title: "Privacybeleid", desc: "Hoe TruckMate met jouw data omgaat.", accent: "from-neutral-500/25 to-neutral-500/5" },
+    { to: "/voorwaarden", icon: <ScrollText className="h-6 w-6" />, title: "Algemene voorwaarden", desc: "Gebruiksregels voor de demo.", accent: "from-neutral-500/25 to-neutral-500/5" },
   ];
   return (
     <AppShell title="Meer">
@@ -110,6 +128,9 @@ function MeerPage() {
           </Link>
         ))}
       </div>
+      <p className="mt-6 text-center text-[10px] text-muted-foreground">
+        TruckMate {APP_VERSION} · Investeerdersdemo
+      </p>
     </AppShell>
   );
 }

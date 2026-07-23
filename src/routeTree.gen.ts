@@ -25,6 +25,7 @@ import { Route as OntdekkenRouteImport } from './routes/ontdekken'
 import { Route as OnderhoudRouteImport } from './routes/onderhoud'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as OfflineKaartenRouteImport } from './routes/offline-kaarten'
+import { Route as NotificatiesRouteImport } from './routes/notificaties'
 import { Route as NavigatieProviderRouteImport } from './routes/navigatie-provider'
 import { Route as NavigatieRouteImport } from './routes/navigatie'
 import { Route as MeldingenRouteImport } from './routes/meldingen'
@@ -129,6 +130,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const OfflineKaartenRoute = OfflineKaartenRouteImport.update({
   id: '/offline-kaarten',
   path: '/offline-kaarten',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificatiesRoute = NotificatiesRouteImport.update({
+  id: '/notificaties',
+  path: '/notificaties',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NavigatieProviderRoute = NavigatieProviderRouteImport.update({
@@ -278,6 +284,7 @@ export interface FileRoutesByFullPath {
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
   '/navigatie-provider': typeof NavigatieProviderRoute
+  '/notificaties': typeof NotificatiesRoute
   '/offline-kaarten': typeof OfflineKaartenRoute
   '/onboarding': typeof OnboardingRoute
   '/onderhoud': typeof OnderhoudRoute
@@ -321,6 +328,7 @@ export interface FileRoutesByTo {
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
   '/navigatie-provider': typeof NavigatieProviderRoute
+  '/notificaties': typeof NotificatiesRoute
   '/offline-kaarten': typeof OfflineKaartenRoute
   '/onboarding': typeof OnboardingRoute
   '/onderhoud': typeof OnderhoudRoute
@@ -365,6 +373,7 @@ export interface FileRoutesById {
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
   '/navigatie-provider': typeof NavigatieProviderRoute
+  '/notificaties': typeof NotificatiesRoute
   '/offline-kaarten': typeof OfflineKaartenRoute
   '/onboarding': typeof OnboardingRoute
   '/onderhoud': typeof OnderhoudRoute
@@ -410,6 +419,7 @@ export interface FileRouteTypes {
     | '/meldingen'
     | '/navigatie'
     | '/navigatie-provider'
+    | '/notificaties'
     | '/offline-kaarten'
     | '/onboarding'
     | '/onderhoud'
@@ -453,6 +463,7 @@ export interface FileRouteTypes {
     | '/meldingen'
     | '/navigatie'
     | '/navigatie-provider'
+    | '/notificaties'
     | '/offline-kaarten'
     | '/onboarding'
     | '/onderhoud'
@@ -496,6 +507,7 @@ export interface FileRouteTypes {
     | '/meldingen'
     | '/navigatie'
     | '/navigatie-provider'
+    | '/notificaties'
     | '/offline-kaarten'
     | '/onboarding'
     | '/onderhoud'
@@ -540,6 +552,7 @@ export interface RootRouteChildren {
   MeldingenRoute: typeof MeldingenRoute
   NavigatieRoute: typeof NavigatieRoute
   NavigatieProviderRoute: typeof NavigatieProviderRoute
+  NotificatiesRoute: typeof NotificatiesRoute
   OfflineKaartenRoute: typeof OfflineKaartenRoute
   OnboardingRoute: typeof OnboardingRoute
   OnderhoudRoute: typeof OnderhoudRoute
@@ -670,6 +683,13 @@ declare module '@tanstack/react-router' {
       path: '/offline-kaarten'
       fullPath: '/offline-kaarten'
       preLoaderRoute: typeof OfflineKaartenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notificaties': {
+      id: '/notificaties'
+      path: '/notificaties'
+      fullPath: '/notificaties'
+      preLoaderRoute: typeof NotificatiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/navigatie-provider': {
@@ -926,6 +946,7 @@ const rootRouteChildren: RootRouteChildren = {
   MeldingenRoute: MeldingenRoute,
   NavigatieRoute: NavigatieRoute,
   NavigatieProviderRoute: NavigatieProviderRoute,
+  NotificatiesRoute: NotificatiesRoute,
   OfflineKaartenRoute: OfflineKaartenRoute,
   OnboardingRoute: OnboardingRoute,
   OnderhoudRoute: OnderhoudRoute,
