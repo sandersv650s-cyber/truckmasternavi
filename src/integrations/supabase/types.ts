@@ -177,6 +177,11 @@ export type Database = {
           truck: string | null
           updated_at: string
           username: string | null
+          vehicle_height_cm: number | null
+          vehicle_length_cm: number | null
+          vehicle_type: string | null
+          vehicle_weight_kg: number | null
+          vehicle_width_cm: number | null
         }
         Insert: {
           avatar_url?: string | null
@@ -187,6 +192,11 @@ export type Database = {
           truck?: string | null
           updated_at?: string
           username?: string | null
+          vehicle_height_cm?: number | null
+          vehicle_length_cm?: number | null
+          vehicle_type?: string | null
+          vehicle_weight_kg?: number | null
+          vehicle_width_cm?: number | null
         }
         Update: {
           avatar_url?: string | null
@@ -197,6 +207,11 @@ export type Database = {
           truck?: string | null
           updated_at?: string
           username?: string | null
+          vehicle_height_cm?: number | null
+          vehicle_length_cm?: number | null
+          vehicle_type?: string | null
+          vehicle_weight_kg?: number | null
+          vehicle_width_cm?: number | null
         }
         Relationships: []
       }
@@ -254,6 +269,39 @@ export type Database = {
           to_location?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      saved_routes: {
+        Row: {
+          created_at: string
+          distance_m: number | null
+          duration_s: number | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+          waypoints: Json
+        }
+        Insert: {
+          created_at?: string
+          distance_m?: number | null
+          duration_s?: number | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+          waypoints?: Json
+        }
+        Update: {
+          created_at?: string
+          distance_m?: number | null
+          duration_s?: number | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+          waypoints?: Json
         }
         Relationships: []
       }

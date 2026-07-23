@@ -15,7 +15,7 @@ type Dict = Record<string, string>;
 const translations: Record<Lang, Dict> = {
   nl: {
     "nav.dashboard": "Dashboard",
-    "nav.map": "Kaart",
+    "nav.planner": "Route",
     "nav.discover": "Ontdekken",
     "nav.community": "Community",
     "nav.profile": "Profiel",
@@ -32,7 +32,7 @@ const translations: Record<Lang, Dict> = {
   },
   en: {
     "nav.dashboard": "Dashboard",
-    "nav.map": "Map",
+    "nav.planner": "Route",
     "nav.discover": "Discover",
     "nav.community": "Community",
     "nav.profile": "Profile",
@@ -49,7 +49,7 @@ const translations: Record<Lang, Dict> = {
   },
   de: {
     "nav.dashboard": "Übersicht",
-    "nav.map": "Karte",
+    "nav.planner": "Route",
     "nav.discover": "Entdecken",
     "nav.community": "Community",
     "nav.profile": "Profil",
@@ -66,7 +66,7 @@ const translations: Record<Lang, Dict> = {
   },
   fr: {
     "nav.dashboard": "Tableau",
-    "nav.map": "Carte",
+    "nav.planner": "Route",
     "nav.discover": "Découvrir",
     "nav.community": "Communauté",
     "nav.profile": "Profil",
@@ -83,7 +83,7 @@ const translations: Record<Lang, Dict> = {
   },
   pl: {
     "nav.dashboard": "Pulpit",
-    "nav.map": "Mapa",
+    "nav.planner": "Trasa",
     "nav.discover": "Odkrywaj",
     "nav.community": "Społeczność",
     "nav.profile": "Profil",

@@ -49,13 +49,19 @@ function MyProfile() {
     if (!user) return;
     setSaving(true);
     try {
-      const { error } = await supabase.from("profiles").upsert({
+      const patch: Record<string, unknown> = {
         id: user.id,
         full_name: form.full_name ?? null,
         username: form.username ?? null,
         bio: form.bio ?? null,
         truck: form.truck ?? null,
-      });
+        vehicle_type: (form as any).vehicle_type ?? null,
+        vehicle_height_cm: (form as any).vehicle_height_cm ?? null,
+        vehicle_width_cm: (form as any).vehicle_width_cm ?? null,
+        vehicle_length_cm: (form as any).vehicle_length_cm ?? null,
+        vehicle_weight_kg: (form as any).vehicle_weight_kg ?? null,
+      };
+      const { error } = await supabase.from("profiles").upsert(patch as any);
       if (error) throw error;
       qc.invalidateQueries({ queryKey: ["profile", user.id] });
       toast.success("Profiel opgeslagen");
@@ -129,6 +135,48 @@ function MyProfile() {
             <div>
               <Label htmlFor="bio">Bio</Label>
               <Textarea id="bio" value={form.bio ?? ""} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={3} maxLength={500} />
+            </div>
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Voertuiggegevens (voor routeplanner)
+              </p>
+              <div className="space-y-2">
+                <div>
+                  <Label htmlFor="vt">Type</Label>
+                  <select
+                    id="vt"
+                    className="mt-1 block h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+                    value={(form as any).vehicle_type ?? ""}
+                    onChange={(e) => setForm({ ...(form as any), vehicle_type: e.target.value || null })}
+                  >
+                    <option value="">— Kies —</option>
+                    <option value="truck">Vrachtwagen</option>
+                    <option value="van">Bestelwagen</option>
+                    <option value="car">Auto</option>
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label htmlFor="vh">Hoogte (cm)</Label>
+                    <Input id="vh" type="number" inputMode="numeric" value={(form as any).vehicle_height_cm ?? ""} onChange={(e) => setForm({ ...(form as any), vehicle_height_cm: e.target.value ? Number(e.target.value) : null })} />
+                  </div>
+                  <div>
+                    <Label htmlFor="vw">Breedte (cm)</Label>
+                    <Input id="vw" type="number" inputMode="numeric" value={(form as any).vehicle_width_cm ?? ""} onChange={(e) => setForm({ ...(form as any), vehicle_width_cm: e.target.value ? Number(e.target.value) : null })} />
+                  </div>
+                  <div>
+                    <Label htmlFor="vl">Lengte (cm)</Label>
+                    <Input id="vl" type="number" inputMode="numeric" value={(form as any).vehicle_length_cm ?? ""} onChange={(e) => setForm({ ...(form as any), vehicle_length_cm: e.target.value ? Number(e.target.value) : null })} />
+                  </div>
+                  <div>
+                    <Label htmlFor="vwt">Gewicht (kg)</Label>
+                    <Input id="vwt" type="number" inputMode="numeric" value={(form as any).vehicle_weight_kg ?? ""} onChange={(e) => setForm({ ...(form as any), vehicle_weight_kg: e.target.value ? Number(e.target.value) : null })} />
+                  </div>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Opgeslagen in je profiel. De huidige gratis routeprovider past deze beperkingen nog niet toe.
+                </p>
+              </div>
             </div>
             <Button className="w-full" onClick={save} disabled={saving || q.isLoading}>
               {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
