@@ -83,7 +83,7 @@ const translations: Record<Lang, Dict> = {
   },
   pl: {
     "nav.dashboard": "Pulpit",
-    "nav.map": "Mapa",
+    "nav.planner": "Trasa",
     "nav.discover": "Odkrywaj",
     "nav.community": "Społeczność",
     "nav.profile": "Profil",
