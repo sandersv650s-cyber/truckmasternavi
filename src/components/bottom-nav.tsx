@@ -1,29 +1,31 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { LayoutDashboard, Map, Compass, Users, User } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 type NavItem = {
   to: "/" | "/kaart" | "/ontdekken" | "/community" | "/profiel";
-  label: string;
+  labelKey: string;
   icon: typeof LayoutDashboard;
   exact?: boolean;
   matches?: string[];
 };
 
 const items: NavItem[] = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/kaart", label: "Kaart", icon: Map, matches: ["/kaart", "/navigatie"] },
+  { to: "/", labelKey: "nav.dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/kaart", labelKey: "nav.map", icon: Map, matches: ["/kaart", "/navigatie"] },
   {
     to: "/ontdekken",
-    label: "Ontdekken",
+    labelKey: "nav.discover",
     icon: Compass,
     matches: ["/ontdekken", "/truckstops", "/brandstof", "/meldingen", "/voorzieningen", "/beloningen", "/zoeken"],
   },
-  { to: "/community", label: "Community", icon: Users },
-  { to: "/profiel", label: "Profiel", icon: User },
+  { to: "/community", labelKey: "nav.community", icon: Users },
+  { to: "/profiel", labelKey: "nav.profile", icon: User },
 ];
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { t } = useI18n();
 
   return (
     <nav
@@ -47,7 +49,7 @@ export function BottomNav() {
                 }`}
               >
                 <Icon className="h-6 w-6" strokeWidth={active ? 2.5 : 2} />
-                <span>{it.label}</span>
+                <span>{t(it.labelKey)}</span>
               </Link>
             </li>
           );
