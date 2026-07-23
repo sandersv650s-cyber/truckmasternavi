@@ -12,6 +12,7 @@ import {
   occupancyMeta,
   flag,
   minAgoLabel,
+  parkingPrediction,
   type Amenity,
   type Truckstop,
 } from "@/lib/discover-data";
@@ -235,6 +236,11 @@ function StopRow({ t, fav, onFav }: { t: Truckstop; fav: boolean; onFav: () => v
               <span className="font-semibold text-foreground">{t.freeSpots}</span> / {t.totalSpots} vrij
             </span>
             <span className="ml-auto text-muted-foreground">{minAgoLabel(t.occupancyUpdatedMinAgo)}</span>
+          </div>
+          <div className="mt-2">
+            <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium ${parkingPrediction(t).color}`}>
+              🔮 {parkingPrediction(t).label}
+            </span>
           </div>
           <div className="mt-2 flex flex-wrap gap-1">
             {t.amenities.slice(0, 5).map((a) => (

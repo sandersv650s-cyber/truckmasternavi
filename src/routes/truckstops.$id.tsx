@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, Navigation, ImageIcon, ArrowLeft, MapPin, Clock, Heart } from "lucide-react";
-import { truckstopById, amenityLabels, occupancyMeta, flag, countryLabel, minAgoLabel, type Truckstop } from "@/lib/discover-data";
+import { truckstopById, amenityLabels, occupancyMeta, flag, countryLabel, minAgoLabel, parkingPrediction, type Truckstop } from "@/lib/discover-data";
 import { userById, currentUser, formatDate } from "@/lib/mock-data";
 import { useFavorites } from "@/lib/favorites";
 
@@ -40,6 +40,7 @@ function TruckstopDetail() {
   const [text, setText] = useState("");
   const [attachPhoto, setAttachPhoto] = useState(false);
   const occ = occupancyMeta[stop.occupancy];
+  const pred = parkingPrediction(stop);
   const { isFav, toggle } = useFavorites("truckstops");
   const fav = isFav(stop.id);
 
@@ -90,6 +91,11 @@ function TruckstopDetail() {
             </div>
             <div className="mt-3 h-2 overflow-hidden rounded-full bg-background/60">
               <div className={`h-full ${occ.color}`} style={{ width: `${occ.pct}%` }} />
+            </div>
+            <div className={`mt-3 rounded-lg border p-3 text-xs ${pred.color}`}>
+              <p className="font-semibold">🔮 Slimme voorspelling: {pred.label}</p>
+              <p className="mt-1 opacity-90">{pred.explanation}</p>
+              <p className="mt-1 text-[10px] opacity-70">Gebaseerd op bezetting van {pred.asOf} + historische drukte (demo).</p>
             </div>
             <Button size="lg" className="mt-4 h-12 w-full font-bold"><Navigation className="mr-2 h-4 w-4" /> Navigeer hierheen</Button>
             <p className="mt-1 text-center text-[10px] text-muted-foreground"><MapPin className="mr-1 inline h-3 w-3" />Openingstijden: {stop.openHours}</p>

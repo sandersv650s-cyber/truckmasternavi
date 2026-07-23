@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ParkingSquare, Fuel, Megaphone, Search, Trophy, ChevronRight, Map as MapIcon } from "lucide-react";
+import { ParkingSquare, Fuel, Megaphone, Search, Trophy, ChevronRight, Map as MapIcon, Sparkles, LayoutGrid } from "lucide-react";
 import { truckstops, fuelStations, initialAlerts, amenityCategoryMeta, type AmenityCategory } from "@/lib/discover-data";
 
 export const Route = createFileRoute("/ontdekken")({
@@ -30,13 +30,21 @@ function OntdekkenPage() {
   const activeAlerts = initialAlerts.length;
 
   const cats: {
-    to: "/kaart" | "/zoeken" | "/truckstops" | "/brandstof" | "/meldingen" | "/voorzieningen" | "/beloningen";
+    to: "/kaart" | "/zoeken" | "/assistent" | "/truckstops" | "/brandstof" | "/meldingen" | "/voorzieningen" | "/beloningen" | "/meer";
     icon: React.ReactNode;
     title: string;
     desc: string;
     accent: string;
     hint: string;
   }[] = [
+    {
+      to: "/assistent",
+      icon: <Sparkles className="h-6 w-6" />,
+      title: "AI-routeassistent",
+      desc: "Vraag in gewone taal — krijg passende stops met uitleg.",
+      accent: "from-primary/25 to-primary/5",
+      hint: "Demo",
+    },
     {
       to: "/kaart",
       icon: <MapIcon className="h-6 w-6" />,
@@ -92,6 +100,14 @@ function OntdekkenPage() {
       desc: "Verdien badges door nuttige bijdragen en betrouwbare meldingen.",
       accent: "from-emerald-500/25 to-emerald-500/5",
       hint: "8 badges beschikbaar",
+    },
+    {
+      to: "/meer",
+      icon: <LayoutGrid className="h-6 w-6" />,
+      title: "Meer functies",
+      desc: "Groepen, konvooi, onderhoud, documenten, integraties en privacy.",
+      accent: "from-purple-500/25 to-purple-500/5",
+      hint: "7 modules",
     },
   ];
 

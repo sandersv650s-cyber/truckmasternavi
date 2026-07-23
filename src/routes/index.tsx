@@ -16,11 +16,12 @@ import {
   MessageCircle,
   Map as MapIcon,
   Search,
-  Compass,
   Megaphone,
   ParkingSquare,
   Heart,
   Star,
+  Sparkles,
+  LayoutGrid,
 } from "lucide-react";
 import { currentUser, rides, posts, userById, formatDate, formatDuration } from "@/lib/mock-data";
 import {
@@ -106,11 +107,12 @@ function Dashboard() {
         </CardContent>
       </Card>
 
-      <div className="mb-5 grid grid-cols-4 gap-2">
+      <div className="mb-5 grid grid-cols-5 gap-2">
         <QuickAction to="/kaart" icon={<MapIcon className="h-5 w-5" />} label="Kaart" />
         <QuickAction to="/zoeken" icon={<Search className="h-5 w-5" />} label="Zoeken" />
-        <QuickAction to="/ontdekken" icon={<Compass className="h-5 w-5" />} label="Ontdek" />
+        <QuickAction to="/assistent" icon={<Sparkles className="h-5 w-5" />} label="AI" />
         <QuickAction to="/meldingen" icon={<Megaphone className="h-5 w-5" />} label="Meld" />
+        <QuickAction to="/meer" icon={<LayoutGrid className="h-5 w-5" />} label="Meer" />
       </div>
 
       {trending.length > 0 && (
@@ -333,7 +335,7 @@ function QuickAction({
   icon,
   label,
 }: {
-  to: "/kaart" | "/zoeken" | "/ontdekken" | "/meldingen";
+  to: "/kaart" | "/zoeken" | "/ontdekken" | "/meldingen" | "/assistent" | "/meer";
   icon: React.ReactNode;
   label: string;
 }) {
