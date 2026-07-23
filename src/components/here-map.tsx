@@ -183,7 +183,7 @@ export function HereMap({
   if (!HERE_API_KEY) {
     return (
       <div className="flex h-full items-center justify-center bg-muted p-6 text-center text-sm text-muted-foreground">
-        HERE-kaart niet beschikbaar — <code className="mx-1">HERE_API_KEY</code> ontbreekt.
+        HERE-kaart niet beschikbaar — <code className="mx-1">VITE_HERE_API_KEY</code> ontbreekt.
       </div>
     );
   }
