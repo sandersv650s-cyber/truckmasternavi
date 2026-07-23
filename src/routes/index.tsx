@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { StorageAvatarImage } from "@/lib/storage-image";
 import {
   Truck, Play, Fuel, Gauge, Trophy, Settings, ArrowRight, MapPin, MessageCircle,
   Map as MapIcon, Search, Megaphone, LayoutGrid, Building2,
@@ -90,7 +91,7 @@ function Dashboard() {
           </div>
           <Link to="/profiel">
             <Avatar className="h-12 w-12 shrink-0 ring-2 ring-primary/40">
-              {profileQ.data?.avatar_url && <AvatarImage src={profileQ.data.avatar_url} alt="" />}
+              <StorageAvatarImage bucket="avatars" path={profileQ.data?.avatar_url} />
               <AvatarFallback>{initials(displayName)}</AvatarFallback>
             </Avatar>
           </Link>

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { StorageAvatarImage, StorageImg } from "@/lib/storage-image";
 import { Truck, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,7 +54,7 @@ function UserProfile() {
             <div className="h-24 bg-gradient-to-r from-primary/40 via-accent/30 to-primary/20" />
             <CardContent className="-mt-10 p-4">
               <Avatar className="h-20 w-20 border-4 border-card">
-                {profQ.data.avatar_url && <AvatarImage src={profQ.data.avatar_url} alt="" />}
+                <StorageAvatarImage bucket="avatars" path={profQ.data.avatar_url} />
                 <AvatarFallback>{initials(profQ.data.full_name)}</AvatarFallback>
               </Avatar>
               <h2 className="mt-2 text-lg font-bold">{profQ.data.full_name ?? "Chauffeur"}</h2>
@@ -79,7 +80,7 @@ function UserProfile() {
                 <Card key={p.id}>
                   <CardContent className="p-3">
                     <p className="text-sm">{p.text}</p>
-                    {p.image_url && <img src={p.image_url} alt="" className="mt-2 max-h-64 w-full rounded-lg object-cover" loading="lazy" />}
+                    {p.image_url && <StorageImg bucket="post-images" path={p.image_url} className="mt-2 max-h-64 w-full rounded-lg object-cover" />}
                     <p className="mt-1 text-[11px] text-muted-foreground">{formatDate(p.created_at)} · ♥ {p.likes_count}</p>
                   </CardContent>
                 </Card>
