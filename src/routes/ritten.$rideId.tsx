@@ -46,6 +46,7 @@ export const Route = createFileRoute("/ritten/$rideId")({
 
 function RideDetail() {
   const ride = Route.useLoaderData();
+  if (!ride) return null; // loader throws notFound() before this renders
 
   return (
     <AppShell
