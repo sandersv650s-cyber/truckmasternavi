@@ -1,18 +1,55 @@
-import { type ReactNode } from "react";
-import { Truck } from "lucide-react";
+import { useEffect, type ReactNode } from "react";
+import { Truck, LogIn } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { BottomNav } from "./bottom-nav";
 import { NotificationCenter } from "./notification-center";
-import { Badge } from "./ui/badge";
+import { useAuth } from "@/lib/auth";
+import { Button } from "./ui/button";
 
 export function AppShell({
   title,
   action,
   children,
+  requireAuth = true,
 }: {
   title?: string;
   action?: ReactNode;
   children: ReactNode;
+  requireAuth?: boolean;
 }) {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (requireAuth && !loading && !user) {
+      navigate({ to: "/login" });
+    }
+  }, [requireAuth, loading, user, navigate]);
+
+  if (requireAuth && loading) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background">
+        <div className="text-sm text-muted-foreground">Laden…</div>
+      </div>
+    );
+  }
+
+  if (requireAuth && !user) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background px-4">
+        <div className="max-w-sm text-center">
+          <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-lg bg-primary/20 text-primary">
+            <Truck className="h-5 w-5" />
+          </div>
+          <p className="text-sm text-muted-foreground">Log in om verder te gaan.</p>
+          <Button className="mt-3" onClick={() => navigate({ to: "/login" })}>
+            <LogIn className="mr-1 h-4 w-4" /> Naar inloggen
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background pb-24">
       <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md">
@@ -20,9 +57,6 @@ export function AppShell({
           {title ? (
             <div className="flex min-w-0 items-center gap-2">
               <h1 className="truncate text-lg font-semibold tracking-tight">{title}</h1>
-              <Badge variant="outline" className="shrink-0 border-amber-500/50 bg-amber-500/10 text-[9px] font-semibold uppercase tracking-wider text-amber-300">
-                Demo
-              </Badge>
             </div>
           ) : (
             <div className="flex min-w-0 items-center gap-2">
@@ -30,9 +64,6 @@ export function AppShell({
                 <Truck className="h-4 w-4" />
               </div>
               <span className="truncate text-base font-bold tracking-tight">TruckMate</span>
-              <Badge variant="outline" className="shrink-0 border-amber-500/50 bg-amber-500/10 text-[9px] font-semibold uppercase tracking-wider text-amber-300">
-                Demo
-              </Badge>
             </div>
           )}
           <div className="flex shrink-0 items-center gap-1">
