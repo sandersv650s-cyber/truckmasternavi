@@ -17,6 +17,7 @@ import { Route as RittenRouteImport } from './routes/ritten'
 import { Route as ProfielRouteImport } from './routes/profiel'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PremiumRouteImport } from './routes/premium'
+import { Route as OverRouteImport } from './routes/over'
 import { Route as OntdekkenRouteImport } from './routes/ontdekken'
 import { Route as OnderhoudRouteImport } from './routes/onderhoud'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
@@ -84,6 +85,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const PremiumRoute = PremiumRouteImport.update({
   id: '/premium',
   path: '/premium',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OverRoute = OverRouteImport.update({
+  id: '/over',
+  path: '/over',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OntdekkenRoute = OntdekkenRouteImport.update({
@@ -251,6 +257,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/onderhoud': typeof OnderhoudRoute
   '/ontdekken': typeof OntdekkenRoute
+  '/over': typeof OverRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
   '/profiel': typeof ProfielRouteWithChildren
@@ -289,6 +296,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/onderhoud': typeof OnderhoudRoute
   '/ontdekken': typeof OntdekkenRoute
+  '/over': typeof OverRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
   '/profiel': typeof ProfielRouteWithChildren
@@ -328,6 +336,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/onderhoud': typeof OnderhoudRoute
   '/ontdekken': typeof OntdekkenRoute
+  '/over': typeof OverRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
   '/profiel': typeof ProfielRouteWithChildren
@@ -368,6 +377,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/onderhoud'
     | '/ontdekken'
+    | '/over'
     | '/premium'
     | '/privacy'
     | '/profiel'
@@ -406,6 +416,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/onderhoud'
     | '/ontdekken'
+    | '/over'
     | '/premium'
     | '/privacy'
     | '/profiel'
@@ -444,6 +455,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/onderhoud'
     | '/ontdekken'
+    | '/over'
     | '/premium'
     | '/privacy'
     | '/profiel'
@@ -483,6 +495,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   OnderhoudRoute: typeof OnderhoudRoute
   OntdekkenRoute: typeof OntdekkenRoute
+  OverRoute: typeof OverRoute
   PremiumRoute: typeof PremiumRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfielRoute: typeof ProfielRouteWithChildren
@@ -549,6 +562,13 @@ declare module '@tanstack/react-router' {
       path: '/premium'
       fullPath: '/premium'
       preLoaderRoute: typeof PremiumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/over': {
+      id: '/over'
+      path: '/over'
+      fullPath: '/over'
+      preLoaderRoute: typeof OverRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ontdekken': {
@@ -829,6 +849,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   OnderhoudRoute: OnderhoudRoute,
   OntdekkenRoute: OntdekkenRoute,
+  OverRoute: OverRoute,
   PremiumRoute: PremiumRoute,
   PrivacyRoute: PrivacyRoute,
   ProfielRoute: ProfielRouteWithChildren,
