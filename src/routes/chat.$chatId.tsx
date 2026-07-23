@@ -28,7 +28,7 @@ export const Route = createFileRoute("/chat/$chatId")({
     return c;
   },
   notFoundComponent: () => (
-    <AppShell title="Niet gevonden">
+    <AppShell demoBanner={"Berichten zijn demo-content — realtime chat is nog niet actief."} title="Niet gevonden">
       <p className="text-sm text-muted-foreground">Dit gesprek bestaat niet.</p>
     </AppShell>
   ),

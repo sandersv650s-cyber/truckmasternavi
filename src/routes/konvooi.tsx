@@ -69,7 +69,7 @@ function KonvooiPage() {
   const inviteCode = "TM-K74Q9";
 
   return (
-    <AppShell title="Konvooimodus">
+    <AppShell demoBanner={"Konvooi-modus vereist een realtime-locatiedienst — hier zie je een demo."} title="Konvooimodus">
       <Card className="mb-3 border-emerald-500/40 bg-emerald-500/5">
         <CardContent className="flex items-start gap-3 p-3">
           <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-emerald-500/20 text-emerald-300">

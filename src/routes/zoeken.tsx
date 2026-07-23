@@ -84,7 +84,7 @@ function ZoekenPage() {
   const cap = (arr: unknown[]) => (tab === "alles" ? arr.slice(0, 3) : arr);
 
   return (
-    <AppShell title="Zoeken">
+    <AppShell demoBanner={"Zoekt in voorbeeldcontent."} title="Zoeken">
       <div className="relative mb-3">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input

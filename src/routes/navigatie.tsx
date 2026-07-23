@@ -33,7 +33,7 @@ function NavigatiePage() {
   const [computed, setComputed] = useState(false);
 
   return (
-    <AppShell title="Navigatie">
+    <AppShell demoBanner={"Trucknavigatie vereist een externe kaart- en routing-dienst (HERE/TomTom) en is nog niet actief."} title="Navigatie">
       <Alert className="mb-4 border-yellow-500/40 bg-yellow-500/10 text-yellow-100">
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle className="text-sm font-semibold">Rijden gaat voor</AlertTitle>

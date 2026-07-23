@@ -25,7 +25,7 @@ export const Route = createFileRoute("/truckstops/$id")({
     ],
   }),
   notFoundComponent: () => (
-    <AppShell title="Niet gevonden">
+    <AppShell demoBanner={"Truckstop-details zijn voorbeelddata."} title="Niet gevonden">
       <p className="text-sm text-muted-foreground">Deze truckstop bestaat niet.</p>
       <Link to="/truckstops" className="mt-3 inline-block text-sm text-primary underline">Terug naar overzicht</Link>
     </AppShell>

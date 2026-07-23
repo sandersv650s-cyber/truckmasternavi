@@ -46,7 +46,7 @@ function BrandstofPage() {
   const cheapest = list.length ? Math.min(...list.map((s) => s.dieselPrice)) : 0;
 
   return (
-    <AppShell title="Dieselprijzen">
+    <AppShell demoBanner={"Brandstofprijzen zijn voorbeelddata — echte prijzen vereisen een prijsfeed."} title="Dieselprijzen">
       <Card className="mb-4 border-amber-500/40 bg-amber-500/5"><CardContent className="p-3 text-xs text-muted-foreground">
         Prijzen zijn <span className="font-semibold text-foreground">demo-data</span> en niet gekoppeld aan een live provider.
       </CardContent></Card>

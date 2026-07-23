@@ -42,7 +42,7 @@ function AssistentPage() {
   const parsed = query ? parseAssistantQuery(query) : null;
 
   return (
-    <AppShell title="AI-assistent">
+    <AppShell demoBanner={"AI-assistent is een demo met vaste antwoorden — nog geen echte LLM aangesloten."} title="AI-assistent">
       <Card className="mb-3 border-primary/40 bg-primary/5">
         <CardContent className="flex items-start gap-3 p-3">
           <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/20 text-primary">

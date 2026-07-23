@@ -56,7 +56,7 @@ function OfflinePage() {
   const totalMb = regions.filter((r) => status[r.code] === "done").reduce((sum, r) => sum + r.sizeMb, 0);
 
   return (
-    <AppShell title="Offline kaarten">
+    <AppShell demoBanner={"Offline kaarten vereisen een licentie bij een kaartaanbieder — nog niet actief."} title="Offline kaarten">
       <Alert className="mb-4">
         <AlertDescription className="text-[11px]">
           <Badge className="mr-2 bg-primary/30 text-primary">Demo</Badge>

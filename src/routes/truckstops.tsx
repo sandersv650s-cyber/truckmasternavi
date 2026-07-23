@@ -70,7 +70,7 @@ function TruckstopsPage() {
   }, [q, minFree, active, onlyFav, isFav]);
 
   return (
-    <AppShell title="Truckstops">
+    <AppShell demoBanner={"Truckstop-lijst bevat voorbeelddata — een echte POI-databron volgt."} title="Truckstops">
       <div className="mb-3 flex gap-2">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

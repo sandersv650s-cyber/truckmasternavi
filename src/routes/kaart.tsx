@@ -118,7 +118,7 @@ function KaartPage() {
     setLayers((p) => ({ ...p, [k]: !p[k] }));
 
   return (
-    <AppShell title="Kaart">
+    <AppShell demoBanner={"Kaartweergave is illustratief — echte POI's vereisen een kaartaanbieder."} title="Kaart">
       <div className="mb-3 flex flex-wrap gap-2">
         <LayerBtn
           on={layers.parking}

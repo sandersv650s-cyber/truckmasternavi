@@ -37,7 +37,7 @@ function GroepenPage() {
   }, [q, kind, onlyJoined]);
 
   return (
-    <AppShell title="Groepen">
+    <AppShell demoBanner={"Groepen tonen voorbeelddata — echte groepen vereisen aparte tabellen en moderatie."} title="Groepen">
       <div className="relative mb-3">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Zoek in groepen…" className="pl-9" />

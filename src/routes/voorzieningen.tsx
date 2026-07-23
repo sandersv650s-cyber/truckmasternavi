@@ -40,7 +40,7 @@ function VoorzieningenPage() {
   const results = active ? truckstops.filter((t) => (match ? t.amenities.includes(match) : true)).slice(0, 8) : [];
 
   return (
-    <AppShell title="Voorzieningen">
+    <AppShell demoBanner={"Voorzieningen tonen voorbeelddata."} title="Voorzieningen">
       <p className="mb-3 text-sm text-muted-foreground">Kies een categorie om plekken in de buurt van je route te zien.</p>
       <div className="mb-6 grid grid-cols-2 gap-2">
         {cats.map((c) => {

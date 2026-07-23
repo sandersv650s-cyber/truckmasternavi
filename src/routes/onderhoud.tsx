@@ -92,7 +92,7 @@ function OnderhoudPage() {
   };
 
   return (
-    <AppShell title="Onderhoudslogboek">
+    <AppShell demoBanner={"Onderhoudslogboek is een demo — items worden nog niet persistent opgeslagen."} title="Onderhoudslogboek">
       <Card className="mb-3">
         <CardContent className="grid grid-cols-3 gap-2 p-3 text-center text-xs">
           <div><p className="text-[10px] uppercase text-muted-foreground">Items</p><p className="text-sm font-bold">{items.length}</p></div>

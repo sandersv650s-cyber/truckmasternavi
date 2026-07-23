@@ -47,7 +47,7 @@ function DeelEtaPage() {
   const expiryLabel = duration === "trip" ? "einde rit" : new Date(Date.now() + Number(duration) * 60_000).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" });
 
   return (
-    <AppShell title="Deel live ETA">
+    <AppShell demoBanner={"ETA-delen is een demo — echte live ETA vereist realtime-locatie en een deel-service."} title="Deel live ETA">
       <Alert className="mb-4">
         <AlertDescription className="text-xs">
           <Badge className="mr-2 bg-primary/30 text-primary">Privacy-first</Badge>

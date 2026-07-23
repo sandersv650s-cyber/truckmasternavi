@@ -77,7 +77,7 @@ function DocumentenPage() {
   };
 
   return (
-    <AppShell title="Documenten">
+    <AppShell demoBanner={"Documentenkluis is een demo — bestanden worden nog niet echt bewaard."} title="Documenten">
       <Card className="mb-3 border-amber-500/40 bg-amber-500/5">
         <CardContent className="flex items-start gap-3 p-3 text-xs">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
