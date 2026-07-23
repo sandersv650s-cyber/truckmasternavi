@@ -34,6 +34,7 @@ import { Route as GroepenRouteImport } from './routes/groepen'
 import { Route as FleetRouteImport } from './routes/fleet'
 import { Route as DocumentenRouteImport } from './routes/documenten'
 import { Route as DeelEtaRouteImport } from './routes/deel-eta'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CarplayRouteImport } from './routes/carplay'
@@ -172,6 +173,11 @@ const DeelEtaRoute = DeelEtaRouteImport.update({
   path: '/deel-eta',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CommunityRoute = CommunityRouteImport.update({
   id: '/community',
   path: '/community',
@@ -241,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/carplay': typeof CarplayRoute
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
+  '/contact': typeof ContactRoute
   '/deel-eta': typeof DeelEtaRoute
   '/documenten': typeof DocumentenRoute
   '/fleet': typeof FleetRoute
@@ -280,6 +287,7 @@ export interface FileRoutesByTo {
   '/carplay': typeof CarplayRoute
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
+  '/contact': typeof ContactRoute
   '/deel-eta': typeof DeelEtaRoute
   '/documenten': typeof DocumentenRoute
   '/fleet': typeof FleetRoute
@@ -320,6 +328,7 @@ export interface FileRoutesById {
   '/carplay': typeof CarplayRoute
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
+  '/contact': typeof ContactRoute
   '/deel-eta': typeof DeelEtaRoute
   '/documenten': typeof DocumentenRoute
   '/fleet': typeof FleetRoute
@@ -361,6 +370,7 @@ export interface FileRouteTypes {
     | '/carplay'
     | '/chat'
     | '/community'
+    | '/contact'
     | '/deel-eta'
     | '/documenten'
     | '/fleet'
@@ -400,6 +410,7 @@ export interface FileRouteTypes {
     | '/carplay'
     | '/chat'
     | '/community'
+    | '/contact'
     | '/deel-eta'
     | '/documenten'
     | '/fleet'
@@ -439,6 +450,7 @@ export interface FileRouteTypes {
     | '/carplay'
     | '/chat'
     | '/community'
+    | '/contact'
     | '/deel-eta'
     | '/documenten'
     | '/fleet'
@@ -479,6 +491,7 @@ export interface RootRouteChildren {
   CarplayRoute: typeof CarplayRoute
   ChatRoute: typeof ChatRouteWithChildren
   CommunityRoute: typeof CommunityRoute
+  ContactRoute: typeof ContactRoute
   DeelEtaRoute: typeof DeelEtaRoute
   DocumentenRoute: typeof DocumentenRoute
   FleetRoute: typeof FleetRoute
@@ -683,6 +696,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeelEtaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/community': {
       id: '/community'
       path: '/community'
@@ -833,6 +853,7 @@ const rootRouteChildren: RootRouteChildren = {
   CarplayRoute: CarplayRoute,
   ChatRoute: ChatRouteWithChildren,
   CommunityRoute: CommunityRoute,
+  ContactRoute: ContactRoute,
   DeelEtaRoute: DeelEtaRoute,
   DocumentenRoute: DocumentenRoute,
   FleetRoute: FleetRoute,
