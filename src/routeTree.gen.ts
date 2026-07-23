@@ -18,6 +18,7 @@ import { Route as ProfielRouteImport } from './routes/profiel'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as OntdekkenRouteImport } from './routes/ontdekken'
 import { Route as OnderhoudRouteImport } from './routes/onderhoud'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as NavigatieRouteImport } from './routes/navigatie'
 import { Route as MeldingenRouteImport } from './routes/meldingen'
 import { Route as MeerRouteImport } from './routes/meer'
@@ -82,6 +83,11 @@ const OntdekkenRoute = OntdekkenRouteImport.update({
 const OnderhoudRoute = OnderhoudRouteImport.update({
   id: '/onderhoud',
   path: '/onderhoud',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NavigatieRoute = NavigatieRouteImport.update({
@@ -201,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/meer': typeof MeerRoute
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
+  '/onboarding': typeof OnboardingRoute
   '/onderhoud': typeof OnderhoudRoute
   '/ontdekken': typeof OntdekkenRoute
   '/privacy': typeof PrivacyRoute
@@ -232,6 +239,7 @@ export interface FileRoutesByTo {
   '/meer': typeof MeerRoute
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
+  '/onboarding': typeof OnboardingRoute
   '/onderhoud': typeof OnderhoudRoute
   '/ontdekken': typeof OntdekkenRoute
   '/privacy': typeof PrivacyRoute
@@ -264,6 +272,7 @@ export interface FileRoutesById {
   '/meer': typeof MeerRoute
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
+  '/onboarding': typeof OnboardingRoute
   '/onderhoud': typeof OnderhoudRoute
   '/ontdekken': typeof OntdekkenRoute
   '/privacy': typeof PrivacyRoute
@@ -297,6 +306,7 @@ export interface FileRouteTypes {
     | '/meer'
     | '/meldingen'
     | '/navigatie'
+    | '/onboarding'
     | '/onderhoud'
     | '/ontdekken'
     | '/privacy'
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/meer'
     | '/meldingen'
     | '/navigatie'
+    | '/onboarding'
     | '/onderhoud'
     | '/ontdekken'
     | '/privacy'
@@ -359,6 +370,7 @@ export interface FileRouteTypes {
     | '/meer'
     | '/meldingen'
     | '/navigatie'
+    | '/onboarding'
     | '/onderhoud'
     | '/ontdekken'
     | '/privacy'
@@ -391,6 +403,7 @@ export interface RootRouteChildren {
   MeerRoute: typeof MeerRoute
   MeldingenRoute: typeof MeldingenRoute
   NavigatieRoute: typeof NavigatieRoute
+  OnboardingRoute: typeof OnboardingRoute
   OnderhoudRoute: typeof OnderhoudRoute
   OntdekkenRoute: typeof OntdekkenRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -465,6 +478,13 @@ declare module '@tanstack/react-router' {
       path: '/onderhoud'
       fullPath: '/onderhoud'
       preLoaderRoute: typeof OnderhoudRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/navigatie': {
@@ -681,6 +701,7 @@ const rootRouteChildren: RootRouteChildren = {
   MeerRoute: MeerRoute,
   MeldingenRoute: MeldingenRoute,
   NavigatieRoute: NavigatieRoute,
+  OnboardingRoute: OnboardingRoute,
   OnderhoudRoute: OnderhoudRoute,
   OntdekkenRoute: OntdekkenRoute,
   PrivacyRoute: PrivacyRoute,
