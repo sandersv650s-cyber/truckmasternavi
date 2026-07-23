@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { StorageAvatarImage, StorageImg } from "@/lib/storage-image";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -230,7 +231,7 @@ function PostCard({
         <div className="mb-2 flex items-center gap-2">
           <Link to="/profiel/$userId" params={{ userId: post.user_id }}>
             <Avatar className="h-10 w-10">
-              {post.author?.avatar_url && <AvatarImage src={post.author.avatar_url} alt="" />}
+              <StorageAvatarImage bucket="avatars" path={post.author?.avatar_url} />
               <AvatarFallback>{initials(post.author?.full_name)}</AvatarFallback>
             </Avatar>
           </Link>
@@ -254,11 +255,10 @@ function PostCard({
         </div>
         <p className="whitespace-pre-wrap text-sm leading-relaxed">{post.text}</p>
         {post.image_url && (
-          <img
-            src={post.image_url}
-            alt=""
+          <StorageImg
+            bucket="post-images"
+            path={post.image_url}
             className="mt-3 max-h-96 w-full rounded-lg object-cover"
-            loading="lazy"
           />
         )}
         <div className="mt-3 flex items-center gap-4 text-sm">
@@ -329,7 +329,7 @@ function Comments({ postId, currentUserId }: { postId: string; currentUserId: st
           return (
             <div key={c.id} className="flex gap-2">
               <Avatar className="h-7 w-7 shrink-0">
-                {a?.avatar_url && <AvatarImage src={a.avatar_url} />}
+                <StorageAvatarImage bucket="avatars" path={a?.avatar_url} />
                 <AvatarFallback>{initials(a?.full_name)}</AvatarFallback>
               </Avatar>
               <div className="flex-1 rounded-lg bg-muted/40 p-2">

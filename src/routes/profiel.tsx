@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { StorageAvatarImage } from "@/lib/storage-image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -96,7 +97,7 @@ function MyProfile() {
         <CardContent className="-mt-10 p-4">
           <div className="relative inline-block">
             <Avatar className="h-20 w-20 border-4 border-card">
-              {q.data?.avatar_url && <AvatarImage src={q.data.avatar_url} alt="" />}
+              <StorageAvatarImage bucket="avatars" path={q.data?.avatar_url} />
               <AvatarFallback>{initials(q.data?.full_name ?? user?.email)}</AvatarFallback>
             </Avatar>
             <label className="absolute -bottom-1 -right-1 grid h-8 w-8 cursor-pointer place-items-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90">
