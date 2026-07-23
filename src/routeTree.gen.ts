@@ -15,6 +15,7 @@ import { Route as VoorwaardenRouteImport } from './routes/voorwaarden'
 import { Route as VoertuigRouteImport } from './routes/voertuig'
 import { Route as TruckstopsRouteImport } from './routes/truckstops'
 import { Route as RittenRouteImport } from './routes/ritten'
+import { Route as ReleaseNotesRouteImport } from './routes/release-notes'
 import { Route as ProfielRouteImport } from './routes/profiel'
 import { Route as PrivacybeleidRouteImport } from './routes/privacybeleid'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -78,6 +79,11 @@ const TruckstopsRoute = TruckstopsRouteImport.update({
 const RittenRoute = RittenRouteImport.update({
   id: '/ritten',
   path: '/ritten',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReleaseNotesRoute = ReleaseNotesRouteImport.update({
+  id: '/release-notes',
+  path: '/release-notes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfielRoute = ProfielRouteImport.update({
@@ -281,6 +287,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/privacybeleid': typeof PrivacybeleidRoute
   '/profiel': typeof ProfielRouteWithChildren
+  '/release-notes': typeof ReleaseNotesRoute
   '/ritten': typeof RittenRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
@@ -323,6 +330,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/privacybeleid': typeof PrivacybeleidRoute
   '/profiel': typeof ProfielRouteWithChildren
+  '/release-notes': typeof ReleaseNotesRoute
   '/ritten': typeof RittenRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
@@ -366,6 +374,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/privacybeleid': typeof PrivacybeleidRoute
   '/profiel': typeof ProfielRouteWithChildren
+  '/release-notes': typeof ReleaseNotesRoute
   '/ritten': typeof RittenRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
@@ -410,6 +419,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/privacybeleid'
     | '/profiel'
+    | '/release-notes'
     | '/ritten'
     | '/truckstops'
     | '/voertuig'
@@ -452,6 +462,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/privacybeleid'
     | '/profiel'
+    | '/release-notes'
     | '/ritten'
     | '/truckstops'
     | '/voertuig'
@@ -494,6 +505,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/privacybeleid'
     | '/profiel'
+    | '/release-notes'
     | '/ritten'
     | '/truckstops'
     | '/voertuig'
@@ -537,6 +549,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   PrivacybeleidRoute: typeof PrivacybeleidRoute
   ProfielRoute: typeof ProfielRouteWithChildren
+  ReleaseNotesRoute: typeof ReleaseNotesRoute
   RittenRoute: typeof RittenRouteWithChildren
   TruckstopsRoute: typeof TruckstopsRouteWithChildren
   VoertuigRoute: typeof VoertuigRoute
@@ -587,6 +600,13 @@ declare module '@tanstack/react-router' {
       path: '/ritten'
       fullPath: '/ritten'
       preLoaderRoute: typeof RittenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/release-notes': {
+      id: '/release-notes'
+      path: '/release-notes'
+      fullPath: '/release-notes'
+      preLoaderRoute: typeof ReleaseNotesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profiel': {
@@ -915,6 +935,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   PrivacybeleidRoute: PrivacybeleidRoute,
   ProfielRoute: ProfielRouteWithChildren,
+  ReleaseNotesRoute: ReleaseNotesRoute,
   RittenRoute: RittenRouteWithChildren,
   TruckstopsRoute: TruckstopsRouteWithChildren,
   VoertuigRoute: VoertuigRoute,
