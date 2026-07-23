@@ -53,6 +53,7 @@ import { Route as RittenRideIdRouteImport } from './routes/ritten.$rideId'
 import { Route as ProfielUserIdRouteImport } from './routes/profiel.$userId'
 import { Route as GroepenIdRouteImport } from './routes/groepen.$id'
 import { Route as ChatChatIdRouteImport } from './routes/chat.$chatId'
+import { Route as RittenRouteImport } from './routes/ritten.'
 
 const ZoekenRoute = ZoekenRouteImport.update({
   id: '/zoeken',
@@ -274,6 +275,11 @@ const ChatChatIdRoute = ChatChatIdRouteImport.update({
   path: '/$chatId',
   getParentRoute: () => ChatRoute,
 } as any)
+const RittenRoute = RittenRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RittenRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -315,6 +321,7 @@ export interface FileRoutesByFullPath {
   '/voorwaarden': typeof VoorwaardenRoute
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
+  '/ritten/': typeof RittenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
@@ -355,12 +362,12 @@ export interface FileRoutesByTo {
   '/profiel': typeof ProfielRouteWithChildren
   '/release-notes': typeof ReleaseNotesRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/ritten': typeof RittenRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/voorwaarden': typeof VoorwaardenRoute
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
+  '/ritten': typeof RittenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
@@ -408,6 +415,7 @@ export interface FileRoutesById {
   '/voorwaarden': typeof VoorwaardenRoute
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
+  '/ritten/': typeof RittenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
@@ -456,6 +464,7 @@ export interface FileRouteTypes {
     | '/voorwaarden'
     | '/voorzieningen'
     | '/zoeken'
+    | '/ritten/'
     | '/chat/$chatId'
     | '/groepen/$id'
     | '/profiel/$userId'
@@ -496,12 +505,12 @@ export interface FileRouteTypes {
     | '/profiel'
     | '/release-notes'
     | '/reset-password'
-    | '/ritten'
     | '/truckstops'
     | '/voertuig'
     | '/voorwaarden'
     | '/voorzieningen'
     | '/zoeken'
+    | '/ritten'
     | '/chat/$chatId'
     | '/groepen/$id'
     | '/profiel/$userId'
@@ -548,6 +557,7 @@ export interface FileRouteTypes {
     | '/voorwaarden'
     | '/voorzieningen'
     | '/zoeken'
+    | '/ritten/'
     | '/chat/$chatId'
     | '/groepen/$id'
     | '/profiel/$userId'
@@ -907,6 +917,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatChatIdRouteImport
       parentRoute: typeof ChatRoute
     }
+    '/ritten/': {
+      id: '/ritten/'
+      path: '/'
+      fullPath: '/ritten/'
+      preLoaderRoute: typeof RittenRouteImport
+      parentRoute: typeof RittenRoute
+    }
   }
 }
 
@@ -943,10 +960,12 @@ const ProfielRouteWithChildren =
   ProfielRoute._addFileChildren(ProfielRouteChildren)
 
 interface RittenRouteChildren {
+  RittenRoute: typeof RittenRoute
   RittenRideIdRoute: typeof RittenRideIdRoute
 }
 
 const RittenRouteChildren: RittenRouteChildren = {
+  RittenRoute: RittenRoute,
   RittenRideIdRoute: RittenRideIdRoute,
 }
 

@@ -7,7 +7,7 @@ import { ArrowLeft, Clock, Fuel, Gauge, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDate, formatDuration, type Ride } from "@/lib/queries";
 
-export const Route = createFileRoute("/ritten/$rideId")({
+export const Route = createFileRoute("/ritten/")({
   head: ({ params }) => ({
     meta: [
       { title: `Rit — TruckMate` },
