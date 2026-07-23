@@ -9,38 +9,134 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VoertuigRouteImport } from './routes/voertuig'
+import { Route as RittenRouteImport } from './routes/ritten'
+import { Route as NavigatieRouteImport } from './routes/navigatie'
+import { Route as CommunityRouteImport } from './routes/community'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RittenRideIdRouteImport } from './routes/ritten.$rideId'
 
+const VoertuigRoute = VoertuigRouteImport.update({
+  id: '/voertuig',
+  path: '/voertuig',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RittenRoute = RittenRouteImport.update({
+  id: '/ritten',
+  path: '/ritten',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NavigatieRoute = NavigatieRouteImport.update({
+  id: '/navigatie',
+  path: '/navigatie',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RittenRideIdRoute = RittenRideIdRouteImport.update({
+  id: '/$rideId',
+  path: '/$rideId',
+  getParentRoute: () => RittenRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/community': typeof CommunityRoute
+  '/navigatie': typeof NavigatieRoute
+  '/ritten': typeof RittenRouteWithChildren
+  '/voertuig': typeof VoertuigRoute
+  '/ritten/$rideId': typeof RittenRideIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/community': typeof CommunityRoute
+  '/navigatie': typeof NavigatieRoute
+  '/ritten': typeof RittenRouteWithChildren
+  '/voertuig': typeof VoertuigRoute
+  '/ritten/$rideId': typeof RittenRideIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/community': typeof CommunityRoute
+  '/navigatie': typeof NavigatieRoute
+  '/ritten': typeof RittenRouteWithChildren
+  '/voertuig': typeof VoertuigRoute
+  '/ritten/$rideId': typeof RittenRideIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/community'
+    | '/navigatie'
+    | '/ritten'
+    | '/voertuig'
+    | '/ritten/$rideId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/community'
+    | '/navigatie'
+    | '/ritten'
+    | '/voertuig'
+    | '/ritten/$rideId'
+  id:
+    | '__root__'
+    | '/'
+    | '/community'
+    | '/navigatie'
+    | '/ritten'
+    | '/voertuig'
+    | '/ritten/$rideId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CommunityRoute: typeof CommunityRoute
+  NavigatieRoute: typeof NavigatieRoute
+  RittenRoute: typeof RittenRouteWithChildren
+  VoertuigRoute: typeof VoertuigRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/voertuig': {
+      id: '/voertuig'
+      path: '/voertuig'
+      fullPath: '/voertuig'
+      preLoaderRoute: typeof VoertuigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ritten': {
+      id: '/ritten'
+      path: '/ritten'
+      fullPath: '/ritten'
+      preLoaderRoute: typeof RittenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/navigatie': {
+      id: '/navigatie'
+      path: '/navigatie'
+      fullPath: '/navigatie'
+      preLoaderRoute: typeof NavigatieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +144,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ritten/$rideId': {
+      id: '/ritten/$rideId'
+      path: '/$rideId'
+      fullPath: '/ritten/$rideId'
+      preLoaderRoute: typeof RittenRideIdRouteImport
+      parentRoute: typeof RittenRoute
+    }
   }
 }
 
+interface RittenRouteChildren {
+  RittenRideIdRoute: typeof RittenRideIdRoute
+}
+
+const RittenRouteChildren: RittenRouteChildren = {
+  RittenRideIdRoute: RittenRideIdRoute,
+}
+
+const RittenRouteWithChildren =
+  RittenRoute._addFileChildren(RittenRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CommunityRoute: CommunityRoute,
+  NavigatieRoute: NavigatieRoute,
+  RittenRoute: RittenRouteWithChildren,
+  VoertuigRoute: VoertuigRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
