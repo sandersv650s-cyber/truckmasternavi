@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Play, Square, Pause, Gauge, Fuel, Clock, MapPin, Timer, Loader2, Trash2 } from "lucide-react";
+import { Play, Square, Pause, Gauge, Fuel, Clock, MapPin, Timer, Loader2, Trash2, Route as RouteIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { formatDate, formatDuration, type Ride } from "@/lib/queries";
+import { formatDistance, formatDuration as fmtDur } from "@/lib/routing";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/ritten")({
@@ -301,7 +302,80 @@ function RittenPage() {
           ))}
         </div>
       )}
+
+      <SavedRoutesSection userId={user?.id} />
     </AppShell>
+  );
+}
+
+function SavedRoutesSection({ userId }: { userId: string | undefined }) {
+  const qc = useQueryClient();
+  const q = useQuery({
+    queryKey: ["saved_routes", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("saved_routes" as any)
+        .select("id,name,waypoints,distance_m,duration_s,updated_at")
+        .order("updated_at", { ascending: false });
+      if (error) throw error;
+      return ((data ?? []) as unknown) as Array<{
+        id: string;
+        name: string;
+        waypoints: Array<{ label: string; lat: number; lng: number }>;
+        distance_m: number | null;
+        duration_s: number | null;
+        updated_at: string;
+      }>;
+    },
+  });
+  const del = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("saved_routes" as any).delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["saved_routes"] });
+      toast.success("Route verwijderd");
+    },
+  });
+  return (
+    <>
+      <div className="mb-2 mt-6 flex items-center justify-between">
+        <h2 className="text-base font-semibold">Opgeslagen routes</h2>
+        <Link to="/routeplanner" className="text-xs text-primary hover:underline">Naar planner</Link>
+      </div>
+      {q.isLoading ? (
+        <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">Laden…</div>
+      ) : !q.data || q.data.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+          Nog geen opgeslagen routes. Ga naar de Routeplanner om er één te maken.
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {q.data.map((r) => (
+            <Card key={r.id}>
+              <CardContent className="flex items-center gap-3 p-3">
+                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary">
+                  <RouteIcon className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{r.name}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {r.waypoints.length} punten
+                    {r.distance_m ? ` · ${formatDistance(r.distance_m)}` : ""}
+                    {r.duration_s ? ` · ${fmtDur(r.duration_s)}` : ""}
+                  </p>
+                </div>
+                <Button size="icon" variant="ghost" onClick={() => { if (confirm(`Route "${r.name}" verwijderen?`)) del.mutate(r.id); }} aria-label="Verwijder route">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
 
