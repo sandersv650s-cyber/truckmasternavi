@@ -10,13 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VoertuigRouteImport } from './routes/voertuig'
+import { Route as TruckstopsRouteImport } from './routes/truckstops'
 import { Route as RittenRouteImport } from './routes/ritten'
 import { Route as ProfielRouteImport } from './routes/profiel'
+import { Route as OntdekkenRouteImport } from './routes/ontdekken'
 import { Route as NavigatieRouteImport } from './routes/navigatie'
+import { Route as MeldingenRouteImport } from './routes/meldingen'
 import { Route as InstellingenRouteImport } from './routes/instellingen'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ChatRouteImport } from './routes/chat'
+import { Route as BrandstofRouteImport } from './routes/brandstof'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TruckstopsIdRouteImport } from './routes/truckstops.$id'
 import { Route as RittenRideIdRouteImport } from './routes/ritten.$rideId'
 import { Route as ProfielUserIdRouteImport } from './routes/profiel.$userId'
 import { Route as ChatChatIdRouteImport } from './routes/chat.$chatId'
@@ -24,6 +29,11 @@ import { Route as ChatChatIdRouteImport } from './routes/chat.$chatId'
 const VoertuigRoute = VoertuigRouteImport.update({
   id: '/voertuig',
   path: '/voertuig',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TruckstopsRoute = TruckstopsRouteImport.update({
+  id: '/truckstops',
+  path: '/truckstops',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RittenRoute = RittenRouteImport.update({
@@ -36,9 +46,19 @@ const ProfielRoute = ProfielRouteImport.update({
   path: '/profiel',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OntdekkenRoute = OntdekkenRouteImport.update({
+  id: '/ontdekken',
+  path: '/ontdekken',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NavigatieRoute = NavigatieRouteImport.update({
   id: '/navigatie',
   path: '/navigatie',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MeldingenRoute = MeldingenRouteImport.update({
+  id: '/meldingen',
+  path: '/meldingen',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InstellingenRoute = InstellingenRouteImport.update({
@@ -56,10 +76,20 @@ const ChatRoute = ChatRouteImport.update({
   path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BrandstofRoute = BrandstofRouteImport.update({
+  id: '/brandstof',
+  path: '/brandstof',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const TruckstopsIdRoute = TruckstopsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => TruckstopsRoute,
 } as any)
 const RittenRideIdRoute = RittenRideIdRouteImport.update({
   id: '/$rideId',
@@ -79,94 +109,128 @@ const ChatChatIdRoute = ChatChatIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/brandstof': typeof BrandstofRoute
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
   '/instellingen': typeof InstellingenRoute
+  '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
+  '/ontdekken': typeof OntdekkenRoute
   '/profiel': typeof ProfielRouteWithChildren
   '/ritten': typeof RittenRouteWithChildren
+  '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
+  '/truckstops/$id': typeof TruckstopsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/brandstof': typeof BrandstofRoute
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
   '/instellingen': typeof InstellingenRoute
+  '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
+  '/ontdekken': typeof OntdekkenRoute
   '/profiel': typeof ProfielRouteWithChildren
   '/ritten': typeof RittenRouteWithChildren
+  '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
+  '/truckstops/$id': typeof TruckstopsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/brandstof': typeof BrandstofRoute
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
   '/instellingen': typeof InstellingenRoute
+  '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
+  '/ontdekken': typeof OntdekkenRoute
   '/profiel': typeof ProfielRouteWithChildren
   '/ritten': typeof RittenRouteWithChildren
+  '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
+  '/truckstops/$id': typeof TruckstopsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/brandstof'
     | '/chat'
     | '/community'
     | '/instellingen'
+    | '/meldingen'
     | '/navigatie'
+    | '/ontdekken'
     | '/profiel'
     | '/ritten'
+    | '/truckstops'
     | '/voertuig'
     | '/chat/$chatId'
     | '/profiel/$userId'
     | '/ritten/$rideId'
+    | '/truckstops/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/brandstof'
     | '/chat'
     | '/community'
     | '/instellingen'
+    | '/meldingen'
     | '/navigatie'
+    | '/ontdekken'
     | '/profiel'
     | '/ritten'
+    | '/truckstops'
     | '/voertuig'
     | '/chat/$chatId'
     | '/profiel/$userId'
     | '/ritten/$rideId'
+    | '/truckstops/$id'
   id:
     | '__root__'
     | '/'
+    | '/brandstof'
     | '/chat'
     | '/community'
     | '/instellingen'
+    | '/meldingen'
     | '/navigatie'
+    | '/ontdekken'
     | '/profiel'
     | '/ritten'
+    | '/truckstops'
     | '/voertuig'
     | '/chat/$chatId'
     | '/profiel/$userId'
     | '/ritten/$rideId'
+    | '/truckstops/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BrandstofRoute: typeof BrandstofRoute
   ChatRoute: typeof ChatRouteWithChildren
   CommunityRoute: typeof CommunityRoute
   InstellingenRoute: typeof InstellingenRoute
+  MeldingenRoute: typeof MeldingenRoute
   NavigatieRoute: typeof NavigatieRoute
+  OntdekkenRoute: typeof OntdekkenRoute
   ProfielRoute: typeof ProfielRouteWithChildren
   RittenRoute: typeof RittenRouteWithChildren
+  TruckstopsRoute: typeof TruckstopsRouteWithChildren
   VoertuigRoute: typeof VoertuigRoute
 }
 
@@ -177,6 +241,13 @@ declare module '@tanstack/react-router' {
       path: '/voertuig'
       fullPath: '/voertuig'
       preLoaderRoute: typeof VoertuigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/truckstops': {
+      id: '/truckstops'
+      path: '/truckstops'
+      fullPath: '/truckstops'
+      preLoaderRoute: typeof TruckstopsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ritten': {
@@ -193,11 +264,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfielRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ontdekken': {
+      id: '/ontdekken'
+      path: '/ontdekken'
+      fullPath: '/ontdekken'
+      preLoaderRoute: typeof OntdekkenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/navigatie': {
       id: '/navigatie'
       path: '/navigatie'
       fullPath: '/navigatie'
       preLoaderRoute: typeof NavigatieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/meldingen': {
+      id: '/meldingen'
+      path: '/meldingen'
+      fullPath: '/meldingen'
+      preLoaderRoute: typeof MeldingenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/instellingen': {
@@ -221,12 +306,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/brandstof': {
+      id: '/brandstof'
+      path: '/brandstof'
+      fullPath: '/brandstof'
+      preLoaderRoute: typeof BrandstofRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/truckstops/$id': {
+      id: '/truckstops/$id'
+      path: '/$id'
+      fullPath: '/truckstops/$id'
+      preLoaderRoute: typeof TruckstopsIdRouteImport
+      parentRoute: typeof TruckstopsRoute
     }
     '/ritten/$rideId': {
       id: '/ritten/$rideId'
@@ -284,14 +383,30 @@ const RittenRouteChildren: RittenRouteChildren = {
 const RittenRouteWithChildren =
   RittenRoute._addFileChildren(RittenRouteChildren)
 
+interface TruckstopsRouteChildren {
+  TruckstopsIdRoute: typeof TruckstopsIdRoute
+}
+
+const TruckstopsRouteChildren: TruckstopsRouteChildren = {
+  TruckstopsIdRoute: TruckstopsIdRoute,
+}
+
+const TruckstopsRouteWithChildren = TruckstopsRoute._addFileChildren(
+  TruckstopsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BrandstofRoute: BrandstofRoute,
   ChatRoute: ChatRouteWithChildren,
   CommunityRoute: CommunityRoute,
   InstellingenRoute: InstellingenRoute,
+  MeldingenRoute: MeldingenRoute,
   NavigatieRoute: NavigatieRoute,
+  OntdekkenRoute: OntdekkenRoute,
   ProfielRoute: ProfielRouteWithChildren,
   RittenRoute: RittenRouteWithChildren,
+  TruckstopsRoute: TruckstopsRouteWithChildren,
   VoertuigRoute: VoertuigRoute,
 }
 export const routeTree = rootRouteImport

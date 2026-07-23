@@ -1,17 +1,23 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Map, Route, Users, User } from "lucide-react";
+import { LayoutDashboard, Map, Compass, Users, User } from "lucide-react";
 
 type NavItem = {
-  to: "/" | "/navigatie" | "/ritten" | "/community" | "/profiel";
+  to: "/" | "/navigatie" | "/ontdekken" | "/community" | "/profiel";
   label: string;
   icon: typeof LayoutDashboard;
   exact?: boolean;
+  matches?: string[];
 };
 
 const items: NavItem[] = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/navigatie", label: "Navigatie", icon: Map },
-  { to: "/ritten", label: "Ritten", icon: Route },
+  {
+    to: "/ontdekken",
+    label: "Ontdekken",
+    icon: Compass,
+    matches: ["/ontdekken", "/truckstops", "/brandstof", "/meldingen", "/voorzieningen", "/beloningen"],
+  },
   { to: "/community", label: "Community", icon: Users },
   { to: "/profiel", label: "Profiel", icon: User },
 ];
@@ -26,7 +32,11 @@ export function BottomNav() {
     >
       <ul className="mx-auto grid max-w-2xl grid-cols-5">
         {items.map((it) => {
-          const active = it.exact ? pathname === it.to : pathname.startsWith(it.to);
+          const active = it.exact
+            ? pathname === it.to
+            : it.matches
+              ? it.matches.some((m) => pathname === m || pathname.startsWith(`${m}/`))
+              : pathname.startsWith(it.to);
           const Icon = it.icon;
           return (
             <li key={it.to}>
