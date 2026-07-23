@@ -157,11 +157,15 @@ function decodePolyline(encoded: string): LatLng[] {
 }
 
 function pushVehicleParams(url: URL, t: TruckProfile) {
-  if (t.height_cm) url.searchParams.set("vehicle[height]", (t.height_cm / 100).toFixed(2));
-  if (t.width_cm) url.searchParams.set("vehicle[width]", (t.width_cm / 100).toFixed(2));
-  if (t.length_cm) url.searchParams.set("vehicle[length]", (t.length_cm / 100).toFixed(2));
-  if (t.weight_kg) url.searchParams.set("vehicle[grossWeight]", String(t.weight_kg));
-  if (t.axle_weight_kg) url.searchParams.set("vehicle[weightPerAxle]", String(t.axle_weight_kg));
+  // HERE Routing v8 expects integer centimeters for dimensions and integer
+  // kilograms for weight. Sending meters (e.g. "4.50") yields
+  // "Malformed request" / E605001 and the whole route call fails.
+  if (t.height_cm) url.searchParams.set("vehicle[height]", String(Math.round(t.height_cm)));
+  if (t.width_cm) url.searchParams.set("vehicle[width]", String(Math.round(t.width_cm)));
+  if (t.length_cm) url.searchParams.set("vehicle[length]", String(Math.round(t.length_cm)));
+  if (t.weight_kg) url.searchParams.set("vehicle[grossWeight]", String(Math.round(t.weight_kg)));
+  if (t.axle_weight_kg)
+    url.searchParams.set("vehicle[weightPerAxle]", String(Math.round(t.axle_weight_kg)));
   if (t.axle_count) url.searchParams.set("vehicle[axleCount]", String(t.axle_count));
   if (t.trailer_count != null)
     url.searchParams.set("vehicle[trailerCount]", String(t.trailer_count));
