@@ -71,7 +71,7 @@ function ChatView() {
       <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-2xl items-center gap-2 px-3 py-2">
           <Link to="/chat">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label="Terug naar chats">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
@@ -85,7 +85,7 @@ function ChatView() {
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" aria-label="Meer opties">
                 <MoreVertical className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
@@ -129,7 +129,7 @@ function ChatView() {
 
       <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]">
         <div className="mx-auto flex max-w-2xl items-center gap-2 p-2">
-          <Button variant="ghost" size="icon" className="shrink-0">
+          <Button variant="ghost" size="icon" className="shrink-0" aria-label="Afbeelding toevoegen">
             <ImageIcon className="h-5 w-5" />
           </Button>
           <Input
@@ -139,7 +139,7 @@ function ChatView() {
             placeholder="Bericht…"
             className="flex-1"
           />
-          <Button size="icon" onClick={send} disabled={!text.trim()}>
+          <Button size="icon" onClick={send} disabled={!text.trim()} aria-label="Verstuur bericht">
             <Send className="h-4 w-4" />
           </Button>
         </div>
