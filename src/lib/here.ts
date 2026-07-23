@@ -1,10 +1,10 @@
 // HERE Technologies routing + search integration.
-// API key is read from VITE_HERE_API_KEY. If missing, callers should show a
-// clear admin-only setup notice; nothing is hardcoded.
+// API key is read from HERE_API_KEY (injected via Vite define). If missing,
+// callers should show a clear admin-only setup notice; nothing is hardcoded.
 import flexpolyline from "@here/flexpolyline";
 
 export const HERE_API_KEY: string | undefined =
-  (import.meta.env as any).VITE_HERE_API_KEY || undefined;
+  (import.meta.env as any).HERE_API_KEY || undefined;
 
 export const hasHereKey = () => Boolean(HERE_API_KEY);
 
@@ -85,7 +85,7 @@ export type RouteOptions = {
 function requireKey(): string {
   if (!HERE_API_KEY) {
     throw new Error(
-      "HERE API key ontbreekt. Voeg VITE_HERE_API_KEY toe in Project Settings → Secrets.",
+      "HERE API key ontbreekt. Voeg HERE_API_KEY toe in Project Settings → Secrets.",
     );
   }
   return HERE_API_KEY;

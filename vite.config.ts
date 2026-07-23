@@ -13,6 +13,11 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    define: {
+      "import.meta.env.HERE_API_KEY": JSON.stringify(process.env.HERE_API_KEY ?? ""),
+    },
+  },
   plugins: [
     VitePWA({
       registerType: "autoUpdate",
