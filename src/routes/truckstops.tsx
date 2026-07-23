@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { List, Map as MapIcon, Star, Search, Filter } from "lucide-react";
+import { List, Map as MapIcon, Star, Search, Filter, Heart } from "lucide-react";
 import {
   truckstops,
   amenityLabels,
@@ -15,6 +15,7 @@ import {
   type Amenity,
   type Truckstop,
 } from "@/lib/discover-data";
+import { useFavorites } from "@/lib/favorites";
 
 export const Route = createFileRoute("/truckstops")({
   head: () => ({
@@ -50,6 +51,8 @@ function TruckstopsPage() {
   const [q, setQ] = useState("");
   const [minFree, setMinFree] = useState(0);
   const [active, setActive] = useState<Amenity[]>([]);
+  const [onlyFav, setOnlyFav] = useState(false);
+  const { isFav, toggle: toggleFav, count: favCount } = useFavorites("truckstops");
 
   const toggle = (a: Amenity) =>
     setActive((prev) => (prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]));
@@ -60,9 +63,10 @@ function TruckstopsPage() {
       if (t.freeSpots < minFree) return false;
       if (!active.every((a) => t.amenities.includes(a))) return false;
       if (term && !`${t.name} ${t.city} ${t.road}`.toLowerCase().includes(term)) return false;
+      if (onlyFav && !isFav(t.id)) return false;
       return true;
     });
-  }, [q, minFree, active]);
+  }, [q, minFree, active, onlyFav, isFav]);
 
   return (
     <AppShell title="Truckstops">
@@ -126,6 +130,14 @@ function TruckstopsPage() {
                 </button>
               ))}
             </div>
+            <button
+              onClick={() => setOnlyFav((v) => !v)}
+              className={`ml-auto inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${
+                onlyFav ? "border-primary bg-primary/20 text-primary" : "border-border text-muted-foreground"
+              }`}
+            >
+              <Heart className={`h-3 w-3 ${onlyFav ? "fill-primary" : ""}`} /> Favorieten{favCount ? ` (${favCount})` : ""}
+            </button>
           </div>
         </CardContent>
       </Card>
@@ -142,7 +154,7 @@ function TruckstopsPage() {
             Geen truckstops gevonden met deze filters.
           </div>
         ) : (
-          filtered.map((t) => <StopRow key={t.id} t={t} />)
+          filtered.map((t) => <StopRow key={t.id} t={t} fav={isFav(t.id)} onFav={() => toggleFav(t.id)} />)
         )}
       </div>
     </AppShell>
@@ -186,15 +198,23 @@ function MapView({ stops }: { stops: Truckstop[] }) {
   );
 }
 
-function StopRow({ t }: { t: Truckstop }) {
+function StopRow({ t, fav, onFav }: { t: Truckstop; fav: boolean; onFav: () => void }) {
   const occ = occupancyMeta[t.occupancy];
   return (
-    <Link to="/truckstops/$id" params={{ id: t.id }}>
-      <Card className="transition hover:border-primary/60">
+    <div className="relative">
+      <button
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onFav(); }}
+        className="absolute right-2 top-2 z-10 grid h-8 w-8 place-items-center rounded-full bg-background/70 backdrop-blur"
+        aria-label={fav ? "Verwijder uit favorieten" : "Toevoegen aan favorieten"}
+      >
+        <Heart className={`h-4 w-4 ${fav ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+      </button>
+      <Link to="/truckstops/$id" params={{ id: t.id }}>
+        <Card className="transition hover:border-primary/60">
         <CardContent className="p-3">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">
+              <p className="truncate pr-10 text-sm font-semibold">
                 <span className="mr-1">{flag(t.country)}</span>
                 {t.name}
               </p>
@@ -229,7 +249,8 @@ function StopRow({ t }: { t: Truckstop }) {
             )}
           </div>
         </CardContent>
-      </Card>
-    </Link>
+        </Card>
+      </Link>
+    </div>
   );
 }

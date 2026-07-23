@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { LayoutDashboard, Map, Compass, Users, User } from "lucide-react";
 
 type NavItem = {
-  to: "/" | "/navigatie" | "/ontdekken" | "/community" | "/profiel";
+  to: "/" | "/kaart" | "/ontdekken" | "/community" | "/profiel";
   label: string;
   icon: typeof LayoutDashboard;
   exact?: boolean;
@@ -11,12 +11,12 @@ type NavItem = {
 
 const items: NavItem[] = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/navigatie", label: "Navigatie", icon: Map },
+  { to: "/kaart", label: "Kaart", icon: Map, matches: ["/kaart", "/navigatie"] },
   {
     to: "/ontdekken",
     label: "Ontdekken",
     icon: Compass,
-    matches: ["/ontdekken", "/truckstops", "/brandstof", "/meldingen", "/voorzieningen", "/beloningen"],
+    matches: ["/ontdekken", "/truckstops", "/brandstof", "/meldingen", "/voorzieningen", "/beloningen", "/zoeken"],
   },
   { to: "/community", label: "Community", icon: Users },
   { to: "/profiel", label: "Profiel", icon: User },
