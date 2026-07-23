@@ -15,6 +15,7 @@ import { Route as VoertuigRouteImport } from './routes/voertuig'
 import { Route as TruckstopsRouteImport } from './routes/truckstops'
 import { Route as RittenRouteImport } from './routes/ritten'
 import { Route as ProfielRouteImport } from './routes/profiel'
+import { Route as PrivacybeleidRouteImport } from './routes/privacybeleid'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as OverRouteImport } from './routes/over'
@@ -76,6 +77,11 @@ const RittenRoute = RittenRouteImport.update({
 const ProfielRoute = ProfielRouteImport.update({
   id: '/profiel',
   path: '/profiel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacybeleidRoute = PrivacybeleidRouteImport.update({
+  id: '/privacybeleid',
+  path: '/privacybeleid',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -267,6 +273,7 @@ export interface FileRoutesByFullPath {
   '/over': typeof OverRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
+  '/privacybeleid': typeof PrivacybeleidRoute
   '/profiel': typeof ProfielRouteWithChildren
   '/ritten': typeof RittenRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
@@ -307,6 +314,7 @@ export interface FileRoutesByTo {
   '/over': typeof OverRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
+  '/privacybeleid': typeof PrivacybeleidRoute
   '/profiel': typeof ProfielRouteWithChildren
   '/ritten': typeof RittenRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
@@ -348,6 +356,7 @@ export interface FileRoutesById {
   '/over': typeof OverRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
+  '/privacybeleid': typeof PrivacybeleidRoute
   '/profiel': typeof ProfielRouteWithChildren
   '/ritten': typeof RittenRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
@@ -390,6 +399,7 @@ export interface FileRouteTypes {
     | '/over'
     | '/premium'
     | '/privacy'
+    | '/privacybeleid'
     | '/profiel'
     | '/ritten'
     | '/truckstops'
@@ -430,6 +440,7 @@ export interface FileRouteTypes {
     | '/over'
     | '/premium'
     | '/privacy'
+    | '/privacybeleid'
     | '/profiel'
     | '/ritten'
     | '/truckstops'
@@ -470,6 +481,7 @@ export interface FileRouteTypes {
     | '/over'
     | '/premium'
     | '/privacy'
+    | '/privacybeleid'
     | '/profiel'
     | '/ritten'
     | '/truckstops'
@@ -511,6 +523,7 @@ export interface RootRouteChildren {
   OverRoute: typeof OverRoute
   PremiumRoute: typeof PremiumRoute
   PrivacyRoute: typeof PrivacyRoute
+  PrivacybeleidRoute: typeof PrivacybeleidRoute
   ProfielRoute: typeof ProfielRouteWithChildren
   RittenRoute: typeof RittenRouteWithChildren
   TruckstopsRoute: typeof TruckstopsRouteWithChildren
@@ -561,6 +574,13 @@ declare module '@tanstack/react-router' {
       path: '/profiel'
       fullPath: '/profiel'
       preLoaderRoute: typeof ProfielRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacybeleid': {
+      id: '/privacybeleid'
+      path: '/privacybeleid'
+      fullPath: '/privacybeleid'
+      preLoaderRoute: typeof PrivacybeleidRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -873,6 +893,7 @@ const rootRouteChildren: RootRouteChildren = {
   OverRoute: OverRoute,
   PremiumRoute: PremiumRoute,
   PrivacyRoute: PrivacyRoute,
+  PrivacybeleidRoute: PrivacybeleidRoute,
   ProfielRoute: ProfielRouteWithChildren,
   RittenRoute: RittenRouteWithChildren,
   TruckstopsRoute: TruckstopsRouteWithChildren,
