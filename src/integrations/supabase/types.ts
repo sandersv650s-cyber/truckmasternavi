@@ -177,8 +177,12 @@ export type Database = {
           truck: string | null
           updated_at: string
           username: string | null
+          vehicle_axle_count: number | null
+          vehicle_axle_weight_kg: number | null
+          vehicle_hazardous: boolean
           vehicle_height_cm: number | null
           vehicle_length_cm: number | null
+          vehicle_trailer_count: number | null
           vehicle_type: string | null
           vehicle_weight_kg: number | null
           vehicle_width_cm: number | null
@@ -192,8 +196,12 @@ export type Database = {
           truck?: string | null
           updated_at?: string
           username?: string | null
+          vehicle_axle_count?: number | null
+          vehicle_axle_weight_kg?: number | null
+          vehicle_hazardous?: boolean
           vehicle_height_cm?: number | null
           vehicle_length_cm?: number | null
+          vehicle_trailer_count?: number | null
           vehicle_type?: string | null
           vehicle_weight_kg?: number | null
           vehicle_width_cm?: number | null
@@ -207,8 +215,12 @@ export type Database = {
           truck?: string | null
           updated_at?: string
           username?: string | null
+          vehicle_axle_count?: number | null
+          vehicle_axle_weight_kg?: number | null
+          vehicle_hazardous?: boolean
           vehicle_height_cm?: number | null
           vehicle_length_cm?: number | null
+          vehicle_trailer_count?: number | null
           vehicle_type?: string | null
           vehicle_weight_kg?: number | null
           vehicle_width_cm?: number | null
@@ -274,31 +286,43 @@ export type Database = {
       }
       saved_routes: {
         Row: {
+          avoid_features: string[] | null
+          completed: boolean
+          completed_at: string | null
           created_at: string
           distance_m: number | null
           duration_s: number | null
           id: string
           name: string
+          truck_profile: Json | null
           updated_at: string
           user_id: string
           waypoints: Json
         }
         Insert: {
+          avoid_features?: string[] | null
+          completed?: boolean
+          completed_at?: string | null
           created_at?: string
           distance_m?: number | null
           duration_s?: number | null
           id?: string
           name: string
+          truck_profile?: Json | null
           updated_at?: string
           user_id: string
           waypoints?: Json
         }
         Update: {
+          avoid_features?: string[] | null
+          completed?: boolean
+          completed_at?: string | null
           created_at?: string
           distance_m?: number | null
           duration_s?: number | null
           id?: string
           name?: string
+          truck_profile?: Json | null
           updated_at?: string
           user_id?: string
           waypoints?: Json
