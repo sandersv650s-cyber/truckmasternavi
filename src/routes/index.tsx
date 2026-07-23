@@ -38,6 +38,8 @@ import {
 import { leaderboard } from "@/lib/discover-data";
 import { useFavorites } from "@/lib/favorites";
 import { useRole } from "@/lib/role";
+import { DemoTour } from "@/components/demo-tour";
+import { useDemoTour } from "@/lib/demo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -68,9 +70,23 @@ function Dashboard() {
   const favParkings = truckstops.filter((t) => favParkingIds.includes(t.id)).slice(0, 3);
   const myPoints = leaderboard.find((l) => l.userId === currentUser.id)?.points ?? 1980;
   const { role } = useRole();
+  const { restart: restartTour } = useDemoTour();
 
   return (
     <AppShell>
+      <DemoTour />
+      <Card className="mb-4 border-amber-500/40 bg-amber-500/5">
+        <CardContent className="flex items-center gap-3 p-3">
+          <Sparkles className="h-5 w-5 shrink-0 text-amber-300" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold">Investeerdersdemo</p>
+            <p className="text-[11px] text-muted-foreground">Alle data en koppelingen zijn gesimuleerd.</p>
+          </div>
+          <Button size="sm" variant="secondary" className="shrink-0" onClick={restartTour}>
+            <Play className="mr-1 h-3.5 w-3.5" /> Start demo
+          </Button>
+        </CardContent>
+      </Card>
       {role === "fleet" && (
         <Link to="/fleet" className="mb-4 block">
           <Card className="border-primary/50 bg-gradient-to-br from-primary/20 via-card to-card">
