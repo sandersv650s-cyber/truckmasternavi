@@ -73,8 +73,7 @@ function MyProfile() {
       const path = `${user.id}/avatar-${Date.now()}.${ext}`;
       const { error } = await supabase.storage.from("avatars").upload(path, file, { contentType: file.type });
       if (error) throw error;
-      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
-      const { error: e2 } = await supabase.from("profiles").upsert({ id: user.id, avatar_url: pub.publicUrl });
+      const { error: e2 } = await supabase.from("profiles").upsert({ id: user.id, avatar_url: path });
       if (e2) throw e2;
       qc.invalidateQueries({ queryKey: ["profile", user.id] });
       toast.success("Foto bijgewerkt");

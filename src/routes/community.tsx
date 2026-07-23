@@ -94,8 +94,7 @@ function CommunityPage() {
         const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
         const up = await supabase.storage.from("post-images").upload(path, file, { contentType: file.type });
         if (up.error) throw up.error;
-        const { data: pub } = supabase.storage.from("post-images").getPublicUrl(path);
-        imageUrl = pub.publicUrl;
+        imageUrl = path;
       }
       const { error } = await supabase.from("posts").insert({
         user_id: user.id,
