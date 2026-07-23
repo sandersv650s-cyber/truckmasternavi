@@ -11,7 +11,7 @@ import { Play, Square, Pause, Gauge, Fuel, Clock, MapPin, Timer, Loader2, Trash2
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { formatDate, formatDuration, type Ride } from "@/lib/queries";
-import { formatDistance, formatDuration as fmtDur } from "@/lib/routing";
+import { formatDistance, formatDuration as fmtDur } from "@/lib/here";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/ritten")({
