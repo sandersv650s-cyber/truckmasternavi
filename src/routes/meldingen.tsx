@@ -38,8 +38,8 @@ type AlertRow = {
   not_actual_count: number;
   expires_at: string;
   created_at: string;
-  profiles: { full_name: string | null; username: string | null; avatar_url: string | null } | null;
 };
+type ProfileMini = { id: string; full_name: string | null; username: string | null; avatar_url: string | null };
 
 type VoteRow = { alert_id: string; vote: "confirm" | "not_actual" };
 
@@ -55,6 +55,7 @@ function minAgo(iso: string): string {
 function MeldingenPage() {
   const { user } = useAuth();
   const [alerts, setAlerts] = useState<AlertRow[]>([]);
+  const [profiles, setProfiles] = useState<Record<string, ProfileMini>>({});
   const [votes, setVotes] = useState<Record<string, "confirm" | "not_actual">>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,11 +70,21 @@ function MeldingenPage() {
     setError(null);
     const { data, error: err } = await supabase
       .from("alerts")
-      .select("id, user_id, category, location, text, confirms_count, not_actual_count, expires_at, created_at, profiles(full_name, username, avatar_url)")
+      .select("id, user_id, category, location, text, confirms_count, not_actual_count, expires_at, created_at")
       .order("created_at", { ascending: false })
       .limit(200);
     if (err) { setError(err.message); setLoading(false); return; }
-    setAlerts((data ?? []) as unknown as AlertRow[]);
+    const rows = (data ?? []) as AlertRow[];
+    setAlerts(rows);
+    const ids = Array.from(new Set(rows.map((r) => r.user_id)));
+    if (ids.length > 0) {
+      const { data: profs } = await supabase.from("profiles").select("id, full_name, username, avatar_url").in("id", ids);
+      const map: Record<string, ProfileMini> = {};
+      for (const p of (profs ?? []) as ProfileMini[]) map[p.id] = p;
+      setProfiles(map);
+    } else {
+      setProfiles({});
+    }
     if (user) {
       const { data: v } = await supabase.from("alert_votes").select("alert_id, vote").eq("user_id", user.id);
       const map: Record<string, "confirm" | "not_actual"> = {};
@@ -182,7 +193,8 @@ function MeldingenPage() {
             const meta = alertMeta[a.category];
             const expired = new Date(a.expires_at).getTime() < Date.now();
             const myVote = votes[a.id];
-            const name = a.profiles?.full_name ?? a.profiles?.username ?? "Chauffeur";
+            const prof = profiles[a.user_id];
+            const name = prof?.full_name ?? prof?.username ?? "Chauffeur";
             return (
               <Card key={a.id} className={expired ? "opacity-60" : ""}><CardContent className="p-3">
                 <div className="flex items-start gap-2">
@@ -196,7 +208,7 @@ function MeldingenPage() {
                     <p className="mt-1 flex items-start gap-1 text-xs text-muted-foreground"><MapPin className="mt-0.5 h-3 w-3 shrink-0" /><span>{a.location}</span></p>
                     <p className="mt-1 text-sm">{a.text}</p>
                     <div className="mt-2 flex items-center gap-1.5">
-                      <Avatar className="h-5 w-5"><AvatarImage src={a.profiles?.avatar_url ?? undefined} alt="" /><AvatarFallback className="text-[9px]">{initials(name, "?")}</AvatarFallback></Avatar>
+                      <Avatar className="h-5 w-5"><AvatarImage src={prof?.avatar_url ?? undefined} alt="" /><AvatarFallback className="text-[9px]">{initials(name, "?")}</AvatarFallback></Avatar>
                       <span className="text-[10px] text-muted-foreground">{name}</span>
                     </div>
                   </div>
