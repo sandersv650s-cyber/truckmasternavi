@@ -71,7 +71,7 @@ const tagStyle: Record<Release["tag"], string> = {
 
 function ReleaseNotes() {
   return (
-    <AppShell title="Release notes">
+    <AppShell title="Release notes" requireAuth={false}>
       <p className="mb-4 text-sm text-muted-foreground">
         Overzicht van wat vandaag werkt in TruckMate en wat we in volgende versies plannen.
       </p>

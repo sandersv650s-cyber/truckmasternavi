@@ -25,7 +25,7 @@ export const Route = createFileRoute("/contact")({
 function ContactPage() {
   const [sent, setSent] = useState(false);
   return (
-    <AppShell title="Contact">
+    <AppShell title="Contact" requireAuth={false}>
       <Alert className="mb-4">
         <AlertDescription className="text-xs">
           Dit is een demo-formulier. Berichten worden niet echt verstuurd.
