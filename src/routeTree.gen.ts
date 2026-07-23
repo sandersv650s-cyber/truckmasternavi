@@ -30,6 +30,7 @@ import { Route as NavigatieProviderRouteImport } from './routes/navigatie-provid
 import { Route as NavigatieRouteImport } from './routes/navigatie'
 import { Route as MeldingenRouteImport } from './routes/meldingen'
 import { Route as MeerRouteImport } from './routes/meer'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as KonvooiRouteImport } from './routes/konvooi'
 import { Route as KaartRouteImport } from './routes/kaart'
 import { Route as IntegratiesRouteImport } from './routes/integraties'
@@ -157,6 +158,11 @@ const MeerRoute = MeerRouteImport.update({
   path: '/meer',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KonvooiRoute = KonvooiRouteImport.update({
   id: '/konvooi',
   path: '/konvooi',
@@ -280,6 +286,7 @@ export interface FileRoutesByFullPath {
   '/integraties': typeof IntegratiesRoute
   '/kaart': typeof KaartRoute
   '/konvooi': typeof KonvooiRoute
+  '/login': typeof LoginRoute
   '/meer': typeof MeerRoute
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
@@ -324,6 +331,7 @@ export interface FileRoutesByTo {
   '/integraties': typeof IntegratiesRoute
   '/kaart': typeof KaartRoute
   '/konvooi': typeof KonvooiRoute
+  '/login': typeof LoginRoute
   '/meer': typeof MeerRoute
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
@@ -369,6 +377,7 @@ export interface FileRoutesById {
   '/integraties': typeof IntegratiesRoute
   '/kaart': typeof KaartRoute
   '/konvooi': typeof KonvooiRoute
+  '/login': typeof LoginRoute
   '/meer': typeof MeerRoute
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
@@ -415,6 +424,7 @@ export interface FileRouteTypes {
     | '/integraties'
     | '/kaart'
     | '/konvooi'
+    | '/login'
     | '/meer'
     | '/meldingen'
     | '/navigatie'
@@ -459,6 +469,7 @@ export interface FileRouteTypes {
     | '/integraties'
     | '/kaart'
     | '/konvooi'
+    | '/login'
     | '/meer'
     | '/meldingen'
     | '/navigatie'
@@ -503,6 +514,7 @@ export interface FileRouteTypes {
     | '/integraties'
     | '/kaart'
     | '/konvooi'
+    | '/login'
     | '/meer'
     | '/meldingen'
     | '/navigatie'
@@ -548,6 +560,7 @@ export interface RootRouteChildren {
   IntegratiesRoute: typeof IntegratiesRoute
   KaartRoute: typeof KaartRoute
   KonvooiRoute: typeof KonvooiRoute
+  LoginRoute: typeof LoginRoute
   MeerRoute: typeof MeerRoute
   MeldingenRoute: typeof MeldingenRoute
   NavigatieRoute: typeof NavigatieRoute
@@ -718,6 +731,13 @@ declare module '@tanstack/react-router' {
       path: '/meer'
       fullPath: '/meer'
       preLoaderRoute: typeof MeerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/konvooi': {
@@ -942,6 +962,7 @@ const rootRouteChildren: RootRouteChildren = {
   IntegratiesRoute: IntegratiesRoute,
   KaartRoute: KaartRoute,
   KonvooiRoute: KonvooiRoute,
+  LoginRoute: LoginRoute,
   MeerRoute: MeerRoute,
   MeldingenRoute: MeldingenRoute,
   NavigatieRoute: NavigatieRoute,
