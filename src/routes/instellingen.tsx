@@ -12,6 +12,8 @@ import { useI18n, languages, type Lang } from "@/lib/i18n";
 import { useRole, roleMeta, type Role } from "@/lib/role";
 import { Link } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
+import { Info, Mail, ScrollText, ShieldCheck, BookOpen, Bell } from "lucide-react";
+import { APP_VERSION } from "@/lib/app-info";
 
 export const Route = createFileRoute("/instellingen")({
   head: () => ({
@@ -148,7 +150,46 @@ function Instellingen() {
         </AlertDescription>
       </Alert>
       <Link to="/onboarding"><Button variant="ghost" size="sm" className="mt-2 w-full text-[11px]">Onboarding opnieuw doorlopen</Button></Link>
+
+      <Card className="mt-4">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Info className="h-4 w-4 text-primary" /> Info & juridisch
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-2">
+          <InfoLink to="/over" icon={<Info className="h-4 w-4" />} label="Over TruckMate" />
+          <InfoLink to="/release-notes" icon={<BookOpen className="h-4 w-4" />} label="Release notes" />
+          <InfoLink to="/notificaties" icon={<Bell className="h-4 w-4" />} label="Notificaties" />
+          <InfoLink to="/contact" icon={<Mail className="h-4 w-4" />} label="Contact" />
+          <InfoLink to="/privacybeleid" icon={<ShieldCheck className="h-4 w-4" />} label="Privacybeleid" />
+          <InfoLink to="/voorwaarden" icon={<ScrollText className="h-4 w-4" />} label="Voorwaarden" />
+        </CardContent>
+      </Card>
+
+      <p className="mt-4 text-center text-[10px] text-muted-foreground">
+        TruckMate <span className="font-medium text-foreground">v{APP_VERSION}</span> · Investeerdersdemo
+      </p>
     </AppShell>
+  );
+}
+
+function InfoLink({
+  to,
+  icon,
+  label,
+}: {
+  to: "/over" | "/release-notes" | "/contact" | "/privacybeleid" | "/voorwaarden" | "/notificaties";
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <Link to={to}>
+      <Button variant="secondary" size="sm" className="w-full justify-start">
+        <span className="mr-2 text-primary">{icon}</span>
+        <span className="truncate">{label}</span>
+      </Button>
+    </Link>
   );
 }
 

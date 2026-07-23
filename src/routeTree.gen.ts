@@ -11,16 +11,21 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ZoekenRouteImport } from './routes/zoeken'
 import { Route as VoorzieningenRouteImport } from './routes/voorzieningen'
+import { Route as VoorwaardenRouteImport } from './routes/voorwaarden'
 import { Route as VoertuigRouteImport } from './routes/voertuig'
 import { Route as TruckstopsRouteImport } from './routes/truckstops'
 import { Route as RittenRouteImport } from './routes/ritten'
+import { Route as ReleaseNotesRouteImport } from './routes/release-notes'
 import { Route as ProfielRouteImport } from './routes/profiel'
+import { Route as PrivacybeleidRouteImport } from './routes/privacybeleid'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PremiumRouteImport } from './routes/premium'
+import { Route as OverRouteImport } from './routes/over'
 import { Route as OntdekkenRouteImport } from './routes/ontdekken'
 import { Route as OnderhoudRouteImport } from './routes/onderhoud'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as OfflineKaartenRouteImport } from './routes/offline-kaarten'
+import { Route as NotificatiesRouteImport } from './routes/notificaties'
 import { Route as NavigatieProviderRouteImport } from './routes/navigatie-provider'
 import { Route as NavigatieRouteImport } from './routes/navigatie'
 import { Route as MeldingenRouteImport } from './routes/meldingen'
@@ -33,6 +38,7 @@ import { Route as GroepenRouteImport } from './routes/groepen'
 import { Route as FleetRouteImport } from './routes/fleet'
 import { Route as DocumentenRouteImport } from './routes/documenten'
 import { Route as DeelEtaRouteImport } from './routes/deel-eta'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CarplayRouteImport } from './routes/carplay'
@@ -56,6 +62,11 @@ const VoorzieningenRoute = VoorzieningenRouteImport.update({
   path: '/voorzieningen',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VoorwaardenRoute = VoorwaardenRouteImport.update({
+  id: '/voorwaarden',
+  path: '/voorwaarden',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VoertuigRoute = VoertuigRouteImport.update({
   id: '/voertuig',
   path: '/voertuig',
@@ -71,9 +82,19 @@ const RittenRoute = RittenRouteImport.update({
   path: '/ritten',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReleaseNotesRoute = ReleaseNotesRouteImport.update({
+  id: '/release-notes',
+  path: '/release-notes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfielRoute = ProfielRouteImport.update({
   id: '/profiel',
   path: '/profiel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacybeleidRoute = PrivacybeleidRouteImport.update({
+  id: '/privacybeleid',
+  path: '/privacybeleid',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -84,6 +105,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const PremiumRoute = PremiumRouteImport.update({
   id: '/premium',
   path: '/premium',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OverRoute = OverRouteImport.update({
+  id: '/over',
+  path: '/over',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OntdekkenRoute = OntdekkenRouteImport.update({
@@ -104,6 +130,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const OfflineKaartenRoute = OfflineKaartenRouteImport.update({
   id: '/offline-kaarten',
   path: '/offline-kaarten',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificatiesRoute = NotificatiesRouteImport.update({
+  id: '/notificaties',
+  path: '/notificaties',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NavigatieProviderRoute = NavigatieProviderRouteImport.update({
@@ -164,6 +195,11 @@ const DocumentenRoute = DocumentenRouteImport.update({
 const DeelEtaRoute = DeelEtaRouteImport.update({
   id: '/deel-eta',
   path: '/deel-eta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunityRoute = CommunityRouteImport.update({
@@ -235,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/carplay': typeof CarplayRoute
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
+  '/contact': typeof ContactRoute
   '/deel-eta': typeof DeelEtaRoute
   '/documenten': typeof DocumentenRoute
   '/fleet': typeof FleetRoute
@@ -247,16 +284,21 @@ export interface FileRoutesByFullPath {
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
   '/navigatie-provider': typeof NavigatieProviderRoute
+  '/notificaties': typeof NotificatiesRoute
   '/offline-kaarten': typeof OfflineKaartenRoute
   '/onboarding': typeof OnboardingRoute
   '/onderhoud': typeof OnderhoudRoute
   '/ontdekken': typeof OntdekkenRoute
+  '/over': typeof OverRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
+  '/privacybeleid': typeof PrivacybeleidRoute
   '/profiel': typeof ProfielRouteWithChildren
+  '/release-notes': typeof ReleaseNotesRoute
   '/ritten': typeof RittenRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
+  '/voorwaarden': typeof VoorwaardenRoute
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
@@ -273,6 +315,7 @@ export interface FileRoutesByTo {
   '/carplay': typeof CarplayRoute
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
+  '/contact': typeof ContactRoute
   '/deel-eta': typeof DeelEtaRoute
   '/documenten': typeof DocumentenRoute
   '/fleet': typeof FleetRoute
@@ -285,16 +328,21 @@ export interface FileRoutesByTo {
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
   '/navigatie-provider': typeof NavigatieProviderRoute
+  '/notificaties': typeof NotificatiesRoute
   '/offline-kaarten': typeof OfflineKaartenRoute
   '/onboarding': typeof OnboardingRoute
   '/onderhoud': typeof OnderhoudRoute
   '/ontdekken': typeof OntdekkenRoute
+  '/over': typeof OverRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
+  '/privacybeleid': typeof PrivacybeleidRoute
   '/profiel': typeof ProfielRouteWithChildren
+  '/release-notes': typeof ReleaseNotesRoute
   '/ritten': typeof RittenRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
+  '/voorwaarden': typeof VoorwaardenRoute
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
@@ -312,6 +360,7 @@ export interface FileRoutesById {
   '/carplay': typeof CarplayRoute
   '/chat': typeof ChatRouteWithChildren
   '/community': typeof CommunityRoute
+  '/contact': typeof ContactRoute
   '/deel-eta': typeof DeelEtaRoute
   '/documenten': typeof DocumentenRoute
   '/fleet': typeof FleetRoute
@@ -324,16 +373,21 @@ export interface FileRoutesById {
   '/meldingen': typeof MeldingenRoute
   '/navigatie': typeof NavigatieRoute
   '/navigatie-provider': typeof NavigatieProviderRoute
+  '/notificaties': typeof NotificatiesRoute
   '/offline-kaarten': typeof OfflineKaartenRoute
   '/onboarding': typeof OnboardingRoute
   '/onderhoud': typeof OnderhoudRoute
   '/ontdekken': typeof OntdekkenRoute
+  '/over': typeof OverRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
+  '/privacybeleid': typeof PrivacybeleidRoute
   '/profiel': typeof ProfielRouteWithChildren
+  '/release-notes': typeof ReleaseNotesRoute
   '/ritten': typeof RittenRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
+  '/voorwaarden': typeof VoorwaardenRoute
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
@@ -352,6 +406,7 @@ export interface FileRouteTypes {
     | '/carplay'
     | '/chat'
     | '/community'
+    | '/contact'
     | '/deel-eta'
     | '/documenten'
     | '/fleet'
@@ -364,16 +419,21 @@ export interface FileRouteTypes {
     | '/meldingen'
     | '/navigatie'
     | '/navigatie-provider'
+    | '/notificaties'
     | '/offline-kaarten'
     | '/onboarding'
     | '/onderhoud'
     | '/ontdekken'
+    | '/over'
     | '/premium'
     | '/privacy'
+    | '/privacybeleid'
     | '/profiel'
+    | '/release-notes'
     | '/ritten'
     | '/truckstops'
     | '/voertuig'
+    | '/voorwaarden'
     | '/voorzieningen'
     | '/zoeken'
     | '/chat/$chatId'
@@ -390,6 +450,7 @@ export interface FileRouteTypes {
     | '/carplay'
     | '/chat'
     | '/community'
+    | '/contact'
     | '/deel-eta'
     | '/documenten'
     | '/fleet'
@@ -402,16 +463,21 @@ export interface FileRouteTypes {
     | '/meldingen'
     | '/navigatie'
     | '/navigatie-provider'
+    | '/notificaties'
     | '/offline-kaarten'
     | '/onboarding'
     | '/onderhoud'
     | '/ontdekken'
+    | '/over'
     | '/premium'
     | '/privacy'
+    | '/privacybeleid'
     | '/profiel'
+    | '/release-notes'
     | '/ritten'
     | '/truckstops'
     | '/voertuig'
+    | '/voorwaarden'
     | '/voorzieningen'
     | '/zoeken'
     | '/chat/$chatId'
@@ -428,6 +494,7 @@ export interface FileRouteTypes {
     | '/carplay'
     | '/chat'
     | '/community'
+    | '/contact'
     | '/deel-eta'
     | '/documenten'
     | '/fleet'
@@ -440,16 +507,21 @@ export interface FileRouteTypes {
     | '/meldingen'
     | '/navigatie'
     | '/navigatie-provider'
+    | '/notificaties'
     | '/offline-kaarten'
     | '/onboarding'
     | '/onderhoud'
     | '/ontdekken'
+    | '/over'
     | '/premium'
     | '/privacy'
+    | '/privacybeleid'
     | '/profiel'
+    | '/release-notes'
     | '/ritten'
     | '/truckstops'
     | '/voertuig'
+    | '/voorwaarden'
     | '/voorzieningen'
     | '/zoeken'
     | '/chat/$chatId'
@@ -467,6 +539,7 @@ export interface RootRouteChildren {
   CarplayRoute: typeof CarplayRoute
   ChatRoute: typeof ChatRouteWithChildren
   CommunityRoute: typeof CommunityRoute
+  ContactRoute: typeof ContactRoute
   DeelEtaRoute: typeof DeelEtaRoute
   DocumentenRoute: typeof DocumentenRoute
   FleetRoute: typeof FleetRoute
@@ -479,16 +552,21 @@ export interface RootRouteChildren {
   MeldingenRoute: typeof MeldingenRoute
   NavigatieRoute: typeof NavigatieRoute
   NavigatieProviderRoute: typeof NavigatieProviderRoute
+  NotificatiesRoute: typeof NotificatiesRoute
   OfflineKaartenRoute: typeof OfflineKaartenRoute
   OnboardingRoute: typeof OnboardingRoute
   OnderhoudRoute: typeof OnderhoudRoute
   OntdekkenRoute: typeof OntdekkenRoute
+  OverRoute: typeof OverRoute
   PremiumRoute: typeof PremiumRoute
   PrivacyRoute: typeof PrivacyRoute
+  PrivacybeleidRoute: typeof PrivacybeleidRoute
   ProfielRoute: typeof ProfielRouteWithChildren
+  ReleaseNotesRoute: typeof ReleaseNotesRoute
   RittenRoute: typeof RittenRouteWithChildren
   TruckstopsRoute: typeof TruckstopsRouteWithChildren
   VoertuigRoute: typeof VoertuigRoute
+  VoorwaardenRoute: typeof VoorwaardenRoute
   VoorzieningenRoute: typeof VoorzieningenRoute
   ZoekenRoute: typeof ZoekenRoute
 }
@@ -507,6 +585,13 @@ declare module '@tanstack/react-router' {
       path: '/voorzieningen'
       fullPath: '/voorzieningen'
       preLoaderRoute: typeof VoorzieningenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/voorwaarden': {
+      id: '/voorwaarden'
+      path: '/voorwaarden'
+      fullPath: '/voorwaarden'
+      preLoaderRoute: typeof VoorwaardenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/voertuig': {
@@ -530,11 +615,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RittenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/release-notes': {
+      id: '/release-notes'
+      path: '/release-notes'
+      fullPath: '/release-notes'
+      preLoaderRoute: typeof ReleaseNotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profiel': {
       id: '/profiel'
       path: '/profiel'
       fullPath: '/profiel'
       preLoaderRoute: typeof ProfielRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacybeleid': {
+      id: '/privacybeleid'
+      path: '/privacybeleid'
+      fullPath: '/privacybeleid'
+      preLoaderRoute: typeof PrivacybeleidRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -549,6 +648,13 @@ declare module '@tanstack/react-router' {
       path: '/premium'
       fullPath: '/premium'
       preLoaderRoute: typeof PremiumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/over': {
+      id: '/over'
+      path: '/over'
+      fullPath: '/over'
+      preLoaderRoute: typeof OverRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ontdekken': {
@@ -577,6 +683,13 @@ declare module '@tanstack/react-router' {
       path: '/offline-kaarten'
       fullPath: '/offline-kaarten'
       preLoaderRoute: typeof OfflineKaartenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notificaties': {
+      id: '/notificaties'
+      path: '/notificaties'
+      fullPath: '/notificaties'
+      preLoaderRoute: typeof NotificatiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/navigatie-provider': {
@@ -661,6 +774,13 @@ declare module '@tanstack/react-router' {
       path: '/deel-eta'
       fullPath: '/deel-eta'
       preLoaderRoute: typeof DeelEtaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/community': {
@@ -813,6 +933,7 @@ const rootRouteChildren: RootRouteChildren = {
   CarplayRoute: CarplayRoute,
   ChatRoute: ChatRouteWithChildren,
   CommunityRoute: CommunityRoute,
+  ContactRoute: ContactRoute,
   DeelEtaRoute: DeelEtaRoute,
   DocumentenRoute: DocumentenRoute,
   FleetRoute: FleetRoute,
@@ -825,16 +946,21 @@ const rootRouteChildren: RootRouteChildren = {
   MeldingenRoute: MeldingenRoute,
   NavigatieRoute: NavigatieRoute,
   NavigatieProviderRoute: NavigatieProviderRoute,
+  NotificatiesRoute: NotificatiesRoute,
   OfflineKaartenRoute: OfflineKaartenRoute,
   OnboardingRoute: OnboardingRoute,
   OnderhoudRoute: OnderhoudRoute,
   OntdekkenRoute: OntdekkenRoute,
+  OverRoute: OverRoute,
   PremiumRoute: PremiumRoute,
   PrivacyRoute: PrivacyRoute,
+  PrivacybeleidRoute: PrivacybeleidRoute,
   ProfielRoute: ProfielRouteWithChildren,
+  ReleaseNotesRoute: ReleaseNotesRoute,
   RittenRoute: RittenRouteWithChildren,
   TruckstopsRoute: TruckstopsRouteWithChildren,
   VoertuigRoute: VoertuigRoute,
+  VoorwaardenRoute: VoorwaardenRoute,
   VoorzieningenRoute: VoorzieningenRoute,
   ZoekenRoute: ZoekenRoute,
 }
