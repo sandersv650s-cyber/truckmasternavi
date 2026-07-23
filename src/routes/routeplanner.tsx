@@ -24,6 +24,7 @@ import {
   AlertTriangle,
   Truck,
   Settings2,
+  Share2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
