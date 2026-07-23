@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      alert_votes: {
+        Row: {
+          alert_id: string
+          created_at: string
+          user_id: string
+          vote: string
+        }
+        Insert: {
+          alert_id: string
+          created_at?: string
+          user_id: string
+          vote: string
+        }
+        Update: {
+          alert_id?: string
+          created_at?: string
+          user_id?: string
+          vote?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_votes_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "alerts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      alerts: {
+        Row: {
+          category: string
+          confirms_count: number
+          created_at: string
+          expires_at: string
+          id: string
+          location: string
+          not_actual_count: number
+          text: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          confirms_count?: number
+          created_at?: string
+          expires_at: string
+          id?: string
+          location: string
+          not_actual_count?: number
+          text: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          confirms_count?: number
+          created_at?: string
+          expires_at?: string
+          id?: string
+          location?: string
+          not_actual_count?: number
+          text?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       post_comments: {
         Row: {
           created_at: string
