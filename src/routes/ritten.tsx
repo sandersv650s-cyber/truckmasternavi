@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
@@ -391,5 +391,3 @@ function Kpi({ icon, label, value }: { icon: React.ReactNode; label: string; val
   );
 }
 
-// Silence unused import lint
-void useNavigate;
