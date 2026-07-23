@@ -25,7 +25,7 @@ function CarplayPage() {
     { icon: <Phone className="h-4 w-4" />, title: "Handsfree bellen konvooi", desc: "Bel je konvooileden met één druk." },
   ];
   return (
-    <AppShell title="CarPlay & Android Auto">
+    <AppShell demoBanner={"CarPlay/Android Auto vereist een native app — deze PWA toont enkel de roadmap."} title="CarPlay & Android Auto">
       <div className="mb-4 grid grid-cols-2 gap-2">
         <Card><CardContent className="p-4 text-center">
           <CarFront className="mx-auto h-6 w-6 text-primary" />

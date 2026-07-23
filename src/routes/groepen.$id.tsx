@@ -36,7 +36,7 @@ export const Route = createFileRoute("/groepen/$id")({
     ],
   }),
   notFoundComponent: () => (
-    <AppShell title="Niet gevonden">
+    <AppShell demoBanner={"Groepsinhoud is voorbeelddata."} title="Niet gevonden">
       <p className="text-sm text-muted-foreground">Deze groep bestaat niet.</p>
       <Link to="/groepen" className="mt-3 inline-block text-sm text-primary underline">
         Terug naar overzicht

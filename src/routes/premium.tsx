@@ -81,7 +81,7 @@ function PremiumPage() {
   ];
 
   return (
-    <AppShell title="Premium">
+    <AppShell demoBanner={"Premium-plannen zijn illustratief — er is nog geen betaalprovider aangesloten."} title="Premium">
       <Alert className="mb-4 border-primary/40 bg-primary/10">
         <AlertDescription className="text-xs">
           <Badge className="mr-2 bg-primary/30 text-primary">Demo</Badge>

@@ -50,7 +50,7 @@ function ProviderPage() {
   ];
 
   return (
-    <AppShell title="Navigatie-provider">
+    <AppShell demoBanner={"Navigatie-providers zijn een roadmap — koppeling volgt."} title="Navigatie-provider">
       <Alert className="mb-4">
         <AlertDescription className="text-[11px]">
           <Badge className="mr-2 bg-primary/30 text-primary">Demo</Badge>

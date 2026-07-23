@@ -5,17 +5,20 @@ import { BottomNav } from "./bottom-nav";
 import { NotificationCenter } from "./notification-center";
 import { useAuth } from "@/lib/auth";
 import { Button } from "./ui/button";
+import { DemoBanner } from "./demo-banner";
 
 export function AppShell({
   title,
   action,
   children,
   requireAuth = true,
+  demoBanner,
 }: {
   title?: string;
   action?: ReactNode;
   children: ReactNode;
   requireAuth?: boolean;
+  demoBanner?: string;
 }) {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -72,7 +75,10 @@ export function AppShell({
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-2xl px-4 py-4">{children}</main>
+      <main className="mx-auto max-w-2xl px-4 py-4">
+        {demoBanner ? <DemoBanner text={demoBanner} /> : null}
+        {children}
+      </main>
       <BottomNav />
     </div>
   );

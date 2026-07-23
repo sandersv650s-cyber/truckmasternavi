@@ -39,7 +39,7 @@ function VoertuigSoonPage() {
   ];
 
   return (
-    <AppShell title="Voertuig">
+    <AppShell demoBanner={"Truck-Bluetooth/OBD wordt niet ondersteund in een webbrowser."} title="Voertuig">
       <Card className="mb-6 overflow-hidden border-primary/40 bg-gradient-to-br from-primary/25 via-card to-card">
         <CardContent className="p-6 text-center">
           <Badge className="mb-3 bg-primary/30 text-primary">Binnenkort</Badge>

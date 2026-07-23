@@ -18,7 +18,7 @@ export const Route = createFileRoute("/chat")({
 
 function ChatList() {
   return (
-    <AppShell title="Berichten">
+    <AppShell demoBanner={"Berichten zijn demo-content — realtime chat vereist een externe realtime-dienst en is nog niet actief."} title="Berichten">
       {chats.length === 0 ? (
         <p className="text-center text-sm text-muted-foreground">Nog geen gesprekken.</p>
       ) : (

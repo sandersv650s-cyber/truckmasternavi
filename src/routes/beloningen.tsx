@@ -37,7 +37,7 @@ function BeloningenPage() {
     .map((e) => e.userId === currentUser.id ? { ...e, points: totalPoints } : e)
     .sort((a, b) => b.points - a.points);
   return (
-    <AppShell title="Beloningen">
+    <AppShell demoBanner={"Leaderboard en badges zijn voorbeelddata."} title="Beloningen">
       <Card className="mb-4 overflow-hidden border-primary/40 bg-gradient-to-br from-primary/20 via-card to-card">
         <CardContent className="p-5 text-center">
           <Trophy className="mx-auto h-8 w-8 text-primary" />

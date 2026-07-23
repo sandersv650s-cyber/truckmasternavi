@@ -37,7 +37,7 @@ function FleetPage() {
   const { role, setRole } = useRole();
 
   return (
-    <AppShell title="Fleet dashboard">
+    <AppShell demoBanner={"Fleet-KPI's zijn illustratief — koppeling met echte vloot-data vereist een integratie."} title="Fleet dashboard">
       <Card className="mb-4">
         <CardContent className="flex items-center gap-3 p-3">
           <Building2 className="h-5 w-5 shrink-0 text-primary" />

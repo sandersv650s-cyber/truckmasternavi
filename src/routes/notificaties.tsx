@@ -30,7 +30,7 @@ function NotificatiesPage() {
   const { notifications, isRead, markRead, markAll, unreadCount, hydrated } = useNotifications();
 
   return (
-    <AppShell title="Notificaties">
+    <AppShell demoBanner={"Notificaties zijn lokaal — echte pushnotificaties vereisen een aparte push-dienst."} title="Notificaties">
       <div className="mb-4 flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           <Bell className="h-4 w-4 shrink-0 text-primary" />

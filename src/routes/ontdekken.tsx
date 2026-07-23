@@ -114,7 +114,7 @@ function OntdekkenPage() {
   const quickCats: AmenityCategory[] = ["douche","restaurant","garage","truckwash"];
 
   return (
-    <AppShell title="Ontdekken">
+    <AppShell demoBanner={"Ontdek-content bevat voorbeelddata."} title="Ontdekken">
       <p className="mb-4 text-sm text-muted-foreground">
         Alles wat je onderweg nodig hebt, in één overzicht.
       </p>

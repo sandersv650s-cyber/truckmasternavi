@@ -20,7 +20,7 @@ export const Route = createFileRoute("/integraties")({
 
 function IntegratiesPage() {
   return (
-    <AppShell title="Integraties">
+    <AppShell demoBanner={"Integraties met tachograaf/fleetsystemen vereisen aparte contracten — nog niet actief."} title="Integraties">
       <Card className="mb-3">
         <CardContent className="flex items-start gap-3 p-3 text-xs">
           <Plug className="mt-0.5 h-4 w-4 shrink-0 text-primary" />

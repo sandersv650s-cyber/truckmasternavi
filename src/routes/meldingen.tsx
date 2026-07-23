@@ -43,7 +43,7 @@ function MeldingenPage() {
   const visible = alerts.filter((a) => filter === "alle" || a.category === filter);
 
   return (
-    <AppShell title="Meldingen">
+    <AppShell demoBanner={"Voorbeeldmeldingen — echte community-alerts vereisen een aparte tabel + moderatie en zijn nog niet live."} title="Meldingen">
       <Button className="mb-3 w-full" onClick={() => setShowForm((v) => !v)}>
         <Plus className="mr-1 h-4 w-4" /> {showForm ? "Sluiten" : "Nieuwe melding"}
       </Button>

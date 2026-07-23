@@ -36,7 +36,7 @@ function PrivacyPage() {
   const categories = Array.from(new Set(privacyOptions.map((o) => o.category)));
 
   return (
-    <AppShell title="Privacy">
+    <AppShell demoBanner={"Privacy-instellingen worden lokaal bewaard."} title="Privacy">
       <Card className="mb-4 border-emerald-500/40 bg-emerald-500/5">
         <CardContent className="flex items-start gap-3 p-3 text-xs">
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
