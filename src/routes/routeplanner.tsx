@@ -24,6 +24,7 @@ import {
   AlertTriangle,
   Truck,
   Settings2,
+  Share2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -648,6 +649,26 @@ function RoutePlannerPage() {
                   <Save className="mr-1 h-4 w-4" />
                 )}
                 Opslaan
+              </Button>
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  if (!selectedRoute) return;
+                  const wps = waypoints.filter((w) => w.lat !== 0 || w.lng !== 0);
+                  const text = `${wps[0]?.label ?? "Vertrek"} → ${wps[wps.length - 1]?.label ?? "Bestemming"} · ${formatDistance(selectedRoute.distance_m)} · ${formatDuration(selectedRoute.duration_s)} · ETA ${etaString(selectedRoute.duration_s)}`;
+                  try {
+                    if (typeof navigator !== "undefined" && (navigator as any).share) {
+                      await (navigator as any).share({ title: "TruckMate route", text });
+                    } else {
+                      await navigator.clipboard.writeText(text);
+                      toast.success("Route gekopieerd naar klembord");
+                    }
+                  } catch {
+                    /* user cancelled */
+                  }
+                }}
+              >
+                <Share2 className="mr-1 h-4 w-4" /> Delen
               </Button>
             </div>
           </CardContent>
