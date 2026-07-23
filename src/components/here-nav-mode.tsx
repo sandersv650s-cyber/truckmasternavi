@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Navigation, X, RefreshCw, AlertTriangle } from "lucide-react";
+import { Navigation, X, RefreshCw, AlertTriangle, Pause, Play } from "lucide-react";
 import {
   formatDistance,
   formatDuration,
@@ -31,10 +31,12 @@ export function HereNavMode({ route: initialRoute, waypoints, onStop, onReroute 
   const [offRoute, setOffRoute] = useState(false);
   const [rerouting, setRerouting] = useState(false);
   const [permError, setPermError] = useState<string | null>(null);
+  const [paused, setPaused] = useState(false);
   const offStreakRef = useRef(0);
   const watchIdRef = useRef<number | null>(null);
 
   useEffect(() => {
+    if (paused) return;
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       setPermError("Geolocatie niet ondersteund op dit apparaat.");
       return;
@@ -57,7 +59,7 @@ export function HereNavMode({ route: initialRoute, waypoints, onStop, onReroute 
     return () => {
       if (watchIdRef.current != null) navigator.geolocation.clearWatch(watchIdRef.current);
     };
-  }, []);
+  }, [paused]);
 
   // Progress along route
   const progress = useMemo(() => {
@@ -96,7 +98,7 @@ export function HereNavMode({ route: initialRoute, waypoints, onStop, onReroute 
 
   // Off-route detection + auto-reroute
   useEffect(() => {
-    if (!pos) return;
+    if (!pos || paused) return;
     if (progress.distanceFromRoute > OFF_ROUTE_M) {
       offStreakRef.current += 1;
       if (offStreakRef.current >= AUTO_REROUTE_STREAK && !rerouting) {
@@ -108,7 +110,7 @@ export function HereNavMode({ route: initialRoute, waypoints, onStop, onReroute 
       if (offRoute) setOffRoute(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pos, progress.distanceFromRoute]);
+  }, [pos, progress.distanceFromRoute, paused]);
 
   async function doReroute() {
     if (!pos || rerouting) return;
@@ -181,10 +183,25 @@ export function HereNavMode({ route: initialRoute, waypoints, onStop, onReroute 
           <p className="font-bold tabular-nums">{etaString(progress.remaining_s)}</p>
         </div>
         <div className="flex items-center justify-center">
-          <Button size="sm" variant="outline" onClick={doReroute} disabled={rerouting || !pos}>
-            <RefreshCw className={`mr-1 h-3 w-3 ${rerouting ? "animate-spin" : ""}`} />
-            Herbereken
-          </Button>
+          <div className="flex gap-1">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setPaused((p) => !p)}
+              aria-label={paused ? "Hervat" : "Pauzeer"}
+            >
+              {paused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={doReroute}
+              disabled={rerouting || !pos || paused}
+              aria-label="Herbereken"
+            >
+              <RefreshCw className={`h-3 w-3 ${rerouting ? "animate-spin" : ""}`} />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
