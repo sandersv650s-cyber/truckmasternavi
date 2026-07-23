@@ -12,7 +12,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { fetchProfile, formatDate, formatDuration, initials, type Ride } from "@/lib/queries";
-import { trendingAlerts, alertMeta, minAgoLabel, fuelStations, flag } from "@/lib/discover-data";
+import { alertMeta, fuelStations, flag, type AlertCategory } from "@/lib/discover-data";
 import { useRole } from "@/lib/role";
 
 export const Route = createFileRoute("/")({
@@ -41,12 +41,26 @@ function Dashboard() {
       return (data ?? []) as Ride[];
     },
   });
+  const trendingQ = useQuery({
+    queryKey: ["alerts", "trending"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("alerts")
+        .select("id, category, location, text, confirms_count, created_at, expires_at")
+        .gt("expires_at", new Date().toISOString())
+        .order("confirms_count", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(3);
+      if (error) throw error;
+      return (data ?? []) as { id: string; category: AlertCategory; location: string; text: string; confirms_count: number; created_at: string; expires_at: string }[];
+    },
+  });
 
   const rides = ridesQ.data ?? [];
   const totalKm = rides.reduce((s, r) => s + Number(r.km || 0), 0);
   const l100s = rides.map((r) => r.l100).filter((v): v is number => v != null).map(Number);
   const avgL100 = l100s.length ? (l100s.reduce((a, b) => a + b, 0) / l100s.length).toFixed(1) : "—";
-  const trending = trendingAlerts(3);
+  const trending = trendingQ.data ?? [];
   const cheapestFuel = [...fuelStations].sort((a, b) => a.dieselPrice - b.dieselPrice)[0];
   const { role } = useRole();
   const displayName = profileQ.data?.full_name || user?.email?.split("@")[0] || "Chauffeur";
@@ -127,6 +141,8 @@ function Dashboard() {
           <div className="mb-5 space-y-2">
             {trending.map((a) => {
               const meta = alertMeta[a.category];
+              const mins = Math.max(0, Math.floor((Date.now() - new Date(a.created_at).getTime()) / 60000));
+              const ago = mins < 60 ? `${mins}m` : `${Math.floor(mins/60)}u`;
               return (
                 <Link key={a.id} to="/meldingen">
                   <Card className="transition hover:border-primary/60">
@@ -136,7 +152,7 @@ function Dashboard() {
                         <div className="flex items-center gap-2">
                           <Badge className={`${meta.color} border text-[10px]`}>{meta.label}</Badge>
                           <span className="text-[10px] text-muted-foreground">
-                            {minAgoLabel(a.createdMinAgo)} · {a.confirms}× bevestigd
+                            {ago} · {a.confirms_count}× bevestigd
                           </span>
                         </div>
                         <p className="mt-1 truncate text-xs font-medium">{a.location}</p>
