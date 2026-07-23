@@ -22,6 +22,8 @@ import {
   Star,
   Sparkles,
   LayoutGrid,
+  Crown,
+  Building2,
 } from "lucide-react";
 import { currentUser, rides, posts, userById, formatDate, formatDuration } from "@/lib/mock-data";
 import {
@@ -35,6 +37,7 @@ import {
 } from "@/lib/discover-data";
 import { leaderboard } from "@/lib/discover-data";
 import { useFavorites } from "@/lib/favorites";
+import { useRole } from "@/lib/role";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -64,9 +67,25 @@ function Dashboard() {
   const { ids: favParkingIds } = useFavorites("truckstops");
   const favParkings = truckstops.filter((t) => favParkingIds.includes(t.id)).slice(0, 3);
   const myPoints = leaderboard.find((l) => l.userId === currentUser.id)?.points ?? 1980;
+  const { role } = useRole();
 
   return (
     <AppShell>
+      {role === "fleet" && (
+        <Link to="/fleet" className="mb-4 block">
+          <Card className="border-primary/50 bg-gradient-to-br from-primary/20 via-card to-card">
+            <CardContent className="flex items-center gap-3 p-3">
+              <Building2 className="h-5 w-5 shrink-0 text-primary" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold">Fleet dashboard</p>
+                <p className="text-[11px] text-muted-foreground">6 voertuigen · 6 chauffeurs · 1 urgent onderhoud</p>
+              </div>
+              <ArrowRight className="h-4 w-4 shrink-0 text-primary" />
+            </CardContent>
+          </Card>
+        </Link>
+      )}
+
       <section className="mb-5">
         <div className="flex items-center justify-between">
           <div className="min-w-0">

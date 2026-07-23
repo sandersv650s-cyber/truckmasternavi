@@ -13,6 +13,13 @@ import {
   ChevronRight,
   Truck,
   Settings,
+  Crown,
+  Building2,
+  Share2,
+  CarFront,
+  Download,
+  Map as MapIcon,
+  Trophy,
 } from "lucide-react";
 
 export const Route = createFileRoute("/meer")({
@@ -37,7 +44,14 @@ type Tile = {
     | "/integraties"
     | "/privacy"
     | "/voertuig"
-    | "/instellingen";
+    | "/instellingen"
+    | "/premium"
+    | "/fleet"
+    | "/deel-eta"
+    | "/carplay"
+    | "/offline-kaarten"
+    | "/navigatie-provider"
+    | "/beloningen";
   icon: React.ReactNode;
   title: string;
   desc: string;
@@ -48,11 +62,18 @@ type Tile = {
 
 function MeerPage() {
   const tiles: Tile[] = [
+    { to: "/premium", icon: <Crown className="h-6 w-6" />, title: "TruckMate Premium", desc: "Free, Driver Pro en Fleet Pro plannen vergelijken.", accent: "from-amber-500/25 to-amber-500/5", badge: "Demo" },
+    { to: "/fleet", icon: <Building2 className="h-6 w-6" />, title: "Fleet dashboard", desc: "Voertuigen, chauffeurs en KPI's voor transportbedrijven.", accent: "from-primary/25 to-primary/5", badge: "Fleet Pro" },
+    { to: "/deel-eta", icon: <Share2 className="h-6 w-6" />, title: "Live ETA delen", desc: "Tijdelijke deel-link voor planner of klant — standaard uit.", accent: "from-sky-500/25 to-sky-500/5", badge: "Privacy-first" },
     { to: "/assistent", icon: <Sparkles className="h-6 w-6" />, title: "AI-routeassistent", desc: "Stel een vraag in gewone taal en krijg slimme parkeer- en stopadviezen.", accent: "from-primary/25 to-primary/5", badge: "Demo" },
+    { to: "/beloningen", icon: <Trophy className="h-6 w-6" />, title: "Beloningen & XP", desc: "Levels, badges, streaks en weekuitdagingen.", accent: "from-yellow-500/25 to-yellow-500/5" },
     { to: "/groepen", icon: <Users className="h-6 w-6" />, title: "Groepen", desc: "Bedrijfs-, regio-, route- en interessegroepen met eigen feed.", accent: "from-sky-500/25 to-sky-500/5", hint: "6 voorbeeldgroepen" },
     { to: "/konvooi", icon: <Radio className="h-6 w-6" />, title: "Konvooimodus", desc: "Rijd samen met collega's en deel locatie tijdelijk — standaard uit.", accent: "from-emerald-500/25 to-emerald-500/5", badge: "Privacy-first" },
     { to: "/onderhoud", icon: <Wrench className="h-6 w-6" />, title: "Onderhoudslogboek", desc: "APK, banden, olie, reparaties en kosten op één plek.", accent: "from-amber-500/25 to-amber-500/5" },
     { to: "/documenten", icon: <FileText className="h-6 w-6" />, title: "Documentenkluis", desc: "CMR, vrachtbrief, ADR, voertuigpapieren en bonnetjes.", accent: "from-purple-500/25 to-purple-500/5" },
+    { to: "/navigatie-provider", icon: <MapIcon className="h-6 w-6" />, title: "Truck-navigatie", desc: "HERE en TomTom truckroutes — demo met mockberekening.", accent: "from-sky-500/25 to-sky-500/5", badge: "Binnenkort" },
+    { to: "/offline-kaarten", icon: <Download className="h-6 w-6" />, title: "Offline kaarten", desc: "Download landen voor navigatie zonder internet.", accent: "from-teal-500/25 to-teal-500/5" },
+    { to: "/carplay", icon: <CarFront className="h-6 w-6" />, title: "CarPlay & Android Auto", desc: "Roadmap voor veilige rijmodus.", accent: "from-slate-500/25 to-slate-500/5", badge: "Binnenkort" },
     { to: "/integraties", icon: <Plug className="h-6 w-6" />, title: "Integraties", desc: "Tachograaf, fleet, OBD/J1939/FMS en TMS — binnenkort.", accent: "from-slate-500/25 to-slate-500/5", badge: "Binnenkort" },
     { to: "/privacy", icon: <ShieldCheck className="h-6 w-6" />, title: "Privacycentrum", desc: "Beheer toestemmingen voor locatie, konvooi, voertuig en data.", accent: "from-teal-500/25 to-teal-500/5" },
     { to: "/voertuig", icon: <Truck className="h-6 w-6" />, title: "Voertuig", desc: "Voertuigkoppeling en Bluetooth — binnenkort beschikbaar.", accent: "from-slate-500/25 to-slate-500/5" },
