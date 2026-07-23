@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,15 +6,15 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Download, Trash2, Shield, Languages, UserCog, RotateCcw, Play } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Trash2, Shield, Languages, UserCog, LogOut } from "lucide-react";
 import { useI18n, languages, type Lang } from "@/lib/i18n";
 import { useRole, roleMeta, type Role } from "@/lib/role";
 import { Link } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
 import { Info, Mail, ScrollText, ShieldCheck, BookOpen, Bell } from "lucide-react";
 import { APP_VERSION } from "@/lib/app-info";
-import { resetDemoData, useDemoTour } from "@/lib/demo";
+import { useAuth } from "@/lib/auth";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/instellingen")({
   head: () => ({
@@ -34,7 +34,13 @@ function Instellingen() {
   const [visibility, setVisibility] = useState("friends");
   const { lang, setLang, t } = useI18n();
   const { role, setRole } = useRole();
-  const { restart: restartTour } = useDemoTour();
+  const { user, signOut } = useAuth();
+  const nav = useNavigate();
+
+  const logout = async () => {
+    await signOut();
+    nav({ to: "/login" });
+  };
 
   return (
     <AppShell title={t("common.settings")}>
@@ -136,36 +142,22 @@ function Instellingen() {
           <CardTitle className="text-base">Data</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <Button variant="secondary" className="w-full justify-start" onClick={restartTour}>
-            <Play className="mr-2 h-4 w-4" /> Demo-rondleiding opnieuw starten
+          <Button variant="secondary" className="w-full justify-start" onClick={logout}>
+            <LogOut className="mr-2 h-4 w-4" /> Uitloggen
           </Button>
           <Button
-            variant="secondary"
+            variant="destructive"
             className="w-full justify-start"
-            onClick={() => {
-              if (confirm("Alle demodata resetten? Voorkeuren, favorieten en notificaties worden hersteld naar de startsituatie.")) {
-                resetDemoData();
-              }
-            }}
+            onClick={() => toast.info("Neem contact op via de contactpagina om je account te laten verwijderen.")}
           >
-            <RotateCcw className="mr-2 h-4 w-4" /> Reset demodata
-          </Button>
-          <Button variant="secondary" className="w-full justify-start">
-            <Download className="mr-2 h-4 w-4" /> Exporteer mijn data
-          </Button>
-          <Button variant="destructive" className="w-full justify-start">
             <Trash2 className="mr-2 h-4 w-4" /> Verwijder account
           </Button>
         </CardContent>
       </Card>
 
-      <Alert>
-        <AlertDescription className="text-xs">
-          Demo-account: <span className="font-medium">demo@truckmate.nl</span> ·{" "}
-          <span className="font-medium">demo1234</span>. Alle data in deze demo is lokaal en fictief.
-        </AlertDescription>
-      </Alert>
-      <Link to="/onboarding"><Button variant="ghost" size="sm" className="mt-2 w-full text-[11px]">Onboarding opnieuw doorlopen</Button></Link>
+      {user && (
+        <p className="mt-2 text-center text-[11px] text-muted-foreground">Ingelogd als {user.email}</p>
+      )}
 
       <Card className="mt-4">
         <CardHeader className="pb-2">
@@ -184,7 +176,7 @@ function Instellingen() {
       </Card>
 
       <p className="mt-4 text-center text-[10px] text-muted-foreground">
-        TruckMate <span className="font-medium text-foreground">v{APP_VERSION}</span> · Investeerdersdemo
+        TruckMate <span className="font-medium text-foreground">v{APP_VERSION}</span>
       </p>
     </AppShell>
   );
