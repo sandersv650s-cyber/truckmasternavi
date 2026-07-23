@@ -9,9 +9,9 @@ import { APP_VERSION, APP_RELEASE_DATE } from "@/lib/app-info";
 export const Route = createFileRoute("/over")({
   head: () => ({
     meta: [
-      { title: "Over TruckMate — versie 1.0" },
-      { name: "description", content: "Wat is TruckMate en waar staat de app voor." },
-      { property: "og:title", content: "Over TruckMate — versie 1.0" },
+      { title: "Over TruckMate Demo v1.0" },
+      { name: "description", content: "TruckMate Demo v1.0 — alle gegevens en koppelingen zijn gesimuleerd." },
+      { property: "og:title", content: "Over TruckMate Demo v1.0" },
       { property: "og:description", content: "De mobiele app voor vrachtwagenchauffeurs en transportbedrijven." },
     ],
   }),
@@ -35,14 +35,15 @@ function OverPage() {
           </div>
           <h1 className="text-2xl font-black">TruckMate</h1>
           <div className="mt-2 flex items-center justify-center gap-2">
-            <Badge className="bg-primary/20 text-primary">v{APP_VERSION}</Badge>
+            <Badge className="bg-primary/20 text-primary">Demo v{APP_VERSION}</Badge>
             <Badge variant="outline" className="border-amber-500/50 bg-amber-500/10 text-amber-300">
               Investeerdersdemo
             </Badge>
           </div>
           <p className="mt-3 text-sm text-muted-foreground">
-            De mobiele app die vrachtwagenchauffeurs en transportbedrijven helpt om slimmer, veiliger
-            en samen op weg te zijn.
+            TruckMate Demo v1.0 — de mobiele app voor vrachtwagenchauffeurs en transportbedrijven.
+            Alle getoonde gegevens, ritten, kaarten en koppelingen (navigatie, tachograaf, OBD, betalingen)
+            zijn in deze demo gesimuleerd.
           </p>
         </CardContent>
       </Card>
