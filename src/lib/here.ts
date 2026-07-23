@@ -4,7 +4,7 @@
 import flexpolyline from "@here/flexpolyline";
 
 export const HERE_API_KEY: string | undefined =
-  (import.meta.env as any).VITE_HERE_API_KEY || undefined;
+  (import.meta.env as any).HERE_API_KEY || undefined;
 
 export const hasHereKey = () => Boolean(HERE_API_KEY);
 
