@@ -59,7 +59,9 @@ import { Route as ProfielUserIdRouteImport } from './routes/profiel.$userId'
 import { Route as KonvooiIdRouteImport } from './routes/konvooi.$id'
 import { Route as GroepenIdRouteImport } from './routes/groepen.$id'
 import { Route as ChatChatIdRouteImport } from './routes/chat.$chatId'
+import { Route as BeheerMeldingenRouteImport } from './routes/beheer.meldingen'
 import { Route as BeheerGebruikersRouteImport } from './routes/beheer.gebruikers'
+import { Route as BeheerAuditlogRouteImport } from './routes/beheer.auditlog'
 import { Route as ApiPublicHereKeyRouteImport } from './routes/api/public/here-key'
 
 const ZoekenRoute = ZoekenRouteImport.update({
@@ -312,9 +314,19 @@ const ChatChatIdRoute = ChatChatIdRouteImport.update({
   path: '/$chatId',
   getParentRoute: () => ChatRoute,
 } as any)
+const BeheerMeldingenRoute = BeheerMeldingenRouteImport.update({
+  id: '/meldingen',
+  path: '/meldingen',
+  getParentRoute: () => BeheerRoute,
+} as any)
 const BeheerGebruikersRoute = BeheerGebruikersRouteImport.update({
   id: '/gebruikers',
   path: '/gebruikers',
+  getParentRoute: () => BeheerRoute,
+} as any)
+const BeheerAuditlogRoute = BeheerAuditlogRouteImport.update({
+  id: '/auditlog',
+  path: '/auditlog',
   getParentRoute: () => BeheerRoute,
 } as any)
 const ApiPublicHereKeyRoute = ApiPublicHereKeyRouteImport.update({
@@ -367,7 +379,9 @@ export interface FileRoutesByFullPath {
   '/voorwaarden': typeof VoorwaardenRoute
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
+  '/beheer/auditlog': typeof BeheerAuditlogRoute
   '/beheer/gebruikers': typeof BeheerGebruikersRoute
+  '/beheer/meldingen': typeof BeheerMeldingenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
   '/konvooi/$id': typeof KonvooiIdRoute
@@ -421,7 +435,9 @@ export interface FileRoutesByTo {
   '/voorwaarden': typeof VoorwaardenRoute
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
+  '/beheer/auditlog': typeof BeheerAuditlogRoute
   '/beheer/gebruikers': typeof BeheerGebruikersRoute
+  '/beheer/meldingen': typeof BeheerMeldingenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
   '/konvooi/$id': typeof KonvooiIdRoute
@@ -476,7 +492,9 @@ export interface FileRoutesById {
   '/voorwaarden': typeof VoorwaardenRoute
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
+  '/beheer/auditlog': typeof BeheerAuditlogRoute
   '/beheer/gebruikers': typeof BeheerGebruikersRoute
+  '/beheer/meldingen': typeof BeheerMeldingenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
   '/konvooi/$id': typeof KonvooiIdRoute
@@ -532,7 +550,9 @@ export interface FileRouteTypes {
     | '/voorwaarden'
     | '/voorzieningen'
     | '/zoeken'
+    | '/beheer/auditlog'
     | '/beheer/gebruikers'
+    | '/beheer/meldingen'
     | '/chat/$chatId'
     | '/groepen/$id'
     | '/konvooi/$id'
@@ -586,7 +606,9 @@ export interface FileRouteTypes {
     | '/voorwaarden'
     | '/voorzieningen'
     | '/zoeken'
+    | '/beheer/auditlog'
     | '/beheer/gebruikers'
+    | '/beheer/meldingen'
     | '/chat/$chatId'
     | '/groepen/$id'
     | '/konvooi/$id'
@@ -640,7 +662,9 @@ export interface FileRouteTypes {
     | '/voorwaarden'
     | '/voorzieningen'
     | '/zoeken'
+    | '/beheer/auditlog'
     | '/beheer/gebruikers'
+    | '/beheer/meldingen'
     | '/chat/$chatId'
     | '/groepen/$id'
     | '/konvooi/$id'
@@ -1050,11 +1074,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatChatIdRouteImport
       parentRoute: typeof ChatRoute
     }
+    '/beheer/meldingen': {
+      id: '/beheer/meldingen'
+      path: '/meldingen'
+      fullPath: '/beheer/meldingen'
+      preLoaderRoute: typeof BeheerMeldingenRouteImport
+      parentRoute: typeof BeheerRoute
+    }
     '/beheer/gebruikers': {
       id: '/beheer/gebruikers'
       path: '/gebruikers'
       fullPath: '/beheer/gebruikers'
       preLoaderRoute: typeof BeheerGebruikersRouteImport
+      parentRoute: typeof BeheerRoute
+    }
+    '/beheer/auditlog': {
+      id: '/beheer/auditlog'
+      path: '/auditlog'
+      fullPath: '/beheer/auditlog'
+      preLoaderRoute: typeof BeheerAuditlogRouteImport
       parentRoute: typeof BeheerRoute
     }
     '/api/public/here-key': {
@@ -1068,11 +1106,15 @@ declare module '@tanstack/react-router' {
 }
 
 interface BeheerRouteChildren {
+  BeheerAuditlogRoute: typeof BeheerAuditlogRoute
   BeheerGebruikersRoute: typeof BeheerGebruikersRoute
+  BeheerMeldingenRoute: typeof BeheerMeldingenRoute
 }
 
 const BeheerRouteChildren: BeheerRouteChildren = {
+  BeheerAuditlogRoute: BeheerAuditlogRoute,
   BeheerGebruikersRoute: BeheerGebruikersRoute,
+  BeheerMeldingenRoute: BeheerMeldingenRoute,
 }
 
 const BeheerRouteWithChildren =
