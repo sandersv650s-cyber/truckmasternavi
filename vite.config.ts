@@ -15,7 +15,9 @@ export default defineConfig({
   },
   vite: {
     define: {
-      "import.meta.env.HERE_API_KEY": JSON.stringify(process.env.HERE_API_KEY ?? ""),
+      // Plain identifier: Vite/esbuild `define` only replaces exact expressions,
+      // so `(import.meta.env as any).HERE_API_KEY` would never be substituted.
+      __HERE_API_KEY__: JSON.stringify(process.env.HERE_API_KEY ?? ""),
     },
   },
   plugins: [
