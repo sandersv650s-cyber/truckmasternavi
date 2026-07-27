@@ -14,6 +14,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { fetchProfile, initials, type Profile } from "@/lib/queries";
 import { toast } from "sonner";
+import {
+  LZV_DEFAULTS,
+  hasErrors,
+  validateVehicle,
+  vehicleClassHints,
+  vehicleClassLabels,
+  type VehicleClass,
+} from "@/lib/lzv";
+import { IssueList, LzvInfoCard } from "@/components/lzv-info-card";
 
 export const Route = createFileRoute("/profiel")({
   head: () => ({
@@ -45,8 +54,63 @@ function MyProfile() {
     if (q.data) setForm(q.data);
   }, [q.data]);
 
+  const f = form as any;
+  /**
+   * Klasse wordt afgeleid uit twee opgeslagen velden:
+   *  - vehicle_is_lzv = true  -> LZV
+   *  - anders met ontheffing  -> exceptioneel transport
+   */
+  const vehicleClass: VehicleClass = f.vehicle_is_lzv
+    ? "lzv"
+    : f.vehicle_has_exemption
+      ? "exceptional"
+      : "truck";
+
+  const setClass = (cls: VehicleClass) => {
+    if (cls === "lzv") {
+      setForm({
+        ...f,
+        vehicle_is_lzv: true,
+        vehicle_type: "truck",
+        // Veilige Nederlandse LZV-standaardwaarden invullen waar nog niets staat.
+        vehicle_length_cm: f.vehicle_length_cm ?? LZV_DEFAULTS.length_cm,
+        vehicle_weight_kg: f.vehicle_weight_kg ?? LZV_DEFAULTS.weight_kg,
+        vehicle_height_cm: f.vehicle_height_cm ?? LZV_DEFAULTS.height_cm,
+        vehicle_width_cm: f.vehicle_width_cm ?? LZV_DEFAULTS.width_cm,
+        vehicle_axle_count: f.vehicle_axle_count ?? LZV_DEFAULTS.axle_count,
+        vehicle_trailer_count: f.vehicle_trailer_count ?? LZV_DEFAULTS.trailer_count,
+      });
+      return;
+    }
+    setForm({
+      ...f,
+      vehicle_is_lzv: false,
+      vehicle_has_exemption: cls === "exceptional" ? true : f.vehicle_has_exemption ?? false,
+    });
+  };
+
+  const issues = validateVehicle({
+    vehicleClass,
+    length_cm: f.vehicle_length_cm,
+    width_cm: f.vehicle_width_cm,
+    height_cm: f.vehicle_height_cm,
+    weight_kg: f.vehicle_weight_kg,
+    current_weight_kg: f.vehicle_current_weight_kg,
+    axle_weight_kg: f.vehicle_axle_weight_kg,
+    axle_count: f.vehicle_axle_count,
+    trailer_count: f.vehicle_trailer_count,
+    has_exemption: f.vehicle_has_exemption,
+    exemption_ref: f.vehicle_exemption_ref,
+    exemption_expires: f.vehicle_exemption_expires,
+  });
+  const blocking = hasErrors(issues);
+
   const save = async () => {
     if (!user) return;
+    if (blocking) {
+      toast.error("Corrigeer eerst de rode fouten in de voertuiggegevens.");
+      return;
+    }
     setSaving(true);
     try {
       const patch: Record<string, unknown> = {
@@ -60,6 +124,13 @@ function MyProfile() {
         vehicle_width_cm: (form as any).vehicle_width_cm ?? null,
         vehicle_length_cm: (form as any).vehicle_length_cm ?? null,
         vehicle_weight_kg: (form as any).vehicle_weight_kg ?? null,
+        vehicle_current_weight_kg: (form as any).vehicle_current_weight_kg ?? null,
+        vehicle_max_permitted_weight_kg:
+          (form as any).vehicle_max_permitted_weight_kg ?? (form as any).vehicle_weight_kg ?? null,
+        vehicle_is_lzv: Boolean((form as any).vehicle_is_lzv),
+        vehicle_has_exemption: Boolean((form as any).vehicle_has_exemption),
+        vehicle_exemption_ref: (form as any).vehicle_exemption_ref?.trim() || null,
+        vehicle_exemption_expires: (form as any).vehicle_exemption_expires || null,
         vehicle_axle_count: (form as any).vehicle_axle_count ?? null,
         vehicle_axle_weight_kg: (form as any).vehicle_axle_weight_kg ?? null,
         vehicle_trailer_count: (form as any).vehicle_trailer_count ?? null,
@@ -146,6 +217,25 @@ function MyProfile() {
               </p>
               <div className="space-y-2">
                 <div>
+                  <Label htmlFor="vcls">Combinatie</Label>
+                  <select
+                    id="vcls"
+                    className="mt-1 block h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+                    value={vehicleClass}
+                    onChange={(e) => setClass(e.target.value as VehicleClass)}
+                  >
+                    {(Object.keys(vehicleClassLabels) as VehicleClass[]).map((c) => (
+                      <option key={c} value={c}>
+                        {vehicleClassLabels[c]}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    {vehicleClassHints[vehicleClass]}
+                  </p>
+                </div>
+                {vehicleClass === "lzv" && <LzvInfoCard />}
+                <div>
                   <Label htmlFor="vt">Type</Label>
                   <select
                     id="vt"
@@ -174,7 +264,13 @@ function MyProfile() {
                   </div>
                   <div>
                     <Label htmlFor="vwt">Gewicht (kg)</Label>
-                    <Input id="vwt" type="number" inputMode="numeric" value={(form as any).vehicle_weight_kg ?? ""} onChange={(e) => setForm({ ...(form as any), vehicle_weight_kg: e.target.value ? Number(e.target.value) : null })} />
+                    <Label htmlFor="vwt" className="sr-only">Toegestane maximummassa (kg)</Label>
+                    <Input id="vwt" type="number" min={1} max={120000} step={100} inputMode="numeric" placeholder="bijv. 50000" value={f.vehicle_weight_kg ?? ""} onChange={(e) => setForm({ ...f, vehicle_weight_kg: e.target.value ? Number(e.target.value) : null })} />
+                    <p className="mt-0.5 text-[10px] text-muted-foreground">Toegestane maximummassa</p>
+                  </div>
+                  <div>
+                    <Label htmlFor="vcw">Actueel gewicht (kg)</Label>
+                    <Input id="vcw" type="number" min={1} max={120000} step={100} inputMode="numeric" placeholder="beladen gewicht" value={f.vehicle_current_weight_kg ?? ""} onChange={(e) => setForm({ ...f, vehicle_current_weight_kg: e.target.value ? Number(e.target.value) : null })} />
                   </div>
                   <div>
                     <Label htmlFor="vac">Aantal assen</Label>
@@ -198,12 +294,34 @@ function MyProfile() {
                   />
                   Gevaarlijke lading (ADR)
                 </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4"
+                    checked={Boolean(f.vehicle_has_exemption)}
+                    onChange={(e) => setForm({ ...f, vehicle_has_exemption: e.target.checked })}
+                  />
+                  Ik heb een (incidentele) RDW-ontheffing
+                </label>
+                {f.vehicle_has_exemption && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label htmlFor="vex">Ontheffingsnummer</Label>
+                      <Input id="vex" maxLength={60} value={f.vehicle_exemption_ref ?? ""} onChange={(e) => setForm({ ...f, vehicle_exemption_ref: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label htmlFor="vexd">Geldig tot</Label>
+                      <Input id="vexd" type="date" value={f.vehicle_exemption_expires ?? ""} onChange={(e) => setForm({ ...f, vehicle_exemption_expires: e.target.value || null })} />
+                    </div>
+                  </div>
+                )}
+                <IssueList issues={issues} />
                 <p className="text-[11px] text-muted-foreground">
                   Wordt door de HERE-routeplanner toegepast voor truck-veilige routes en waarschuwingen.
                 </p>
               </div>
             </div>
-            <Button className="w-full" onClick={save} disabled={saving || q.isLoading}>
+            <Button className="w-full" onClick={save} disabled={saving || q.isLoading || blocking}>
               {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
               Opslaan
             </Button>

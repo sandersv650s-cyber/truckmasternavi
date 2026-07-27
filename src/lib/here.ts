@@ -105,11 +105,15 @@ export type TruckProfile = {
   width_cm?: number | null;
   length_cm?: number | null;
   weight_kg?: number | null;
+  /** actueel/beladen gewicht in kg (HERE: vehicle[currentWeight]) */
+  current_weight_kg?: number | null;
   axle_weight_kg?: number | null;
   axle_count?: number | null;
   trailer_count?: number | null;
   hazardous?: boolean | null;
   tunnel_category?: "B" | "C" | "D" | "E" | null;
+  /** Lange Zware Voertuigcombinatie */
+  is_lzv?: boolean | null;
 };
 
 export type AvoidFeature =
@@ -219,17 +223,24 @@ function pushVehicleParams(url: URL, t: TruckProfile) {
   // HERE Routing v8 expects integer centimeters for dimensions and integer
   // kilograms for weight. Sending meters (e.g. "4.50") yields
   // "Malformed request" / E605001 and the whole route call fails.
+  // Dimensies, gewichten en assen horen onder vehicle[...]; truck-specifieke
+  // eigenschappen (type, aanhangers, ADR, tunnelcategorie) onder truck[...].
   if (t.height_cm) url.searchParams.set("vehicle[height]", String(Math.round(t.height_cm)));
   if (t.width_cm) url.searchParams.set("vehicle[width]", String(Math.round(t.width_cm)));
   if (t.length_cm) url.searchParams.set("vehicle[length]", String(Math.round(t.length_cm)));
   if (t.weight_kg) url.searchParams.set("vehicle[grossWeight]", String(Math.round(t.weight_kg)));
+  if (t.current_weight_kg)
+    url.searchParams.set("vehicle[currentWeight]", String(Math.round(t.current_weight_kg)));
   if (t.axle_weight_kg)
     url.searchParams.set("vehicle[weightPerAxle]", String(Math.round(t.axle_weight_kg)));
   if (t.axle_count) url.searchParams.set("vehicle[axleCount]", String(t.axle_count));
-  if (t.trailer_count != null)
-    url.searchParams.set("vehicle[trailerCount]", String(t.trailer_count));
-  if (t.hazardous) url.searchParams.set("vehicle[shippedHazardousGoods]", "explosive");
-  if (t.tunnel_category) url.searchParams.set("vehicle[tunnelCategory]", t.tunnel_category);
+  if (t.trailer_count != null && t.trailer_count >= 0)
+    url.searchParams.set("truck[trailerCount]", String(Math.round(t.trailer_count)));
+  if (t.hazardous) url.searchParams.set("truck[shippedHazardousGoods]", "explosive");
+  if (t.tunnel_category) url.searchParams.set("truck[tunnelCategory]", t.tunnel_category);
+  // HERE kent geen LZV-categorie; een LZV wordt als tractor-oplegger gerouteerd
+  // met de opgegeven lengte/gewicht. Dit vervangt geen RDW/DWO-controle.
+  url.searchParams.set("truck[type]", t.is_lzv || (t.trailer_count ?? 0) > 0 ? "tractor" : "straight");
 }
 
 export async function computeRoutes(opts: RouteOptions, signal?: AbortSignal): Promise<HereRoute[]> {
