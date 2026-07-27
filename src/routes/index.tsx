@@ -8,7 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { StorageAvatarImage } from "@/lib/storage-image";
 import {
   Truck, Play, Fuel, Gauge, Trophy, Settings, ArrowRight, MapPin, MessageCircle,
-  Map as MapIcon, Search, Megaphone, LayoutGrid, Building2,
+  Map as MapIcon, Navigation as NavigationIcon, Search, Megaphone, LayoutGrid, Building2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -256,7 +256,7 @@ function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; va
 function QuickAction({
   to, icon, label,
 }: {
-  to: "/kaart" | "/zoeken" | "/community" | "/meldingen" | "/meer";
+  to: "/routeplanner" | "/kaart" | "/zoeken" | "/community" | "/meldingen" | "/meer";
   icon: React.ReactNode;
   label: string;
 }) {
