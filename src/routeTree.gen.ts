@@ -59,6 +59,7 @@ import { Route as ProfielUserIdRouteImport } from './routes/profiel.$userId'
 import { Route as KonvooiIdRouteImport } from './routes/konvooi.$id'
 import { Route as GroepenIdRouteImport } from './routes/groepen.$id'
 import { Route as ChatChatIdRouteImport } from './routes/chat.$chatId'
+import { Route as BeheerSuggestiesRouteImport } from './routes/beheer.suggesties'
 import { Route as BeheerMeldingenRouteImport } from './routes/beheer.meldingen'
 import { Route as BeheerLocatiesRouteImport } from './routes/beheer.locaties'
 import { Route as BeheerGebruikersRouteImport } from './routes/beheer.gebruikers'
@@ -315,6 +316,11 @@ const ChatChatIdRoute = ChatChatIdRouteImport.update({
   path: '/$chatId',
   getParentRoute: () => ChatRoute,
 } as any)
+const BeheerSuggestiesRoute = BeheerSuggestiesRouteImport.update({
+  id: '/suggesties',
+  path: '/suggesties',
+  getParentRoute: () => BeheerRoute,
+} as any)
 const BeheerMeldingenRoute = BeheerMeldingenRouteImport.update({
   id: '/meldingen',
   path: '/meldingen',
@@ -389,6 +395,7 @@ export interface FileRoutesByFullPath {
   '/beheer/gebruikers': typeof BeheerGebruikersRoute
   '/beheer/locaties': typeof BeheerLocatiesRoute
   '/beheer/meldingen': typeof BeheerMeldingenRoute
+  '/beheer/suggesties': typeof BeheerSuggestiesRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
   '/konvooi/$id': typeof KonvooiIdRoute
@@ -446,6 +453,7 @@ export interface FileRoutesByTo {
   '/beheer/gebruikers': typeof BeheerGebruikersRoute
   '/beheer/locaties': typeof BeheerLocatiesRoute
   '/beheer/meldingen': typeof BeheerMeldingenRoute
+  '/beheer/suggesties': typeof BeheerSuggestiesRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
   '/konvooi/$id': typeof KonvooiIdRoute
@@ -504,6 +512,7 @@ export interface FileRoutesById {
   '/beheer/gebruikers': typeof BeheerGebruikersRoute
   '/beheer/locaties': typeof BeheerLocatiesRoute
   '/beheer/meldingen': typeof BeheerMeldingenRoute
+  '/beheer/suggesties': typeof BeheerSuggestiesRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
   '/konvooi/$id': typeof KonvooiIdRoute
@@ -563,6 +572,7 @@ export interface FileRouteTypes {
     | '/beheer/gebruikers'
     | '/beheer/locaties'
     | '/beheer/meldingen'
+    | '/beheer/suggesties'
     | '/chat/$chatId'
     | '/groepen/$id'
     | '/konvooi/$id'
@@ -620,6 +630,7 @@ export interface FileRouteTypes {
     | '/beheer/gebruikers'
     | '/beheer/locaties'
     | '/beheer/meldingen'
+    | '/beheer/suggesties'
     | '/chat/$chatId'
     | '/groepen/$id'
     | '/konvooi/$id'
@@ -677,6 +688,7 @@ export interface FileRouteTypes {
     | '/beheer/gebruikers'
     | '/beheer/locaties'
     | '/beheer/meldingen'
+    | '/beheer/suggesties'
     | '/chat/$chatId'
     | '/groepen/$id'
     | '/konvooi/$id'
@@ -1086,6 +1098,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatChatIdRouteImport
       parentRoute: typeof ChatRoute
     }
+    '/beheer/suggesties': {
+      id: '/beheer/suggesties'
+      path: '/suggesties'
+      fullPath: '/beheer/suggesties'
+      preLoaderRoute: typeof BeheerSuggestiesRouteImport
+      parentRoute: typeof BeheerRoute
+    }
     '/beheer/meldingen': {
       id: '/beheer/meldingen'
       path: '/meldingen'
@@ -1129,6 +1148,7 @@ interface BeheerRouteChildren {
   BeheerGebruikersRoute: typeof BeheerGebruikersRoute
   BeheerLocatiesRoute: typeof BeheerLocatiesRoute
   BeheerMeldingenRoute: typeof BeheerMeldingenRoute
+  BeheerSuggestiesRoute: typeof BeheerSuggestiesRoute
 }
 
 const BeheerRouteChildren: BeheerRouteChildren = {
@@ -1136,6 +1156,7 @@ const BeheerRouteChildren: BeheerRouteChildren = {
   BeheerGebruikersRoute: BeheerGebruikersRoute,
   BeheerLocatiesRoute: BeheerLocatiesRoute,
   BeheerMeldingenRoute: BeheerMeldingenRoute,
+  BeheerSuggestiesRoute: BeheerSuggestiesRoute,
 }
 
 const BeheerRouteWithChildren =
