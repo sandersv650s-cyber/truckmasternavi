@@ -262,6 +262,21 @@ function PostCard({
               <Trash2 className="h-3.5 w-3.5" />
             </button>
           )}
+          {!mine && currentUserId && (
+            <ReportDialog
+              reportedUserId={post.user_id}
+              contextType="post"
+              contextId={post.id}
+              trigger={
+                <button
+                  className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  aria-label="Bericht melden"
+                >
+                  <Flag className="h-3.5 w-3.5" />
+                </button>
+              }
+            />
+          )}
         </div>
         <p className="whitespace-pre-wrap text-sm leading-relaxed">{post.text}</p>
         {post.image_url && (
