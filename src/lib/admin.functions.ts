@@ -330,21 +330,3 @@ export const adminListBlocks = createServerFn({ method: "POST" })
       blocked_name: name(r.blocked_id),
     }));
   });
-
-const _legacyLogAction = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i) =>
-    z
-      .object({
-        action: z.string().max(80),
-        targetType: z.string().max(40),
-        targetId: z.string().max(80),
-        details: z.record(z.string(), z.unknown()).optional(),
-      })
-      .parse(i),
-  )
-  .handler(async ({ data, context }) => {
-    await assertStaff(context as any);
-    await audit(context.userId, data.action, data.targetType, data.targetId, data.details);
-    return { ok: true };
-  });
