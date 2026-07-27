@@ -26,17 +26,19 @@ type Release = {
 
 const releases: Release[] = [
   {
-    version: "1.2",
+    version: "1.3",
     date: "Nu",
     tag: "Nu",
     highlights: [
       "Realtime 1-op-1 chat en konvooi-chat via de eigen database, met ongelezen status en live updates.",
-      "Konvooi rijden: aanmaken, uitnodigingscode, deelnemen/verlaten en locatie delen met expliciete toestemming en automatische vervaltijd.",
+      "Konvooi rijden: aanmaken, uitnodigingscode, deelnemen/verlaten en locatie delen met expliciete toestemming, automatische vervaltijd en live deelnemersupdates.",
       "Gebruikers blokkeren/deblokkeren en ongewenst gedrag melden vanuit profiel, chat en community.",
+      "Nieuw: 'Mijn meldingen' — je ziet de status en afhandeling van je eigen meldingen; interne moderatienotities blijven afgeschermd.",
       "Beheerdersdashboard met gebruikersbeheer, rollen, schorsen, moderatie-inbox met interne notities en auditlog.",
       "Distributiecentra en terminals uit de database met openingstijden, uitzonderingen, status, kaart en beheer-CRUD.",
       "Brandstofprijzen databasegestuurd met diesel, AdBlue, HVO100 en LNG, plus beheerpagina met bulk-import.",
-      "Nog te koppelen: externe live brandstofprijs-feed (secret FUEL_PRICE_API_KEY). Zolang die ontbreekt tonen we eerlijk 'voorbeelddata' in plaats van live prijzen.",
+      "Let op: actuele brandstofprijzen vereisen nog een externe provider met API-key (FUEL_PRICE_API_KEY). Zolang die ontbreekt tonen we uitsluitend voorbeelddata, duidelijk gemarkeerd met een 'Voorbeelddata'-label en bronvermelding.",
+      "Ook locatiegegevens van terminals en distributiecentra die nog niet uit een externe bron komen, blijven zichtbaar gemarkeerd als voorbeelddata.",
     ],
   },
   {
@@ -65,7 +67,7 @@ const releases: Release[] = [
     ],
   },
   {
-    version: "1.2",
+    version: "1.4",
     date: "Concept",
     tag: "Concept",
     highlights: [
