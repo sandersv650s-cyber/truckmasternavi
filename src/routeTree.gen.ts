@@ -60,6 +60,7 @@ import { Route as KonvooiIdRouteImport } from './routes/konvooi.$id'
 import { Route as GroepenIdRouteImport } from './routes/groepen.$id'
 import { Route as ChatChatIdRouteImport } from './routes/chat.$chatId'
 import { Route as BeheerMeldingenRouteImport } from './routes/beheer.meldingen'
+import { Route as BeheerLocatiesRouteImport } from './routes/beheer.locaties'
 import { Route as BeheerGebruikersRouteImport } from './routes/beheer.gebruikers'
 import { Route as BeheerAuditlogRouteImport } from './routes/beheer.auditlog'
 import { Route as ApiPublicHereKeyRouteImport } from './routes/api/public/here-key'
@@ -319,6 +320,11 @@ const BeheerMeldingenRoute = BeheerMeldingenRouteImport.update({
   path: '/meldingen',
   getParentRoute: () => BeheerRoute,
 } as any)
+const BeheerLocatiesRoute = BeheerLocatiesRouteImport.update({
+  id: '/locaties',
+  path: '/locaties',
+  getParentRoute: () => BeheerRoute,
+} as any)
 const BeheerGebruikersRoute = BeheerGebruikersRouteImport.update({
   id: '/gebruikers',
   path: '/gebruikers',
@@ -381,6 +387,7 @@ export interface FileRoutesByFullPath {
   '/zoeken': typeof ZoekenRoute
   '/beheer/auditlog': typeof BeheerAuditlogRoute
   '/beheer/gebruikers': typeof BeheerGebruikersRoute
+  '/beheer/locaties': typeof BeheerLocatiesRoute
   '/beheer/meldingen': typeof BeheerMeldingenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
@@ -437,6 +444,7 @@ export interface FileRoutesByTo {
   '/zoeken': typeof ZoekenRoute
   '/beheer/auditlog': typeof BeheerAuditlogRoute
   '/beheer/gebruikers': typeof BeheerGebruikersRoute
+  '/beheer/locaties': typeof BeheerLocatiesRoute
   '/beheer/meldingen': typeof BeheerMeldingenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
@@ -494,6 +502,7 @@ export interface FileRoutesById {
   '/zoeken': typeof ZoekenRoute
   '/beheer/auditlog': typeof BeheerAuditlogRoute
   '/beheer/gebruikers': typeof BeheerGebruikersRoute
+  '/beheer/locaties': typeof BeheerLocatiesRoute
   '/beheer/meldingen': typeof BeheerMeldingenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
@@ -552,6 +561,7 @@ export interface FileRouteTypes {
     | '/zoeken'
     | '/beheer/auditlog'
     | '/beheer/gebruikers'
+    | '/beheer/locaties'
     | '/beheer/meldingen'
     | '/chat/$chatId'
     | '/groepen/$id'
@@ -608,6 +618,7 @@ export interface FileRouteTypes {
     | '/zoeken'
     | '/beheer/auditlog'
     | '/beheer/gebruikers'
+    | '/beheer/locaties'
     | '/beheer/meldingen'
     | '/chat/$chatId'
     | '/groepen/$id'
@@ -664,6 +675,7 @@ export interface FileRouteTypes {
     | '/zoeken'
     | '/beheer/auditlog'
     | '/beheer/gebruikers'
+    | '/beheer/locaties'
     | '/beheer/meldingen'
     | '/chat/$chatId'
     | '/groepen/$id'
@@ -1081,6 +1093,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BeheerMeldingenRouteImport
       parentRoute: typeof BeheerRoute
     }
+    '/beheer/locaties': {
+      id: '/beheer/locaties'
+      path: '/locaties'
+      fullPath: '/beheer/locaties'
+      preLoaderRoute: typeof BeheerLocatiesRouteImport
+      parentRoute: typeof BeheerRoute
+    }
     '/beheer/gebruikers': {
       id: '/beheer/gebruikers'
       path: '/gebruikers'
@@ -1108,12 +1127,14 @@ declare module '@tanstack/react-router' {
 interface BeheerRouteChildren {
   BeheerAuditlogRoute: typeof BeheerAuditlogRoute
   BeheerGebruikersRoute: typeof BeheerGebruikersRoute
+  BeheerLocatiesRoute: typeof BeheerLocatiesRoute
   BeheerMeldingenRoute: typeof BeheerMeldingenRoute
 }
 
 const BeheerRouteChildren: BeheerRouteChildren = {
   BeheerAuditlogRoute: BeheerAuditlogRoute,
   BeheerGebruikersRoute: BeheerGebruikersRoute,
+  BeheerLocatiesRoute: BeheerLocatiesRoute,
   BeheerMeldingenRoute: BeheerMeldingenRoute,
 }
 
