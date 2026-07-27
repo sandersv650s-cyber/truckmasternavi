@@ -22,7 +22,7 @@ import {
   vehicleClassLabels,
   type VehicleClass,
 } from "@/lib/lzv";
-import { LzvInfoCard } from "@/components/lzv-info-card";
+import { IssueList, LzvInfoCard } from "@/components/lzv-info-card";
 
 export const Route = createFileRoute("/profiel")({
   head: () => ({
