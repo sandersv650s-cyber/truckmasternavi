@@ -383,7 +383,7 @@ function RoutePlannerPage() {
             <div>
               <p className="font-semibold">HERE Maps setup vereist (admin)</p>
               <p>
-                Voeg de secret <code>VITE_HERE_API_KEY</code> toe in
+                Voeg de secret <code>HERE_API_KEY</code> toe in
                 Project Settings → Secrets en publiceer de app opnieuw. Zonder
                 sleutel werken kaart, adreszoeken en routing niet.
               </p>

@@ -1,13 +1,26 @@
 // HERE Technologies routing + search integration.
-// API key is read from VITE_HERE_API_KEY (standard Vite client env var).
-// A legacy HERE_API_KEY fallback (injected via Vite define in vite.config.ts)
-// is kept for backwards compatibility. Nothing is hardcoded.
+// The API key comes from the Lovable secret HERE_API_KEY, injected into the
+// client bundle as the global `__HERE_API_KEY__` via Vite `define`
+// (see vite.config.ts). Nothing is hardcoded.
 import flexpolyline from "@here/flexpolyline";
 
-export const HERE_API_KEY: string | undefined =
-  (import.meta.env as any).VITE_HERE_API_KEY ||
-  (import.meta.env as any).HERE_API_KEY ||
-  undefined;
+declare const __HERE_API_KEY__: string | undefined;
+
+function readKey(): string | undefined {
+  // Vite define replaces the bare identifier at build time.
+  const injected =
+    typeof __HERE_API_KEY__ !== "undefined" ? __HERE_API_KEY__ : undefined;
+  const env = (import.meta as any).env ?? {};
+  const fromEnv = env.VITE_HERE_API_KEY;
+  // Server-side (SSR / server functions) can also read process.env directly.
+  const fromProcess =
+    typeof process !== "undefined" ? process.env?.HERE_API_KEY : undefined;
+  const key = injected || fromEnv || fromProcess;
+  return key && String(key).trim() ? String(key).trim() : undefined;
+}
+
+/** Single central key constant used by every HERE map/REST call. */
+export const HERE_API_KEY: string | undefined = readKey();
 
 export const hasHereKey = () => Boolean(HERE_API_KEY);
 
@@ -88,7 +101,7 @@ export type RouteOptions = {
 function requireKey(): string {
   if (!HERE_API_KEY) {
     throw new Error(
-      "HERE API key ontbreekt. Voeg VITE_HERE_API_KEY toe in Project Settings → Secrets.",
+      "HERE API key ontbreekt. Voeg de secret HERE_API_KEY toe in Project Settings → Secrets en publiceer opnieuw.",
     );
   }
   return HERE_API_KEY;
@@ -111,7 +124,13 @@ export async function autosuggest(
   url.searchParams.set("apiKey", key);
   url.searchParams.set("at", at ? `${at.lat},${at.lng}` : "52.1,5.3");
   const res = await fetch(url, { signal });
-  if (!res.ok) throw new Error(`HERE autosuggest fout (${res.status})`);
+  if (!res.ok) {
+    if (res.status === 401 || res.status === 403)
+      throw new Error(
+        `HERE weigert de API-sleutel (${res.status}) — controleer de domeinrestricties van de key.`,
+      );
+    throw new Error(`HERE autosuggest fout (${res.status})`);
+  }
   const j = (await res.json()) as { items?: any[] };
   return (j.items ?? [])
     .map((it) => ({
@@ -202,7 +221,11 @@ export async function computeRoutes(opts: RouteOptions, signal?: AbortSignal): P
     const msg =
       (j as any)?.title || (j as any)?.cause || `HERE routing fout (${res.status})`;
     if (res.status === 401 || res.status === 403) {
-      throw new Error("HERE API-sleutel ongeldig of ontbreekt.");
+      throw new Error(
+        `HERE weigert de API-sleutel (${res.status}). Controleer in de HERE-portal of het domein ${
+          typeof window !== "undefined" ? window.location.hostname : "deze site"
+        } is toegestaan bij de key-restricties (allowed referrers/domains).`,
+      );
     }
     throw new Error(msg);
   }
