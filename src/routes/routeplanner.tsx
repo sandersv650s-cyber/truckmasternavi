@@ -54,6 +54,17 @@ const HereNavMode = lazy(() =>
 );
 
 export const Route = createFileRoute("/routeplanner")({
+  validateSearch: (raw: Record<string, unknown>): PlannerSearch => {
+    const num = (v: unknown) => {
+      const n = Number(v);
+      return Number.isFinite(n) && n !== 0 ? n : undefined;
+    };
+    return {
+      destLat: num(raw.destLat),
+      destLng: num(raw.destLng),
+      destLabel: typeof raw.destLabel === "string" ? raw.destLabel.slice(0, 120) : undefined,
+    };
+  },
   head: () => ({
     meta: [
       { title: "Routeplanner — TruckMate" },
@@ -71,20 +82,6 @@ export const Route = createFileRoute("/routeplanner")({
   }),
   component: RoutePlannerPage,
 });
-
-type PlannerSearch = { destLat?: number; destLng?: number; destLabel?: string };
-
-Route.options.validateSearch = (raw: Record<string, unknown>): PlannerSearch => {
-  const num = (v: unknown) => {
-    const n = Number(v);
-    return Number.isFinite(n) && n !== 0 ? n : undefined;
-  };
-  return {
-    destLat: num(raw.destLat),
-    destLng: num(raw.destLng),
-    destLabel: typeof raw.destLabel === "string" ? raw.destLabel.slice(0, 120) : undefined,
-  };
-};
 
 type WP = { key: string; label: string; lat: number; lng: number };
 const newKey = () => Math.random().toString(36).slice(2, 9);
