@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AdminGuard } from "@/components/admin-guard";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Flag, Building2, ScrollText, MessageSquarePlus } from "lucide-react";
+import { Users, Flag, Building2, ScrollText, MessageSquarePlus, Fuel } from "lucide-react";
 
 export const Route = createFileRoute("/beheer")({
   head: () => ({
@@ -20,6 +20,7 @@ const tiles = [
   { to: "/beheer/meldingen", icon: Flag, title: "Moderatie-inbox", desc: "Rapportages afhandelen" },
   { to: "/beheer/suggesties", icon: MessageSquarePlus, title: "Correcties", desc: "Voorstellen beoordelen" },
   { to: "/beheer/locaties", icon: Building2, title: "DC's & terminals", desc: "Locaties beheren" },
+  { to: "/beheer/brandstof", icon: Fuel, title: "Brandstof", desc: "Stations, prijzen, import" },
   { to: "/beheer/auditlog", icon: ScrollText, title: "Auditlog", desc: "Alle beheeracties" },
 ] as const;
 
