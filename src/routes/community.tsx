@@ -8,10 +8,12 @@ import { StorageAvatarImage, StorageImg } from "@/lib/storage-image";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Heart, MessageCircle, ImageIcon, Send, Loader2, X, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, ImageIcon, Send, Loader2, X, Trash2, Flag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { formatDate, initials, type PostRow, type Profile, type CommentRow } from "@/lib/queries";
+import { fetchBlockedIds } from "@/lib/blocks";
+import { ReportDialog } from "@/components/report-dialog";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/community")({
@@ -35,8 +37,15 @@ type FeedItem = PostRow & {
 function CommunityPage() {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const blockedQ = useQuery({
+    queryKey: ["blocked-ids", user?.id],
+    queryFn: () => fetchBlockedIds(user!.id),
+    enabled: !!user,
+  });
+  const blockedIds = blockedQ.data ?? [];
   const feedQ = useQuery({
-    queryKey: ["feed", user?.id ?? "anon"],
+    queryKey: ["feed", user?.id ?? "anon", blockedIds.join(",")],
+    enabled: !user || blockedQ.isSuccess,
     queryFn: async (): Promise<FeedItem[]> => {
       const { data: posts, error } = await supabase
         .from("posts")
@@ -44,7 +53,8 @@ function CommunityPage() {
         .order("created_at", { ascending: false })
         .limit(50);
       if (error) throw error;
-      const rows = (posts ?? []) as PostRow[];
+      // Geblokkeerde relaties zijn wederzijds onzichtbaar in de feed.
+      const rows = ((posts ?? []) as PostRow[]).filter((p) => !blockedIds.includes(p.user_id));
       if (rows.length === 0) return [];
       const userIds = Array.from(new Set(rows.map((r) => r.user_id)));
       const postIds = rows.map((r) => r.id);
@@ -251,6 +261,21 @@ function PostCard({
             <button onClick={onDelete} className="rounded p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" aria-label="Verwijderen">
               <Trash2 className="h-3.5 w-3.5" />
             </button>
+          )}
+          {!mine && currentUserId && (
+            <ReportDialog
+              reportedUserId={post.user_id}
+              contextType="post"
+              contextId={post.id}
+              trigger={
+                <button
+                  className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  aria-label="Bericht melden"
+                >
+                  <Flag className="h-3.5 w-3.5" />
+                </button>
+              }
+            />
           )}
         </div>
         <p className="whitespace-pre-wrap text-sm leading-relaxed">{post.text}</p>

@@ -139,6 +139,29 @@ function Instellingen() {
 
       <Card className="mb-4">
         <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ShieldCheck className="h-4 w-4 text-primary" /> Veiligheid & moderatie
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <Link to="/geblokkeerd">
+            <Button variant="secondary" className="w-full justify-start">
+              <Shield className="mr-2 h-4 w-4" /> Geblokkeerde gebruikers beheren
+            </Button>
+          </Link>
+          <Link to="/mijn-meldingen">
+            <Button variant="secondary" className="w-full justify-start">
+              <ShieldCheck className="mr-2 h-4 w-4" /> Mijn meldingen en status
+            </Button>
+          </Link>
+          <p className="text-[11px] text-muted-foreground">
+            Geblokkeerde gebruikers kunnen je geen berichten sturen en verdwijnen uit je community-feed.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-4">
+        <CardHeader className="pb-2">
           <CardTitle className="text-base">Data</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
