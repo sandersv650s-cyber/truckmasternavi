@@ -120,6 +120,11 @@ function TerminalsPage() {
                           {f}
                         </Badge>
                       ))}
+                      {t.is_example && (
+                        <Badge variant="outline" className="border-amber-500/50 text-[10px] text-amber-400">
+                          Voorbeelddata
+                        </Badge>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
