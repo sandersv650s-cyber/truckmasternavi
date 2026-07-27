@@ -182,10 +182,18 @@ export function HereMap({
     }
   }, [currentLocation, heading, followMode]);
 
-  if (!HERE_API_KEY) {
+  if (keyLoading) {
+    return (
+      <div className="grid h-full place-items-center bg-muted text-sm text-muted-foreground">
+        Kaart laden…
+      </div>
+    );
+  }
+  if (!apiKey) {
     return (
       <div className="flex h-full items-center justify-center bg-muted p-6 text-center text-sm text-muted-foreground">
-        HERE-kaart niet beschikbaar — secret <code className="mx-1">HERE_API_KEY</code> ontbreekt.
+        HERE-kaart niet beschikbaar — de kaartsleutel kon niet worden geladen.
+        Probeer te vernieuwen of neem contact op met de beheerder.
       </div>
     );
   }
