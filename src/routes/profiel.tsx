@@ -217,6 +217,25 @@ function MyProfile() {
               </p>
               <div className="space-y-2">
                 <div>
+                  <Label htmlFor="vcls">Combinatie</Label>
+                  <select
+                    id="vcls"
+                    className="mt-1 block h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+                    value={vehicleClass}
+                    onChange={(e) => setClass(e.target.value as VehicleClass)}
+                  >
+                    {(Object.keys(vehicleClassLabels) as VehicleClass[]).map((c) => (
+                      <option key={c} value={c}>
+                        {vehicleClassLabels[c]}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    {vehicleClassHints[vehicleClass]}
+                  </p>
+                </div>
+                {vehicleClass === "lzv" && <LzvInfoCard />}
+                <div>
                   <Label htmlFor="vt">Type</Label>
                   <select
                     id="vt"
@@ -245,7 +264,13 @@ function MyProfile() {
                   </div>
                   <div>
                     <Label htmlFor="vwt">Gewicht (kg)</Label>
-                    <Input id="vwt" type="number" inputMode="numeric" value={(form as any).vehicle_weight_kg ?? ""} onChange={(e) => setForm({ ...(form as any), vehicle_weight_kg: e.target.value ? Number(e.target.value) : null })} />
+                    <Label htmlFor="vwt" className="sr-only">Toegestane maximummassa (kg)</Label>
+                    <Input id="vwt" type="number" min={1} max={120000} step={100} inputMode="numeric" placeholder="bijv. 50000" value={f.vehicle_weight_kg ?? ""} onChange={(e) => setForm({ ...f, vehicle_weight_kg: e.target.value ? Number(e.target.value) : null })} />
+                    <p className="mt-0.5 text-[10px] text-muted-foreground">Toegestane maximummassa</p>
+                  </div>
+                  <div>
+                    <Label htmlFor="vcw">Actueel gewicht (kg)</Label>
+                    <Input id="vcw" type="number" min={1} max={120000} step={100} inputMode="numeric" placeholder="beladen gewicht" value={f.vehicle_current_weight_kg ?? ""} onChange={(e) => setForm({ ...f, vehicle_current_weight_kg: e.target.value ? Number(e.target.value) : null })} />
                   </div>
                   <div>
                     <Label htmlFor="vac">Aantal assen</Label>
@@ -269,12 +294,34 @@ function MyProfile() {
                   />
                   Gevaarlijke lading (ADR)
                 </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4"
+                    checked={Boolean(f.vehicle_has_exemption)}
+                    onChange={(e) => setForm({ ...f, vehicle_has_exemption: e.target.checked })}
+                  />
+                  Ik heb een (incidentele) RDW-ontheffing
+                </label>
+                {f.vehicle_has_exemption && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label htmlFor="vex">Ontheffingsnummer</Label>
+                      <Input id="vex" maxLength={60} value={f.vehicle_exemption_ref ?? ""} onChange={(e) => setForm({ ...f, vehicle_exemption_ref: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label htmlFor="vexd">Geldig tot</Label>
+                      <Input id="vexd" type="date" value={f.vehicle_exemption_expires ?? ""} onChange={(e) => setForm({ ...f, vehicle_exemption_expires: e.target.value || null })} />
+                    </div>
+                  </div>
+                )}
+                <IssueList issues={issues} />
                 <p className="text-[11px] text-muted-foreground">
                   Wordt door de HERE-routeplanner toegepast voor truck-veilige routes en waarschuwingen.
                 </p>
               </div>
             </div>
-            <Button className="w-full" onClick={save} disabled={saving || q.isLoading}>
+            <Button className="w-full" onClick={save} disabled={saving || q.isLoading || blocking}>
               {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
               Opslaan
             </Button>
