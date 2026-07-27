@@ -49,6 +49,7 @@ import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CarplayRouteImport } from './routes/carplay'
 import { Route as BrandstofRouteImport } from './routes/brandstof'
 import { Route as BeloningenRouteImport } from './routes/beloningen'
+import { Route as BeheerRouteImport } from './routes/beheer'
 import { Route as AssistentRouteImport } from './routes/assistent'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TruckstopsIdRouteImport } from './routes/truckstops.$id'
@@ -58,6 +59,7 @@ import { Route as ProfielUserIdRouteImport } from './routes/profiel.$userId'
 import { Route as KonvooiIdRouteImport } from './routes/konvooi.$id'
 import { Route as GroepenIdRouteImport } from './routes/groepen.$id'
 import { Route as ChatChatIdRouteImport } from './routes/chat.$chatId'
+import { Route as BeheerGebruikersRouteImport } from './routes/beheer.gebruikers'
 import { Route as ApiPublicHereKeyRouteImport } from './routes/api/public/here-key'
 
 const ZoekenRoute = ZoekenRouteImport.update({
@@ -260,6 +262,11 @@ const BeloningenRoute = BeloningenRouteImport.update({
   path: '/beloningen',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BeheerRoute = BeheerRouteImport.update({
+  id: '/beheer',
+  path: '/beheer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AssistentRoute = AssistentRouteImport.update({
   id: '/assistent',
   path: '/assistent',
@@ -305,6 +312,11 @@ const ChatChatIdRoute = ChatChatIdRouteImport.update({
   path: '/$chatId',
   getParentRoute: () => ChatRoute,
 } as any)
+const BeheerGebruikersRoute = BeheerGebruikersRouteImport.update({
+  id: '/gebruikers',
+  path: '/gebruikers',
+  getParentRoute: () => BeheerRoute,
+} as any)
 const ApiPublicHereKeyRoute = ApiPublicHereKeyRouteImport.update({
   id: '/api/public/here-key',
   path: '/api/public/here-key',
@@ -314,6 +326,7 @@ const ApiPublicHereKeyRoute = ApiPublicHereKeyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/assistent': typeof AssistentRoute
+  '/beheer': typeof BeheerRouteWithChildren
   '/beloningen': typeof BeloningenRoute
   '/brandstof': typeof BrandstofRoute
   '/carplay': typeof CarplayRoute
@@ -354,6 +367,7 @@ export interface FileRoutesByFullPath {
   '/voorwaarden': typeof VoorwaardenRoute
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
+  '/beheer/gebruikers': typeof BeheerGebruikersRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
   '/konvooi/$id': typeof KonvooiIdRoute
@@ -366,6 +380,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/assistent': typeof AssistentRoute
+  '/beheer': typeof BeheerRouteWithChildren
   '/beloningen': typeof BeloningenRoute
   '/brandstof': typeof BrandstofRoute
   '/carplay': typeof CarplayRoute
@@ -406,6 +421,7 @@ export interface FileRoutesByTo {
   '/voorwaarden': typeof VoorwaardenRoute
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
+  '/beheer/gebruikers': typeof BeheerGebruikersRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
   '/konvooi/$id': typeof KonvooiIdRoute
@@ -419,6 +435,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/assistent': typeof AssistentRoute
+  '/beheer': typeof BeheerRouteWithChildren
   '/beloningen': typeof BeloningenRoute
   '/brandstof': typeof BrandstofRoute
   '/carplay': typeof CarplayRoute
@@ -459,6 +476,7 @@ export interface FileRoutesById {
   '/voorwaarden': typeof VoorwaardenRoute
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
+  '/beheer/gebruikers': typeof BeheerGebruikersRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
   '/konvooi/$id': typeof KonvooiIdRoute
@@ -473,6 +491,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/assistent'
+    | '/beheer'
     | '/beloningen'
     | '/brandstof'
     | '/carplay'
@@ -513,6 +532,7 @@ export interface FileRouteTypes {
     | '/voorwaarden'
     | '/voorzieningen'
     | '/zoeken'
+    | '/beheer/gebruikers'
     | '/chat/$chatId'
     | '/groepen/$id'
     | '/konvooi/$id'
@@ -525,6 +545,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/assistent'
+    | '/beheer'
     | '/beloningen'
     | '/brandstof'
     | '/carplay'
@@ -565,6 +586,7 @@ export interface FileRouteTypes {
     | '/voorwaarden'
     | '/voorzieningen'
     | '/zoeken'
+    | '/beheer/gebruikers'
     | '/chat/$chatId'
     | '/groepen/$id'
     | '/konvooi/$id'
@@ -577,6 +599,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/assistent'
+    | '/beheer'
     | '/beloningen'
     | '/brandstof'
     | '/carplay'
@@ -617,6 +640,7 @@ export interface FileRouteTypes {
     | '/voorwaarden'
     | '/voorzieningen'
     | '/zoeken'
+    | '/beheer/gebruikers'
     | '/chat/$chatId'
     | '/groepen/$id'
     | '/konvooi/$id'
@@ -630,6 +654,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AssistentRoute: typeof AssistentRoute
+  BeheerRoute: typeof BeheerRouteWithChildren
   BeloningenRoute: typeof BeloningenRoute
   BrandstofRoute: typeof BrandstofRoute
   CarplayRoute: typeof CarplayRoute
@@ -955,6 +980,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BeloningenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/beheer': {
+      id: '/beheer'
+      path: '/beheer'
+      fullPath: '/beheer'
+      preLoaderRoute: typeof BeheerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/assistent': {
       id: '/assistent'
       path: '/assistent'
@@ -1018,6 +1050,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatChatIdRouteImport
       parentRoute: typeof ChatRoute
     }
+    '/beheer/gebruikers': {
+      id: '/beheer/gebruikers'
+      path: '/gebruikers'
+      fullPath: '/beheer/gebruikers'
+      preLoaderRoute: typeof BeheerGebruikersRouteImport
+      parentRoute: typeof BeheerRoute
+    }
     '/api/public/here-key': {
       id: '/api/public/here-key'
       path: '/api/public/here-key'
@@ -1027,6 +1066,17 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface BeheerRouteChildren {
+  BeheerGebruikersRoute: typeof BeheerGebruikersRoute
+}
+
+const BeheerRouteChildren: BeheerRouteChildren = {
+  BeheerGebruikersRoute: BeheerGebruikersRoute,
+}
+
+const BeheerRouteWithChildren =
+  BeheerRoute._addFileChildren(BeheerRouteChildren)
 
 interface ChatRouteChildren {
   ChatChatIdRoute: typeof ChatChatIdRoute
@@ -1109,6 +1159,7 @@ const TruckstopsRouteWithChildren = TruckstopsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AssistentRoute: AssistentRoute,
+  BeheerRoute: BeheerRouteWithChildren,
   BeloningenRoute: BeloningenRoute,
   BrandstofRoute: BrandstofRoute,
   CarplayRoute: CarplayRoute,
