@@ -25,7 +25,19 @@ export type Terminal = {
   facilities: string[];
   wait_time_notes: string | null;
   notes: string | null;
+  source: string;
+  is_example: boolean;
+  status: TerminalStatus;
+  updated_at?: string;
 };
+
+export const terminalStatuses = {
+  unknown: "Onbekend",
+  normal: "Normale doorlooptijd",
+  busy: "Drukte / wachttijd",
+  closed: "Tijdelijk gesloten",
+} as const;
+export type TerminalStatus = keyof typeof terminalStatuses;
 
 export type TerminalHour = {
   id: string;

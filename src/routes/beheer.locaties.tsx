@@ -15,15 +15,19 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Building2, Plus, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   deleteTerminal,
   fetchTerminals,
+  terminalStatuses,
   terminalTypes,
   upsertTerminal,
   type Terminal,
+  type TerminalStatus,
   type TerminalType,
 } from "@/lib/terminals";
-import { useIsAdmin } from "@/lib/admin";
+import { useMyRoles } from "@/lib/admin";
 
 export const Route = createFileRoute("/beheer/locaties")({
   head: () => ({
@@ -47,10 +51,14 @@ const empty = {
   phone: "",
   facilities: "",
   wait_time_notes: "",
+  lat: "",
+  lng: "",
+  status: "unknown" as TerminalStatus,
+  is_example: false,
 };
 
 function AdminTerminals() {
-  const { isAdmin, checking } = useIsAdmin();
+  const { isStaff, checking } = useMyRoles();
   const [rows, setRows] = useState<Terminal[] | null>(null);
   const [form, setForm] = useState({ ...empty });
   const [editing, setEditing] = useState<string | null>(null);
@@ -68,9 +76,9 @@ function AdminTerminals() {
   };
 
   useEffect(() => {
-    if (!checking && isAdmin) void load();
+    if (!checking && isStaff) void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checking, isAdmin]);
+  }, [checking, isStaff]);
 
   const save = async () => {
     if (!form.name.trim()) return;
@@ -86,6 +94,11 @@ function AdminTerminals() {
         country: form.country.trim() || "NL",
         phone: form.phone.trim() || null,
         wait_time_notes: form.wait_time_notes.trim() || null,
+        lat: form.lat ? Number(form.lat) : null,
+        lng: form.lng ? Number(form.lng) : null,
+        status: form.status,
+        is_example: form.is_example,
+        source: form.is_example ? "seed" : "admin",
         facilities: form.facilities
           .split(",")
           .map((f) => f.trim())
@@ -148,6 +161,35 @@ function AdminTerminals() {
             <Label className="mb-1 block text-xs">Telefoon</Label>
             <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} maxLength={40} />
           </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label className="mb-1 block text-xs">Breedtegraad</Label>
+              <Input value={form.lat} onChange={(e) => setForm({ ...form, lat: e.target.value })} inputMode="decimal" />
+            </div>
+            <div>
+              <Label className="mb-1 block text-xs">Lengtegraad</Label>
+              <Input value={form.lng} onChange={(e) => setForm({ ...form, lng: e.target.value })} inputMode="decimal" />
+            </div>
+          </div>
+          <div>
+            <Label className="mb-1 block text-xs">Status</Label>
+            <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as TerminalStatus })}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(terminalStatuses).map(([k, label]) => (
+                  <SelectItem key={k} value={k}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center justify-between rounded-lg border border-border p-2">
+            <span className="text-xs">Markeren als voorbeelddata</span>
+            <Switch checked={form.is_example} onCheckedChange={(v) => setForm({ ...form, is_example: v })} />
+          </div>
           <div>
             <Label className="mb-1 block text-xs">Faciliteiten (komma-gescheiden)</Label>
             <Input
@@ -200,9 +242,14 @@ function AdminTerminals() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold">{t.name}</p>
                   <p className="truncate text-[11px] text-muted-foreground">
-                    {terminalTypes[t.type]} · {[t.city, t.country].filter(Boolean).join(", ")}
+                    {terminalTypes[t.type]} · {[t.city, t.country].filter(Boolean).join(", ")} · bron {t.source}
                   </p>
                 </div>
+                {t.is_example && (
+                  <Badge variant="outline" className="border-amber-500/50 text-[10px] text-amber-400">
+                    Voorbeeld
+                  </Badge>
+                )}
                 <Button
                   size="sm"
                   variant="secondary"
@@ -218,6 +265,10 @@ function AdminTerminals() {
                       phone: t.phone ?? "",
                       facilities: t.facilities.join(", "),
                       wait_time_notes: t.wait_time_notes ?? "",
+                      lat: t.lat != null ? String(t.lat) : "",
+                      lng: t.lng != null ? String(t.lng) : "",
+                      status: t.status ?? "unknown",
+                      is_example: t.is_example,
                     });
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }}

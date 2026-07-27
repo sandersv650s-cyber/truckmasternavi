@@ -26,6 +26,20 @@ type Release = {
 
 const releases: Release[] = [
   {
+    version: "1.2",
+    date: "Nu",
+    tag: "Nu",
+    highlights: [
+      "Realtime 1-op-1 chat en konvooi-chat via de eigen database, met ongelezen status en live updates.",
+      "Konvooi rijden: aanmaken, uitnodigingscode, deelnemen/verlaten en locatie delen met expliciete toestemming en automatische vervaltijd.",
+      "Gebruikers blokkeren/deblokkeren en ongewenst gedrag melden vanuit profiel, chat en community.",
+      "Beheerdersdashboard met gebruikersbeheer, rollen, schorsen, moderatie-inbox met interne notities en auditlog.",
+      "Distributiecentra en terminals uit de database met openingstijden, uitzonderingen, status, kaart en beheer-CRUD.",
+      "Brandstofprijzen databasegestuurd met diesel, AdBlue, HVO100 en LNG, plus beheerpagina met bulk-import.",
+      "Nog te koppelen: externe live brandstofprijs-feed (secret FUEL_PRICE_API_KEY). Zolang die ontbreekt tonen we eerlijk 'voorbeelddata' in plaats van live prijzen.",
+    ],
+  },
+  {
     version: APP_VERSION,
     date: APP_RELEASE_DATE,
     tag: "Nu",

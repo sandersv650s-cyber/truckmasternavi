@@ -63,6 +63,7 @@ import { Route as BeheerSuggestiesRouteImport } from './routes/beheer.suggesties
 import { Route as BeheerMeldingenRouteImport } from './routes/beheer.meldingen'
 import { Route as BeheerLocatiesRouteImport } from './routes/beheer.locaties'
 import { Route as BeheerGebruikersRouteImport } from './routes/beheer.gebruikers'
+import { Route as BeheerBrandstofRouteImport } from './routes/beheer.brandstof'
 import { Route as BeheerAuditlogRouteImport } from './routes/beheer.auditlog'
 import { Route as ApiPublicHereKeyRouteImport } from './routes/api/public/here-key'
 
@@ -336,6 +337,11 @@ const BeheerGebruikersRoute = BeheerGebruikersRouteImport.update({
   path: '/gebruikers',
   getParentRoute: () => BeheerRoute,
 } as any)
+const BeheerBrandstofRoute = BeheerBrandstofRouteImport.update({
+  id: '/brandstof',
+  path: '/brandstof',
+  getParentRoute: () => BeheerRoute,
+} as any)
 const BeheerAuditlogRoute = BeheerAuditlogRouteImport.update({
   id: '/auditlog',
   path: '/auditlog',
@@ -392,6 +398,7 @@ export interface FileRoutesByFullPath {
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
   '/beheer/auditlog': typeof BeheerAuditlogRoute
+  '/beheer/brandstof': typeof BeheerBrandstofRoute
   '/beheer/gebruikers': typeof BeheerGebruikersRoute
   '/beheer/locaties': typeof BeheerLocatiesRoute
   '/beheer/meldingen': typeof BeheerMeldingenRoute
@@ -450,6 +457,7 @@ export interface FileRoutesByTo {
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
   '/beheer/auditlog': typeof BeheerAuditlogRoute
+  '/beheer/brandstof': typeof BeheerBrandstofRoute
   '/beheer/gebruikers': typeof BeheerGebruikersRoute
   '/beheer/locaties': typeof BeheerLocatiesRoute
   '/beheer/meldingen': typeof BeheerMeldingenRoute
@@ -509,6 +517,7 @@ export interface FileRoutesById {
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
   '/beheer/auditlog': typeof BeheerAuditlogRoute
+  '/beheer/brandstof': typeof BeheerBrandstofRoute
   '/beheer/gebruikers': typeof BeheerGebruikersRoute
   '/beheer/locaties': typeof BeheerLocatiesRoute
   '/beheer/meldingen': typeof BeheerMeldingenRoute
@@ -569,6 +578,7 @@ export interface FileRouteTypes {
     | '/voorzieningen'
     | '/zoeken'
     | '/beheer/auditlog'
+    | '/beheer/brandstof'
     | '/beheer/gebruikers'
     | '/beheer/locaties'
     | '/beheer/meldingen'
@@ -627,6 +637,7 @@ export interface FileRouteTypes {
     | '/voorzieningen'
     | '/zoeken'
     | '/beheer/auditlog'
+    | '/beheer/brandstof'
     | '/beheer/gebruikers'
     | '/beheer/locaties'
     | '/beheer/meldingen'
@@ -685,6 +696,7 @@ export interface FileRouteTypes {
     | '/voorzieningen'
     | '/zoeken'
     | '/beheer/auditlog'
+    | '/beheer/brandstof'
     | '/beheer/gebruikers'
     | '/beheer/locaties'
     | '/beheer/meldingen'
@@ -1126,6 +1138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BeheerGebruikersRouteImport
       parentRoute: typeof BeheerRoute
     }
+    '/beheer/brandstof': {
+      id: '/beheer/brandstof'
+      path: '/brandstof'
+      fullPath: '/beheer/brandstof'
+      preLoaderRoute: typeof BeheerBrandstofRouteImport
+      parentRoute: typeof BeheerRoute
+    }
     '/beheer/auditlog': {
       id: '/beheer/auditlog'
       path: '/auditlog'
@@ -1145,6 +1164,7 @@ declare module '@tanstack/react-router' {
 
 interface BeheerRouteChildren {
   BeheerAuditlogRoute: typeof BeheerAuditlogRoute
+  BeheerBrandstofRoute: typeof BeheerBrandstofRoute
   BeheerGebruikersRoute: typeof BeheerGebruikersRoute
   BeheerLocatiesRoute: typeof BeheerLocatiesRoute
   BeheerMeldingenRoute: typeof BeheerMeldingenRoute
@@ -1153,6 +1173,7 @@ interface BeheerRouteChildren {
 
 const BeheerRouteChildren: BeheerRouteChildren = {
   BeheerAuditlogRoute: BeheerAuditlogRoute,
+  BeheerBrandstofRoute: BeheerBrandstofRoute,
   BeheerGebruikersRoute: BeheerGebruikersRoute,
   BeheerLocatiesRoute: BeheerLocatiesRoute,
   BeheerMeldingenRoute: BeheerMeldingenRoute,
@@ -1289,13 +1310,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

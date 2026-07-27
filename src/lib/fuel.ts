@@ -19,6 +19,8 @@ export type FuelStation = {
   truck_suitable: boolean;
   has_adblue: boolean;
   open_hours: string | null;
+  source: string;
+  is_example: boolean;
 };
 
 export type FuelPrice = {
@@ -119,4 +121,85 @@ export function getFuelProvider() {
 }
 export function setFuelProvider(p: FuelPriceProvider) {
   activeProvider = p;
+}
+
+/* ---------- Beheer (admin/moderator) ---------- */
+
+export async function upsertStation(s: Partial<FuelStation> & { name: string }) {
+  const { data, error } = await supabase.from("fuel_stations").upsert(s).select("*").single();
+  if (error) throw error;
+  return data as FuelStation;
+}
+
+export async function deleteStation(id: string) {
+  const { error } = await supabase.from("fuel_stations").delete().eq("id", id);
+  if (error) throw error;
+}
+
+/** Nieuwe prijsregistratie; historie blijft bewaard voor 'laatst bijgewerkt'. */
+export async function reportPrice(input: {
+  station_id: string;
+  fuel_type: FuelType;
+  price_eur: number;
+  source?: string;
+  is_demo?: boolean;
+}) {
+  const { error } = await supabase.from("fuel_prices").insert({
+    station_id: input.station_id,
+    fuel_type: input.fuel_type,
+    price_eur: input.price_eur,
+    source: input.source ?? "admin",
+    is_demo: input.is_demo ?? false,
+    reported_at: new Date().toISOString(),
+  });
+  if (error) throw error;
+}
+
+/**
+ * Bulk-import: regels `stationnaam;brandstof;prijs`.
+ * Bestaat het station niet, dan wordt het aangemaakt.
+ */
+export async function importPricesCsv(text: string, source = "import") {
+  const lines = text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+  const stations = await supabase.from("fuel_stations").select("id, name");
+  if (stations.error) throw stations.error;
+  const byName = new Map(
+    (stations.data ?? []).map((s) => [s.name.toLowerCase(), s.id as string]),
+  );
+  let ok = 0;
+  const errors: string[] = [];
+  for (const line of lines) {
+    const [name, type, price] = line.split(";").map((v) => v?.trim());
+    const value = Number((price ?? "").replace(",", "."));
+    if (!name || !type || !Number.isFinite(value)) {
+      errors.push(`Ongeldige regel: ${line}`);
+      continue;
+    }
+    if (!(type in fuelTypes)) {
+      errors.push(`Onbekende brandstofsoort: ${type}`);
+      continue;
+    }
+    let id = byName.get(name.toLowerCase());
+    if (!id) {
+      const created = await upsertStation({ name, source, is_example: false });
+      id = created.id;
+      byName.set(name.toLowerCase(), id);
+    }
+    try {
+      await reportPrice({
+        station_id: id,
+        fuel_type: type as FuelType,
+        price_eur: value,
+        source,
+        is_demo: false,
+      });
+      ok += 1;
+    } catch (e) {
+      errors.push(e instanceof Error ? e.message : `Fout bij ${name}`);
+    }
+  }
+  return { ok, errors };
 }
