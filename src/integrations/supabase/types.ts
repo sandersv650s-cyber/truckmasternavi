@@ -356,11 +356,13 @@ export type Database = {
           created_at: string
           has_adblue: boolean
           id: string
+          is_example: boolean
           lat: number | null
           lng: number | null
           name: string
           open_hours: string | null
           road: string | null
+          source: string
           truck_suitable: boolean
           updated_at: string
         }
@@ -372,11 +374,13 @@ export type Database = {
           created_at?: string
           has_adblue?: boolean
           id?: string
+          is_example?: boolean
           lat?: number | null
           lng?: number | null
           name: string
           open_hours?: string | null
           road?: string | null
+          source?: string
           truck_suitable?: boolean
           updated_at?: string
         }
@@ -388,11 +392,13 @@ export type Database = {
           created_at?: string
           has_adblue?: boolean
           id?: string
+          is_example?: boolean
           lat?: number | null
           lng?: number | null
           name?: string
           open_hours?: string | null
           road?: string | null
+          source?: string
           truck_suitable?: boolean
           updated_at?: string
         }
@@ -904,12 +910,15 @@ export type Database = {
           email: string | null
           facilities: string[]
           id: string
+          is_example: boolean
           lat: number | null
           lng: number | null
           name: string
           notes: string | null
           phone: string | null
           postal_code: string | null
+          source: string
+          status: string
           type: string
           updated_at: string
           wait_time_notes: string | null
@@ -923,12 +932,15 @@ export type Database = {
           email?: string | null
           facilities?: string[]
           id?: string
+          is_example?: boolean
           lat?: number | null
           lng?: number | null
           name: string
           notes?: string | null
           phone?: string | null
           postal_code?: string | null
+          source?: string
+          status?: string
           type?: string
           updated_at?: string
           wait_time_notes?: string | null
@@ -942,12 +954,15 @@ export type Database = {
           email?: string | null
           facilities?: string[]
           id?: string
+          is_example?: boolean
           lat?: number | null
           lng?: number | null
           name?: string
           notes?: string | null
           phone?: string | null
           postal_code?: string | null
+          source?: string
+          status?: string
           type?: string
           updated_at?: string
           wait_time_notes?: string | null
