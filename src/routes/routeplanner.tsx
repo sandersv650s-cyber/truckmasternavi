@@ -35,7 +35,6 @@ import {
   etaString,
   formatDistance,
   formatDuration,
-  hasHereKey,
   lookupSuggestion,
   reverseGeocode,
   type AvoidFeature,
