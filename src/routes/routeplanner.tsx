@@ -384,9 +384,9 @@ function RoutePlannerPage() {
             <div>
               <p className="font-semibold">HERE Maps setup vereist (admin)</p>
               <p>
-                Voeg de secret <code>HERE_API_KEY</code> toe in
-                Project Settings → Secrets en publiceer de app opnieuw. Zonder
-                sleutel werken kaart, adreszoeken en routing niet.
+                De kaartsleutel kon niet worden geladen. Vernieuw de pagina;
+                blijft dit staan, dan moet de beheerder de secret
+                <code className="mx-1">HERE_API_KEY</code> controleren.
               </p>
             </div>
           </CardContent>
@@ -835,7 +835,7 @@ function AddressRow({
       clearTimeout(t);
       ac.abort();
     };
-  }, [value, biasAt]);
+  }, [value, biasAt, hereReady]);
 
   const pick = async (h: HereSuggestion) => {
     let pos = h.position ?? null;
