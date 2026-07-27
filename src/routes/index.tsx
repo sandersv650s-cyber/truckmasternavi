@@ -115,8 +115,13 @@ function Dashboard() {
             <Stat icon={<Fuel className="h-4 w-4" />} label="Gem. l/100" value={avgL100} />
             <Stat icon={<Trophy className="h-4 w-4" />} label="Ritten" value={`${rides.length}`} />
           </div>
-          <Link to="/ritten">
+          <Link to="/routeplanner" className="block">
             <Button size="lg" className="h-14 w-full text-base font-bold">
+              <NavigationIcon className="mr-2 h-5 w-5" /> Routeplanner openen
+            </Button>
+          </Link>
+          <Link to="/ritten" className="mt-2 block">
+            <Button size="lg" variant="secondary" className="h-12 w-full text-base font-semibold">
               <Play className="mr-2 h-5 w-5 fill-current" /> Start rit
             </Button>
           </Link>
@@ -124,7 +129,7 @@ function Dashboard() {
       </Card>
 
       <div className="mb-5 grid grid-cols-5 gap-2">
-        <QuickAction to="/kaart" icon={<MapIcon className="h-5 w-5" />} label="Kaart" />
+        <QuickAction to="/routeplanner" icon={<NavigationIcon className="h-5 w-5" />} label="Route" />
         <QuickAction to="/zoeken" icon={<Search className="h-5 w-5" />} label="Zoeken" />
         <QuickAction to="/community" icon={<MessageCircle className="h-5 w-5" />} label="Feed" />
         <QuickAction to="/meldingen" icon={<Megaphone className="h-5 w-5" />} label="Meld" />
