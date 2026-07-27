@@ -9,8 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Flag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { adminUpdateReport } from "@/lib/admin.functions";
-import { reportCategories, reportStatuses, useIsAdmin, type ReportStatus } from "@/lib/admin";
+import { Input } from "@/components/ui/input";
+import { adminListReportNotes, adminUpdateReport } from "@/lib/admin.functions";
+import { reportCategories, reportStatuses, useMyRoles, type ReportStatus } from "@/lib/admin";
 
 export const Route = createFileRoute("/beheer/meldingen")({
   head: () => ({
@@ -33,20 +34,30 @@ type Report = {
   context_type: string | null;
   context_id: string | null;
   status: ReportStatus;
-  admin_notes: string | null;
+  action_taken: string | null;
   created_at: string;
 };
 
+type Note = { id: string; note: string; author_id: string; created_at: string };
+
 function AdminReports() {
-  const { isAdmin, checking } = useIsAdmin();
+  const { isStaff, checking } = useMyRoles();
   const update = useServerFn(adminUpdateReport);
+  const listNotes = useServerFn(adminListReportNotes);
   const [rows, setRows] = useState<Report[] | null>(null);
   const [filter, setFilter] = useState<ReportStatus | "all">("open");
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [actions, setActions] = useState<Record<string, string>>({});
+  const [history, setHistory] = useState<Record<string, Note[]>>({});
   const [error, setError] = useState<string | null>(null);
 
   const load = async () => {
-    let q = supabase.from("reports").select("*").order("created_at", { ascending: false });
+    let q = supabase
+      .from("reports")
+      .select(
+        "id, reporter_id, reported_user_id, category, details, context_type, context_id, status, action_taken, created_at",
+      )
+      .order("created_at", { ascending: false });
     if (filter !== "all") q = q.eq("status", filter);
     const { data, error: e } = await q;
     if (e) {
@@ -54,17 +65,28 @@ function AdminReports() {
       setRows([]);
       return;
     }
-    setRows((data ?? []) as Report[]);
+    const list = (data ?? []) as unknown as Report[];
+    setRows(list);
     setError(null);
+    const entries = await Promise.all(
+      list.map(async (r) => {
+        try {
+          return [r.id, await listNotes({ data: { reportId: r.id } })] as const;
+        } catch {
+          return [r.id, [] as Note[]] as const;
+        }
+      }),
+    );
+    setHistory(Object.fromEntries(entries));
   };
 
   useEffect(() => {
-    if (!checking && isAdmin) void load();
+    if (!checking && isStaff) void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checking, isAdmin, filter]);
+  }, [checking, isStaff, filter]);
 
   return (
-    <AdminGuard title="Meldingen">
+    <AdminGuard title="Moderatie-inbox" require="staff">
       <div className="mb-3 flex flex-wrap gap-1.5">
         {(["all", ...reportStatuses] as (ReportStatus | "all")[]).map((s) => (
           <button
@@ -113,12 +135,34 @@ function AdminReports() {
                   )}
                 </p>
                 <Textarea
-                  value={notes[r.id] ?? r.admin_notes ?? ""}
+                  value={notes[r.id] ?? ""}
                   onChange={(e) => setNotes((n) => ({ ...n, [r.id]: e.target.value }))}
-                  placeholder="Interne notitie…"
+                  placeholder="Interne notitie (niet zichtbaar voor de melder)…"
                   className="min-h-16 text-xs"
                   maxLength={2000}
                 />
+                <Input
+                  value={actions[r.id] ?? r.action_taken ?? ""}
+                  onChange={(e) => setActions((a) => ({ ...a, [r.id]: e.target.value }))}
+                  placeholder="Genomen actie (bijv. gewaarschuwd, geschorst)"
+                  className="text-xs"
+                  maxLength={500}
+                />
+                {(history[r.id]?.length ?? 0) > 0 && (
+                  <div className="rounded-md border border-border/60 bg-muted/30 p-2">
+                    <p className="mb-1 text-[10px] font-semibold uppercase text-muted-foreground">
+                      Interne notities
+                    </p>
+                    <ul className="space-y-1">
+                      {history[r.id].map((n) => (
+                        <li key={n.id} className="text-[11px] text-muted-foreground">
+                          <span className="font-mono">{n.author_id.slice(0, 8)}</span> ·{" "}
+                          {new Date(n.created_at).toLocaleString("nl-NL")}: {n.note}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 <div className="flex flex-wrap gap-1.5">
                   {reportStatuses
                     .filter((s) => s !== r.status)
@@ -130,9 +174,15 @@ function AdminReports() {
                         onClick={async () => {
                           try {
                             await update({
-                              data: { reportId: r.id, status: s, notes: notes[r.id] ?? r.admin_notes ?? undefined },
+                              data: {
+                                reportId: r.id,
+                                status: s,
+                                notes: notes[r.id] || undefined,
+                                actionTaken: actions[r.id] ?? r.action_taken ?? undefined,
+                              },
                             });
                             toast.success("Melding bijgewerkt.");
+                            setNotes((n) => ({ ...n, [r.id]: "" }));
                             await load();
                           } catch (e) {
                             toast.error(e instanceof Error ? e.message : "Bijwerken mislukt.");
