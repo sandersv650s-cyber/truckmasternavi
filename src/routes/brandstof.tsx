@@ -5,9 +5,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Fuel, Star, Truck, Droplets, Heart, RefreshCw } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Fuel, Star, Truck, Droplets, Heart, RefreshCw, Navigation, MapPin } from "lucide-react";
 import { useFavorites } from "@/lib/favorites";
-import { getFuelProvider, type StationWithPrice } from "@/lib/fuel";
+import {
+  distanceKm,
+  fuelTypes,
+  fuelUnit,
+  getFuelProvider,
+  type FuelType,
+  type StationWithPrice,
+} from "@/lib/fuel";
 
 export const Route = createFileRoute("/brandstof")({
   head: () => ({
@@ -30,6 +38,8 @@ function BrandstofPage() {
   const [adblue, setAdblue] = useState(false);
   const [onlyFav, setOnlyFav] = useState(false);
   const [city, setCity] = useState("");
+  const [fuelType, setFuelType] = useState<FuelType>("diesel");
+  const [me, setMe] = useState<{ lat: number; lng: number } | null>(null);
   const { isFav, toggle: toggleFav } = useFavorites("brandstof");
   const [rows, setRows] = useState<StationWithPrice[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -57,18 +67,34 @@ function BrandstofPage() {
     };
   }, [provider, city, truckOnly, adblue, reloadKey]);
 
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (p) => setMe({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      () => setMe(null),
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 },
+    );
+  }, []);
+
   const list = useMemo(() => {
     const base = (rows ?? []).filter((s) => !onlyFav || isFav(s.id));
     return [...base].sort((a, b) => {
       if (sort === "naam") return a.name.localeCompare(b.name);
       if (sort === "recent")
-        return (b.price?.reported_at ?? "").localeCompare(a.price?.reported_at ?? "");
-      return (a.price?.price_eur ?? Infinity) - (b.price?.price_eur ?? Infinity);
+        return (b.prices[fuelType]?.reported_at ?? "").localeCompare(
+          a.prices[fuelType]?.reported_at ?? "",
+        );
+      if (sort === "afstand" && me)
+        return (distanceKm(me, a) ?? Infinity) - (distanceKm(me, b) ?? Infinity);
+      return (a.prices[fuelType]?.price_eur ?? Infinity) - (b.prices[fuelType]?.price_eur ?? Infinity);
     });
-  }, [rows, onlyFav, isFav, sort]);
+  }, [rows, onlyFav, isFav, sort, fuelType, me]);
 
   const cheapest = list.reduce<number | null>(
-    (min, s) => (s.price && (min === null || s.price.price_eur < min) ? s.price.price_eur : min),
+    (min, s) => {
+      const p = s.prices[fuelType];
+      return p && (min === null || p.price_eur < min) ? p.price_eur : min;
+    },
     null,
   );
 
@@ -91,13 +117,31 @@ function BrandstofPage() {
       </div>
 
       <div className="mb-3 flex flex-wrap gap-1.5">
-        {(["goedkoop", "naam", "recent"] as SortKey[]).map((s) => (
+        {(Object.keys(fuelTypes) as FuelType[]).map((f) => (
+          <button
+            key={f}
+            onClick={() => setFuelType(f)}
+            className={`rounded-full border px-3 py-1 text-xs font-semibold ${fuelType === f ? "border-primary bg-primary/20 text-primary" : "border-border text-muted-foreground"}`}
+          >
+            {fuelTypes[f]}
+          </button>
+        ))}
+      </div>
+
+      <div className="mb-3 flex flex-wrap gap-1.5">
+        {(["goedkoop", "afstand", "naam", "recent"] as SortKey[]).map((s) => (
           <button
             key={s}
             onClick={() => setSort(s)}
             className={`rounded-full border px-3 py-1 text-xs font-medium ${sort === s ? "border-primary bg-primary/20 text-primary" : "border-border text-muted-foreground"}`}
           >
-            {s === "goedkoop" ? "Goedkoopst" : s === "naam" ? "Naam" : "Recent bijgewerkt"}
+            {s === "goedkoop"
+              ? "Goedkoopst"
+              : s === "afstand"
+                ? "Dichtstbij"
+                : s === "naam"
+                  ? "Naam"
+                  : "Recent bijgewerkt"}
           </button>
         ))}
         <button
@@ -131,8 +175,10 @@ function BrandstofPage() {
       ) : (
         <div className="space-y-2">
           {list.map((s) => {
-            const isCheap = s.price != null && s.price.price_eur === cheapest;
+            const price = s.prices[fuelType] ?? null;
+            const isCheap = price != null && price.price_eur === cheapest;
             const fav = isFav(s.id);
+            const dist = me ? distanceKm(me, s) : null;
             return (
               <Card key={s.id} className={isCheap ? "border-primary/60" : ""}>
                 <CardContent className="p-3">
@@ -144,13 +190,15 @@ function BrandstofPage() {
                       </p>
                     </div>
                     <div className="shrink-0 text-right">
-                      {s.price ? (
+                      {price ? (
                         <p className="text-lg font-black leading-none">
-                          € {s.price.price_eur.toFixed(3)}
-                          <span className="ml-1 text-[10px] font-normal text-muted-foreground">/L</span>
+                          € {price.price_eur.toFixed(3)}
+                          <span className="ml-1 text-[10px] font-normal text-muted-foreground">
+                            {fuelUnit[fuelType]}
+                          </span>
                         </p>
                       ) : (
-                        <p className="text-xs text-muted-foreground">Geen prijs</p>
+                        <p className="text-xs text-muted-foreground">Geen {fuelTypes[fuelType]}</p>
                       )}
                       {isCheap && <Badge className="mt-1 bg-emerald-500/20 text-emerald-300 text-[10px]">Goedkoopst</Badge>}
                     </div>
@@ -166,16 +214,44 @@ function BrandstofPage() {
                         <Truck className="mr-1 h-3 w-3" /> Truck OK
                       </Badge>
                     )}
-                    {s.price && (
+                    {dist != null && (
+                      <Badge variant="outline" className="text-[10px]">
+                        <MapPin className="mr-1 h-3 w-3" /> {dist} km
+                      </Badge>
+                    )}
+                    {price && (
                       <span className="ml-auto">
                         Bijgewerkt{" "}
-                        {new Date(s.price.reported_at).toLocaleDateString("nl-NL", {
+                        {new Date(price.reported_at).toLocaleString("nl-NL", {
                           day: "numeric",
                           month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
                         })}
                       </span>
                     )}
                   </div>
+                  {Object.keys(s.prices).length > 1 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] text-muted-foreground">
+                      {(Object.keys(s.prices) as FuelType[])
+                        .filter((f) => f !== fuelType)
+                        .map((f) => (
+                          <span key={f} className="rounded border border-border px-1.5 py-0.5">
+                            {fuelTypes[f]} € {s.prices[f]!.price_eur.toFixed(3)}
+                          </span>
+                        ))}
+                    </div>
+                  )}
+                  {s.lat != null && s.lng != null && (
+                    <Button asChild size="sm" variant="secondary" className="mt-2 w-full">
+                      <Link
+                        to="/routeplanner"
+                        search={{ destLat: s.lat, destLng: s.lng, destLabel: s.name }}
+                      >
+                        <Navigation className="mr-1 h-4 w-4" /> Navigeer hierheen
+                      </Link>
+                    </Button>
+                  )}
                   <div className="mt-2 flex items-center gap-2">
                     <p className="flex-1 text-[10px] text-muted-foreground">
                       <Fuel className="mr-1 inline h-3 w-3" />
