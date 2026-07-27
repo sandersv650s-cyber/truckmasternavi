@@ -18,12 +18,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Search, ShieldOff, ShieldCheck, Trash2 } from "lucide-react";
+import { Search, ShieldOff, ShieldCheck, Trash2, AlertTriangle } from "lucide-react";
 import {
   adminDeleteUser,
   adminListUsers,
   adminSetRole,
   adminSetSuspended,
+  adminWarnUser,
 } from "@/lib/admin.functions";
 import { appRoleLabels, useMyRoles, type AppRole } from "@/lib/admin";
 
@@ -47,9 +48,11 @@ function AdminUsers() {
   const setSuspended = useServerFn(adminSetSuspended);
   const removeUser = useServerFn(adminDeleteUser);
   const setRole = useServerFn(adminSetRole);
+  const warnUser = useServerFn(adminWarnUser);
   const [rows, setRows] = useState<Row[] | null>(null);
   const [search, setSearch] = useState("");
   const [confirmEmail, setConfirmEmail] = useState("");
+  const [warnReason, setWarnReason] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const load = async (term = "") => {
@@ -127,6 +130,47 @@ function AdminUsers() {
                     <p className="mt-1 text-[11px] text-muted-foreground">Reden: {u.suspended_reason}</p>
                   )}
                   <div className="mt-2 flex gap-2">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={!isAdmin && targetIsAdmin}
+                          onClick={() => setWarnReason("")}
+                          aria-label="Waarschuwing geven"
+                        >
+                          <AlertTriangle className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Waarschuwing vastleggen</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            De waarschuwing wordt met reden en tijdstempel in het auditlogboek opgenomen.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <Input
+                          value={warnReason}
+                          onChange={(e) => setWarnReason(e.target.value)}
+                          placeholder="Reden van de waarschuwing"
+                        />
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Annuleren</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={async () => {
+                              try {
+                                await warnUser({ data: { userId: u.id, reason: warnReason } });
+                                toast.success("Waarschuwing vastgelegd.");
+                              } catch (e) {
+                                toast.error(e instanceof Error ? e.message : "Actie mislukt.");
+                              }
+                            }}
+                          >
+                            Vastleggen
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                     <Button
                       size="sm"
                       variant={suspended ? "secondary" : "outline"}

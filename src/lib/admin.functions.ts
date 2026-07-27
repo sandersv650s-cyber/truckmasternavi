@@ -283,3 +283,50 @@ export const adminLogAction = createServerFn({ method: "POST" })
     await audit(context.userId, data.action, data.targetType, data.targetId, data.details);
     return { ok: true };
   });
+
+/** Officiële waarschuwing vastleggen — moderators en beheerders. */
+export const adminWarnUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z.object({ userId: z.string().uuid(), reason: z.string().min(3).max(500) }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const isAdmin = await assertStaff(context as any);
+    if (!isAdmin && (await targetIsAdmin(data.userId)))
+      throw new Error("Moderators kunnen beheerdersaccounts niet waarschuwen.");
+    await audit(context.userId, "user.warn", "user", data.userId, { reason: data.reason.trim() });
+    return { ok: true };
+  });
+
+/** Overzicht van blokkaderelaties — moderators en beheerders. */
+export const adminListBlocks = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(() => ({}))
+  .handler(async ({ context }) => {
+    await assertStaff(context as any);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
+      .from("user_blocks")
+      .select("id, blocker_id, blocked_id, created_at")
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (error) throw new Error(error.message);
+    const ids = Array.from(
+      new Set((rows ?? []).flatMap((r: any) => [r.blocker_id, r.blocked_id])),
+    );
+    const { data: profiles } = ids.length
+      ? await supabaseAdmin.from("profiles").select("id, full_name, username").in("id", ids)
+      : { data: [] as any[] };
+    const name = (id: string) => {
+      const p: any = (profiles ?? []).find((x: any) => x.id === id);
+      return p?.full_name ?? p?.username ?? id.slice(0, 8);
+    };
+    return (rows ?? []).map((r: any) => ({
+      id: r.id as string,
+      created_at: r.created_at as string,
+      blocker_id: r.blocker_id as string,
+      blocked_id: r.blocked_id as string,
+      blocker_name: name(r.blocker_id),
+      blocked_name: name(r.blocked_id),
+    }));
+  });

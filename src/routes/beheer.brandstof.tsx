@@ -16,7 +16,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Fuel, Plus, Trash2, Upload } from "lucide-react";
+import { Fuel, Plus, Trash2, Upload, RefreshCw } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { syncFuelPrices } from "@/lib/fuel.functions";
 import {
   deleteStation,
   fuelTypes,
@@ -58,6 +60,8 @@ const empty = {
 
 function AdminFuel() {
   const { isStaff, checking } = useMyRoles();
+  const runSync = useServerFn(syncFuelPrices);
+  const [syncing, setSyncing] = useState(false);
   const [rows, setRows] = useState<StationWithPrice[] | null>(null);
   const [form, setForm] = useState({ ...empty });
   const [editing, setEditing] = useState<string | null>(null);
@@ -147,6 +151,35 @@ function AdminFuel() {
 
   return (
     <AdminGuard title="Brandstof" require="staff">
+      <Card className="mb-4">
+        <CardContent className="space-y-2 p-4">
+          <p className="text-sm font-semibold">Externe prijsfeed</p>
+          <p className="text-[11px] text-muted-foreground">
+            Synchroniseer prijzen vanaf een externe provider. Zonder gekoppelde provider blijft alle data
+            gemarkeerd als handmatig/voorbeeld.
+          </p>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={syncing}
+            onClick={async () => {
+              setSyncing(true);
+              try {
+                const res = await runSync({ data: {} });
+                if (res.ok) toast.success(res.message);
+                else toast.warning(res.message);
+              } catch (e) {
+                toast.error(e instanceof Error ? e.message : "Synchronisatie mislukt.");
+              } finally {
+                setSyncing(false);
+              }
+            }}
+          >
+            <RefreshCw className={`mr-1 h-4 w-4 ${syncing ? "animate-spin" : ""}`} /> Prijzen synchroniseren
+          </Button>
+        </CardContent>
+      </Card>
+
       <Card className="mb-4">
         <CardContent className="space-y-2 p-4">
           <p className="text-sm font-semibold">{editing ? "Station bewerken" : "Nieuw station"}</p>
