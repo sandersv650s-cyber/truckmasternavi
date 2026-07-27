@@ -89,3 +89,66 @@ export async function upsertHours(terminalId: string, rows: Omit<TerminalHour, "
     .upsert(payload, { onConflict: "terminal_id,weekday" });
   if (error) throw error;
 }
+
+export type TerminalException = {
+  id: string;
+  terminal_id: string;
+  date: string;
+  closed: boolean;
+  opens: string | null;
+  closes: string | null;
+  reason: string | null;
+};
+
+export async function fetchExceptions(terminalId: string) {
+  const today = new Date().toISOString().slice(0, 10);
+  const { data, error } = await supabase
+    .from("terminal_exceptions")
+    .select("*")
+    .eq("terminal_id", terminalId)
+    .gte("date", today)
+    .order("date");
+  if (error) throw error;
+  return (data ?? []) as TerminalException[];
+}
+
+export type TerminalSuggestion = {
+  id: string;
+  terminal_id: string | null;
+  user_id: string;
+  field: string;
+  suggestion: string;
+  status: "new" | "approved" | "rejected";
+  review_note: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+};
+
+export const suggestionFields = [
+  { value: "hours", label: "Openingstijden" },
+  { value: "address", label: "Adres" },
+  { value: "contact", label: "Contactgegevens" },
+  { value: "facilities", label: "Voorzieningen" },
+  { value: "other", label: "Anders" },
+] as const;
+
+export async function createSuggestion(input: {
+  terminal_id: string;
+  user_id: string;
+  field: string;
+  suggestion: string;
+}) {
+  const { error } = await supabase.from("terminal_suggestions").insert(input);
+  if (error) throw error;
+}
+
+export async function fetchSuggestions(status?: string) {
+  let q = supabase
+    .from("terminal_suggestions")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (status && status !== "all") q = q.eq("status", status);
+  const { data, error } = await q;
+  if (error) throw error;
+  return (data ?? []) as TerminalSuggestion[];
+}

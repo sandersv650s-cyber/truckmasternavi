@@ -31,9 +31,43 @@ export type FuelPrice = {
   reported_at: string;
 };
 
-export type StationWithPrice = FuelStation & { price: FuelPrice | null };
+export const fuelTypes = {
+  diesel: "Diesel",
+  adblue: "AdBlue",
+  hvo100: "HVO100",
+  lng: "LNG",
+} as const;
+export type FuelType = keyof typeof fuelTypes;
+export const fuelUnit: Record<FuelType, string> = {
+  diesel: "/L",
+  adblue: "/L",
+  hvo100: "/L",
+  lng: "/kg",
+};
+
+export type StationWithPrice = FuelStation & {
+  /** laatste prijs per brandstofsoort */
+  prices: Partial<Record<FuelType, FuelPrice>>;
+  /** laatste dieselprijs, voor sortering en compatibiliteit */
+  price: FuelPrice | null;
+};
 
 export type FuelQuery = { city?: string; truckOnly?: boolean; adblue?: boolean };
+
+/** Hemelsbrede afstand in km. */
+export function distanceKm(
+  a: { lat: number; lng: number },
+  b: { lat: number | null; lng: number | null },
+): number | null {
+  if (b.lat == null || b.lng == null) return null;
+  const R = 6371;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((a.lat * Math.PI) / 180) * Math.cos((b.lat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+  return Math.round(2 * R * Math.asin(Math.sqrt(h)) * 10) / 10;
+}
 
 export interface FuelPriceProvider {
   readonly id: string;
@@ -65,11 +99,17 @@ export const supabaseFuelProvider: FuelPriceProvider = {
       )
       .order("reported_at", { ascending: false });
     if (e2) throw e2;
-    const latest = new Map<string, FuelPrice>();
+    const latest = new Map<string, Partial<Record<FuelType, FuelPrice>>>();
     for (const p of (prices ?? []) as FuelPrice[]) {
-      if (!latest.has(p.station_id)) latest.set(p.station_id, p);
+      const bucket = latest.get(p.station_id) ?? {};
+      const type = p.fuel_type as FuelType;
+      if (!bucket[type]) bucket[type] = p;
+      latest.set(p.station_id, bucket);
     }
-    return rows.map((s) => ({ ...s, price: latest.get(s.id) ?? null }));
+    return rows.map((s) => {
+      const byType = latest.get(s.id) ?? {};
+      return { ...s, prices: byType, price: byType.diesel ?? null };
+    });
   },
 };
 

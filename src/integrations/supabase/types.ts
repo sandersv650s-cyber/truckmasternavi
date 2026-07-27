@@ -584,8 +584,41 @@ export type Database = {
         }
         Relationships: []
       }
+      report_notes: {
+        Row: {
+          author_id: string
+          created_at: string
+          id: string
+          note: string
+          report_id: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          id?: string
+          note: string
+          report_id: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          note?: string
+          report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_notes_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
+          action_taken: string | null
           admin_notes: string | null
           category: string
           context_id: string | null
@@ -601,6 +634,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          action_taken?: string | null
           admin_notes?: string | null
           category: string
           context_id?: string | null
@@ -616,6 +650,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          action_taken?: string | null
           admin_notes?: string | null
           category?: string
           context_id?: string | null
@@ -734,6 +769,47 @@ export type Database = {
         }
         Relationships: []
       }
+      terminal_exceptions: {
+        Row: {
+          closed: boolean
+          closes: string | null
+          created_at: string
+          date: string
+          id: string
+          opens: string | null
+          reason: string | null
+          terminal_id: string
+        }
+        Insert: {
+          closed?: boolean
+          closes?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          opens?: string | null
+          reason?: string | null
+          terminal_id: string
+        }
+        Update: {
+          closed?: boolean
+          closes?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          opens?: string | null
+          reason?: string | null
+          terminal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "terminal_exceptions_terminal_id_fkey"
+            columns: ["terminal_id"]
+            isOneToOne: false
+            referencedRelation: "terminals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       terminal_hours: {
         Row: {
           closed: boolean
@@ -762,6 +838,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "terminal_hours_terminal_id_fkey"
+            columns: ["terminal_id"]
+            isOneToOne: false
+            referencedRelation: "terminals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      terminal_suggestions: {
+        Row: {
+          created_at: string
+          field: string
+          id: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          suggestion: string
+          terminal_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          field: string
+          id?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          suggestion: string
+          terminal_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          field?: string
+          id?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          suggestion?: string
+          terminal_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "terminal_suggestions_terminal_id_fkey"
             columns: ["terminal_id"]
             isOneToOne: false
             referencedRelation: "terminals"
@@ -897,6 +1023,8 @@ export type Database = {
         Args: { _convoy: string; _uid: string }
         Returns: boolean
       }
+      is_moderator: { Args: { _uid: string }; Returns: boolean }
+      is_staff: { Args: { _uid: string }; Returns: boolean }
       purge_expired_convoy_locations: { Args: never; Returns: undefined }
     }
     Enums: {

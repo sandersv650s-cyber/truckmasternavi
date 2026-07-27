@@ -3,12 +3,33 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
-  const { data, error } = await context.supabase.rpc("has_role", {
-    _user_id: context.userId,
-    _role: "admin",
-  });
+  const { data, error } = await context.supabase.rpc("is_admin", { _uid: context.userId });
   if (error) throw new Error("Rolcontrole mislukt.");
   if (!data) throw new Error("Forbidden: alleen beheerders.");
+}
+
+/** true = admin, false = moderator; gooit bij gewone gebruikers. */
+async function assertStaff(context: { supabase: any; userId: string }) {
+  const { data: admin, error } = await context.supabase.rpc("is_admin", { _uid: context.userId });
+  if (error) throw new Error("Rolcontrole mislukt.");
+  if (admin) return true;
+  const { data: staff, error: e2 } = await context.supabase.rpc("is_staff", {
+    _uid: context.userId,
+  });
+  if (e2) throw new Error("Rolcontrole mislukt.");
+  if (!staff) throw new Error("Forbidden: alleen moderators en beheerders.");
+  return false;
+}
+
+async function targetIsAdmin(userId: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  return Boolean(data);
 }
 
 async function audit(
@@ -79,9 +100,11 @@ export const adminSetSuspended = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context as any);
+    const isAdmin = await assertStaff(context as any);
     if (data.userId === context.userId)
       throw new Error("Je kunt je eigen beheerdersaccount niet schorsen.");
+    if (!isAdmin && (await targetIsAdmin(data.userId)))
+      throw new Error("Moderators kunnen beheerdersaccounts niet schorsen.");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, {
       ban_duration: data.suspended ? "876000h" : "none",
@@ -130,23 +153,116 @@ export const adminUpdateReport = createServerFn({ method: "POST" })
         reportId: z.string().uuid(),
         status: z.enum(["open", "in_behandeling", "afgehandeld", "afgewezen"]),
         notes: z.string().max(2000).optional(),
+        actionTaken: z.string().max(500).optional(),
       })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context as any);
+    await assertStaff(context as any);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("reports")
       .update({
         status: data.status,
-        admin_notes: data.notes ?? null,
+        action_taken: data.actionTaken ?? null,
         handled_by: context.userId,
         handled_at: new Date().toISOString(),
       })
       .eq("id", data.reportId);
     if (error) throw new Error(error.message);
+    if (data.notes?.trim()) {
+      await supabaseAdmin.from("report_notes").insert({
+        report_id: data.reportId,
+        author_id: context.userId,
+        note: data.notes.trim(),
+      });
+    }
     await audit(context.userId, "report.update", "report", data.reportId, { status: data.status });
+    return { ok: true };
+  });
+
+/** Interne notities zijn uitsluitend voor moderators/beheerders. */
+export const adminListReportNotes = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ reportId: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    await assertStaff(context as any);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
+      .from("report_notes")
+      .select("id, note, author_id, created_at")
+      .eq("report_id", data.reportId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as { id: string; note: string; author_id: string; created_at: string }[];
+  });
+
+/** Rollen toekennen of intrekken — uitsluitend beheerders. */
+export const adminSetRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z
+      .object({
+        userId: z.string().uuid(),
+        role: z.enum(["admin", "moderator", "user"]),
+        grant: z.boolean(),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context as any);
+    if (data.userId === context.userId && data.role === "admin" && !data.grant)
+      throw new Error("Je kunt je eigen beheerdersrol niet intrekken.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.grant) {
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .upsert({ user_id: data.userId, role: data.role } as never, {
+          onConflict: "user_id,role",
+        });
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .delete()
+        .eq("user_id", data.userId)
+        .eq("role", data.role);
+      if (error) throw new Error(error.message);
+    }
+    await audit(context.userId, data.grant ? "role.grant" : "role.revoke", "user", data.userId, {
+      role: data.role,
+    });
+    return { ok: true };
+  });
+
+/** Correctievoorstellen van gebruikers beoordelen — moderators en beheerders. */
+export const adminReviewSuggestion = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z
+      .object({
+        suggestionId: z.string().uuid(),
+        status: z.enum(["new", "approved", "rejected"]),
+        note: z.string().max(1000).optional(),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertStaff(context as any);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("terminal_suggestions")
+      .update({
+        status: data.status,
+        review_note: data.note ?? null,
+        reviewed_by: context.userId,
+        reviewed_at: new Date().toISOString(),
+      })
+      .eq("id", data.suggestionId);
+    if (error) throw new Error(error.message);
+    await audit(context.userId, "suggestion.review", "terminal_suggestion", data.suggestionId, {
+      status: data.status,
+    });
     return { ok: true };
   });
 
@@ -163,7 +279,7 @@ export const adminLogAction = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context as any);
+    await assertStaff(context as any);
     await audit(context.userId, data.action, data.targetType, data.targetId, data.details);
     return { ok: true };
   });
