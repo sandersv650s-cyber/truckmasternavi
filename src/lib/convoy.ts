@@ -76,7 +76,11 @@ export async function createConvoy(input: {
   starts_at?: string | null;
   planned_route?: unknown;
 }) {
-  const { data, error } = await supabase.from("convoys").insert(input).select("*").single();
+  const { data, error } = await supabase
+    .from("convoys")
+    .insert(input as never)
+    .select("*")
+    .single();
   if (error) throw error;
   return data as Convoy;
 }

@@ -21,7 +21,7 @@ async function audit(
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   await supabaseAdmin
     .from("admin_audit_log")
-    .insert({ admin_id: adminId, action, target_type, target_id, details: details ?? {} });
+    .insert({ admin_id: adminId, action, target_type, target_id, details: (details ?? {}) as never });
 }
 
 export const adminListUsers = createServerFn({ method: "POST" })
