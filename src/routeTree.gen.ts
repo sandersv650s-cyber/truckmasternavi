@@ -52,6 +52,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as TruckstopsIdRouteImport } from './routes/truckstops.$id'
 import { Route as RittenRideIdRouteImport } from './routes/ritten.$rideId'
 import { Route as ProfielUserIdRouteImport } from './routes/profiel.$userId'
+import { Route as KonvooiIdRouteImport } from './routes/konvooi.$id'
 import { Route as GroepenIdRouteImport } from './routes/groepen.$id'
 import { Route as ChatChatIdRouteImport } from './routes/chat.$chatId'
 import { Route as ApiPublicHereKeyRouteImport } from './routes/api/public/here-key'
@@ -271,6 +272,11 @@ const ProfielUserIdRoute = ProfielUserIdRouteImport.update({
   path: '/$userId',
   getParentRoute: () => ProfielRoute,
 } as any)
+const KonvooiIdRoute = KonvooiIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => KonvooiRoute,
+} as any)
 const GroepenIdRoute = GroepenIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -303,7 +309,7 @@ export interface FileRoutesByFullPath {
   '/instellingen': typeof InstellingenRoute
   '/integraties': typeof IntegratiesRoute
   '/kaart': typeof KaartRoute
-  '/konvooi': typeof KonvooiRoute
+  '/konvooi': typeof KonvooiRouteWithChildren
   '/login': typeof LoginRoute
   '/meer': typeof MeerRoute
   '/meldingen': typeof MeldingenRoute
@@ -330,6 +336,7 @@ export interface FileRoutesByFullPath {
   '/zoeken': typeof ZoekenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
+  '/konvooi/$id': typeof KonvooiIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
   '/truckstops/$id': typeof TruckstopsIdRoute
@@ -351,7 +358,7 @@ export interface FileRoutesByTo {
   '/instellingen': typeof InstellingenRoute
   '/integraties': typeof IntegratiesRoute
   '/kaart': typeof KaartRoute
-  '/konvooi': typeof KonvooiRoute
+  '/konvooi': typeof KonvooiRouteWithChildren
   '/login': typeof LoginRoute
   '/meer': typeof MeerRoute
   '/meldingen': typeof MeldingenRoute
@@ -378,6 +385,7 @@ export interface FileRoutesByTo {
   '/zoeken': typeof ZoekenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
+  '/konvooi/$id': typeof KonvooiIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
   '/truckstops/$id': typeof TruckstopsIdRoute
@@ -400,7 +408,7 @@ export interface FileRoutesById {
   '/instellingen': typeof InstellingenRoute
   '/integraties': typeof IntegratiesRoute
   '/kaart': typeof KaartRoute
-  '/konvooi': typeof KonvooiRoute
+  '/konvooi': typeof KonvooiRouteWithChildren
   '/login': typeof LoginRoute
   '/meer': typeof MeerRoute
   '/meldingen': typeof MeldingenRoute
@@ -427,6 +435,7 @@ export interface FileRoutesById {
   '/zoeken': typeof ZoekenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
+  '/konvooi/$id': typeof KonvooiIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
   '/truckstops/$id': typeof TruckstopsIdRoute
@@ -477,6 +486,7 @@ export interface FileRouteTypes {
     | '/zoeken'
     | '/chat/$chatId'
     | '/groepen/$id'
+    | '/konvooi/$id'
     | '/profiel/$userId'
     | '/ritten/$rideId'
     | '/truckstops/$id'
@@ -525,6 +535,7 @@ export interface FileRouteTypes {
     | '/zoeken'
     | '/chat/$chatId'
     | '/groepen/$id'
+    | '/konvooi/$id'
     | '/profiel/$userId'
     | '/ritten/$rideId'
     | '/truckstops/$id'
@@ -573,6 +584,7 @@ export interface FileRouteTypes {
     | '/zoeken'
     | '/chat/$chatId'
     | '/groepen/$id'
+    | '/konvooi/$id'
     | '/profiel/$userId'
     | '/ritten/$rideId'
     | '/truckstops/$id'
@@ -595,7 +607,7 @@ export interface RootRouteChildren {
   InstellingenRoute: typeof InstellingenRoute
   IntegratiesRoute: typeof IntegratiesRoute
   KaartRoute: typeof KaartRoute
-  KonvooiRoute: typeof KonvooiRoute
+  KonvooiRoute: typeof KonvooiRouteWithChildren
   LoginRoute: typeof LoginRoute
   MeerRoute: typeof MeerRoute
   MeldingenRoute: typeof MeldingenRoute
@@ -926,6 +938,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfielUserIdRouteImport
       parentRoute: typeof ProfielRoute
     }
+    '/konvooi/$id': {
+      id: '/konvooi/$id'
+      path: '/$id'
+      fullPath: '/konvooi/$id'
+      preLoaderRoute: typeof KonvooiIdRouteImport
+      parentRoute: typeof KonvooiRoute
+    }
     '/groepen/$id': {
       id: '/groepen/$id'
       path: '/$id'
@@ -970,6 +989,17 @@ const GroepenRouteChildren: GroepenRouteChildren = {
 
 const GroepenRouteWithChildren =
   GroepenRoute._addFileChildren(GroepenRouteChildren)
+
+interface KonvooiRouteChildren {
+  KonvooiIdRoute: typeof KonvooiIdRoute
+}
+
+const KonvooiRouteChildren: KonvooiRouteChildren = {
+  KonvooiIdRoute: KonvooiIdRoute,
+}
+
+const KonvooiRouteWithChildren =
+  KonvooiRoute._addFileChildren(KonvooiRouteChildren)
 
 interface ProfielRouteChildren {
   ProfielUserIdRoute: typeof ProfielUserIdRoute
@@ -1021,7 +1051,7 @@ const rootRouteChildren: RootRouteChildren = {
   InstellingenRoute: InstellingenRoute,
   IntegratiesRoute: IntegratiesRoute,
   KaartRoute: KaartRoute,
-  KonvooiRoute: KonvooiRoute,
+  KonvooiRoute: KonvooiRouteWithChildren,
   LoginRoute: LoginRoute,
   MeerRoute: MeerRoute,
   MeldingenRoute: MeldingenRoute,

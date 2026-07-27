@@ -1,6 +1,5 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useState } from "react";
-import { AppShell } from "@/components/app-shell";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,61 +9,160 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowLeft, ImageIcon, MoreVertical, Send, Ban, Flag } from "lucide-react";
-import { chatById, userById, currentUser, type ChatMessage } from "@/lib/mock-data";
+import { ArrowLeft, MoreVertical, Send, Ban, Flag, Users } from "lucide-react";
+import { toast } from "sonner";
+import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  fetchMessages,
+  markRead,
+  sendMessage,
+  type Conversation,
+  type Message,
+  type Participant,
+} from "@/lib/chat";
+import { blockUser, fetchBlockedIds } from "@/lib/blocks";
+import { ReportDialog } from "@/components/report-dialog";
+import { initials } from "@/lib/queries";
 
 export const Route = createFileRoute("/chat/$chatId")({
   head: () => ({
     meta: [
       { title: "Gesprek — TruckMate" },
-      { name: "description", content: "Chat met een andere chauffeur." },
+      { name: "description", content: "Realtime chat met een chauffeur of konvooigroep." },
       { property: "og:title", content: "Gesprek — TruckMate" },
-      { property: "og:description", content: "Één-op-één chat." },
+      { property: "og:description", content: "Chat in TruckMate Connect." },
     ],
   }),
-  loader: ({ params }) => {
-    const c = chatById(params.chatId);
-    if (!c) throw notFound();
-    return c;
-  },
-  notFoundComponent: () => (
-    <AppShell demoBanner={"Berichten zijn demo-content — realtime chat is nog niet actief."} title="Niet gevonden">
-      <p className="text-sm text-muted-foreground">Dit gesprek bestaat niet.</p>
-    </AppShell>
-  ),
-  errorComponent: ({ error }) => (
-    <AppShell title="Fout">
-      <p className="text-sm text-destructive">{error.message}</p>
-    </AppShell>
-  ),
   component: ChatView,
 });
 
-function ChatView() {
-  const chat = Route.useLoaderData();
-  const other = userById(chat.userId);
-  const [messages, setMessages] = useState<ChatMessage[]>(chat.messages);
-  const [text, setText] = useState("");
+type MiniProfile = { id: string; full_name: string | null; username: string | null; avatar_url: string | null };
 
-  const send = () => {
-    if (!text.trim()) return;
-    setMessages((m) => [
-      ...m,
-      { id: `m${Date.now()}`, from: currentUser.id, text: text.trim(), at: new Date().toISOString() },
-    ]);
-    setText("");
-    setTimeout(() => {
-      setMessages((m) => [
-        ...m,
-        {
-          id: `m${Date.now() + 1}`,
-          from: other.id,
-          text: "Duidelijk, dank!",
-          at: new Date().toISOString(),
+function ChatView() {
+  const { chatId } = Route.useParams();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [conversation, setConversation] = useState<Conversation | null>(null);
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [profiles, setProfiles] = useState<Record<string, MiniProfile>>({});
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [blockedIds, setBlockedIds] = useState<string[]>([]);
+  const [text, setText] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  const load = useCallback(async () => {
+    if (!user) return;
+    try {
+      const { data: conv, error: e1 } = await supabase
+        .from("conversations")
+        .select("*")
+        .eq("id", chatId)
+        .maybeSingle();
+      if (e1) throw e1;
+      if (!conv) {
+        setError("Dit gesprek bestaat niet of je hebt er geen toegang toe.");
+        return;
+      }
+      setConversation(conv as Conversation);
+      const { data: parts } = await supabase
+        .from("conversation_participants")
+        .select("*")
+        .eq("conversation_id", chatId);
+      const ps = (parts ?? []) as Participant[];
+      setParticipants(ps);
+      const ids = ps.map((p) => p.user_id);
+      if (ids.length) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("id, full_name, username, avatar_url")
+          .in("id", ids);
+        setProfiles(Object.fromEntries((data ?? []).map((p) => [p.id, p as MiniProfile])));
+      }
+      setMessages(await fetchMessages(chatId));
+      setBlockedIds(await fetchBlockedIds(user.id));
+      await markRead(chatId, user.id);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Gesprek laden mislukt.");
+    } finally {
+      setLoading(false);
+    }
+  }, [chatId, user]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`messages-${chatId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${chatId}` },
+        (payload) => {
+          setMessages((m) => {
+            const msg = payload.new as Message;
+            return m.some((x) => x.id === msg.id) ? m : [...m, msg];
+          });
+          if (user) void markRead(chatId, user.id);
         },
-      ]);
-    }, 1200);
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [chatId, user]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ block: "end" });
+  }, [messages]);
+
+  const other = participants.find((p) => p.user_id !== user?.id);
+  const otherProfile = other ? profiles[other.user_id] : undefined;
+  const isGroup = conversation?.kind === "convoy";
+  const title = isGroup
+    ? (conversation?.title ?? "Konvooichat")
+    : (otherProfile?.full_name ?? otherProfile?.username ?? "Chauffeur");
+  const blocked = Boolean(other && blockedIds.includes(other.user_id));
+
+  const send = async () => {
+    if (!user || !text.trim()) return;
+    const body = text.trim().slice(0, 2000);
+    setText("");
+    try {
+      await sendMessage(chatId, user.id, body);
+    } catch (e) {
+      setText(body);
+      toast.error(e instanceof Error ? e.message : "Versturen mislukt.");
+    }
   };
+
+  const doBlock = async () => {
+    if (!user || !other) return;
+    try {
+      await blockUser(user.id, other.user_id);
+      toast.success("Gebruiker geblokkeerd. Jullie kunnen elkaar geen berichten meer sturen.");
+      setBlockedIds((b) => [...b, other.user_id]);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Blokkeren mislukt.");
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background px-4 text-center">
+        <div>
+          <p className="text-sm text-destructive">{error}</p>
+          <Button className="mt-3" variant="secondary" onClick={() => navigate({ to: "/chat" })}>
+            Terug naar berichten
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-background pb-24">
@@ -76,70 +174,91 @@ function ChatView() {
             </Button>
           </Link>
           <Avatar className="h-9 w-9">
-            <AvatarImage src={other.avatar} alt={other.name} />
-            <AvatarFallback>{other.name[0]}</AvatarFallback>
+            <AvatarImage src={otherProfile?.avatar_url ?? undefined} alt="" />
+            <AvatarFallback>{isGroup ? <Users className="h-4 w-4" /> : initials(title)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold">{other.name}</p>
-            <p className="text-[11px] text-emerald-400">Online</p>
+            <p className="truncate text-sm font-semibold">{title}</p>
+            <p className="text-[11px] text-muted-foreground">
+              {isGroup ? `${participants.length} deelnemers` : blocked ? "Geblokkeerd" : "Realtime"}
+            </p>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="Meer opties">
-                <MoreVertical className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                <Ban className="mr-2 h-4 w-4" /> Blokkeren
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive">
-                <Flag className="mr-2 h-4 w-4" /> Rapporteren
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {!isGroup && other && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Meer opties">
+                  <MoreVertical className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={doBlock} disabled={blocked}>
+                  <Ban className="mr-2 h-4 w-4" /> Blokkeren
+                </DropdownMenuItem>
+                <ReportDialog
+                  reportedUserId={other.user_id}
+                  contextType="message"
+                  contextId={chatId}
+                  trigger={
+                    <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
+                      <Flag className="mr-2 h-4 w-4" /> Rapporteren
+                    </DropdownMenuItem>
+                  }
+                />
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </header>
 
       <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 px-3 py-4">
-        {messages.map((m) => {
-          const mine = m.from === currentUser.id;
-          return (
-            <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-              <div
-                className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm shadow-sm ${
-                  mine
-                    ? "rounded-br-sm bg-primary text-primary-foreground"
-                    : "rounded-bl-sm border border-border bg-card text-card-foreground"
-                }`}
-              >
-                <p className="whitespace-pre-wrap">{m.text}</p>
-                <p
-                  className={`mt-1 text-[10px] ${
-                    mine ? "text-primary-foreground/70" : "text-muted-foreground"
+        {loading ? (
+          <p className="text-center text-sm text-muted-foreground">Laden…</p>
+        ) : messages.length === 0 ? (
+          <p className="py-10 text-center text-sm text-muted-foreground">
+            Nog geen berichten. Stuur het eerste bericht.
+          </p>
+        ) : (
+          messages.map((m) => {
+            const mine = m.sender_id === user?.id;
+            const sender = profiles[m.sender_id];
+            return (
+              <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm shadow-sm ${
+                    mine
+                      ? "rounded-br-sm bg-primary text-primary-foreground"
+                      : "rounded-bl-sm border border-border bg-card text-card-foreground"
                   }`}
                 >
-                  {new Date(m.at).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })}
-                </p>
+                  {isGroup && !mine && (
+                    <p className="mb-0.5 text-[10px] font-semibold text-primary">
+                      {sender?.full_name ?? sender?.username ?? "Chauffeur"}
+                    </p>
+                  )}
+                  <p className="whitespace-pre-wrap">{m.text}</p>
+                  <p className={`mt-1 text-[10px] ${mine ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                    {new Date(m.created_at).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
+        <div ref={bottomRef} />
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]">
         <div className="mx-auto flex max-w-2xl items-center gap-2 p-2">
-          <Button variant="ghost" size="icon" className="shrink-0" aria-label="Afbeelding toevoegen">
-            <ImageIcon className="h-5 w-5" />
-          </Button>
           <Input
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
-            placeholder="Bericht…"
+            placeholder={blocked ? "Blokkade actief — berichten uitgeschakeld" : "Bericht…"}
+            disabled={blocked}
+            maxLength={2000}
             className="flex-1"
           />
-          <Button size="icon" onClick={send} disabled={!text.trim()} aria-label="Verstuur bericht">
+          <Button size="icon" onClick={send} disabled={!text.trim() || blocked} aria-label="Verstuur bericht">
             <Send className="h-4 w-4" />
           </Button>
         </div>
