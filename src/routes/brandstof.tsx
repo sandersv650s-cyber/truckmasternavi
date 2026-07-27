@@ -229,6 +229,11 @@ function BrandstofPage() {
                         <Truck className="mr-1 h-3 w-3" /> Truck OK
                       </Badge>
                     )}
+                    {s.is_example && (
+                      <Badge variant="outline" className="border-amber-500/50 text-[10px] text-amber-400">
+                        Voorbeelddata
+                      </Badge>
+                    )}
                     {dist != null && (
                       <Badge variant="outline" className="text-[10px]">
                         <MapPin className="mr-1 h-3 w-3" /> {dist} km
