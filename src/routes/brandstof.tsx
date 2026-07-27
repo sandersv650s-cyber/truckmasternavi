@@ -29,7 +29,7 @@ export const Route = createFileRoute("/brandstof")({
   component: BrandstofPage,
 });
 
-type SortKey = "goedkoop" | "naam" | "recent";
+type SortKey = "goedkoop" | "afstand" | "naam" | "recent";
 
 function BrandstofPage() {
   const provider = getFuelProvider();
