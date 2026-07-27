@@ -15,15 +15,19 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Building2, Plus, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   deleteTerminal,
   fetchTerminals,
+  terminalStatuses,
   terminalTypes,
   upsertTerminal,
   type Terminal,
+  type TerminalStatus,
   type TerminalType,
 } from "@/lib/terminals";
-import { useIsAdmin } from "@/lib/admin";
+import { useMyRoles } from "@/lib/admin";
 
 export const Route = createFileRoute("/beheer/locaties")({
   head: () => ({
@@ -47,10 +51,14 @@ const empty = {
   phone: "",
   facilities: "",
   wait_time_notes: "",
+  lat: "",
+  lng: "",
+  status: "unknown" as TerminalStatus,
+  is_example: false,
 };
 
 function AdminTerminals() {
-  const { isAdmin, checking } = useIsAdmin();
+  const { isStaff, checking } = useMyRoles();
   const [rows, setRows] = useState<Terminal[] | null>(null);
   const [form, setForm] = useState({ ...empty });
   const [editing, setEditing] = useState<string | null>(null);
@@ -68,9 +76,9 @@ function AdminTerminals() {
   };
 
   useEffect(() => {
-    if (!checking && isAdmin) void load();
+    if (!checking && isStaff) void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checking, isAdmin]);
+  }, [checking, isStaff]);
 
   const save = async () => {
     if (!form.name.trim()) return;
@@ -86,6 +94,11 @@ function AdminTerminals() {
         country: form.country.trim() || "NL",
         phone: form.phone.trim() || null,
         wait_time_notes: form.wait_time_notes.trim() || null,
+        lat: form.lat ? Number(form.lat) : null,
+        lng: form.lng ? Number(form.lng) : null,
+        status: form.status,
+        is_example: form.is_example,
+        source: form.is_example ? "seed" : "admin",
         facilities: form.facilities
           .split(",")
           .map((f) => f.trim())
