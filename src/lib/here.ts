@@ -1,28 +1,64 @@
 // HERE Technologies routing + search integration.
-// The API key comes from the Lovable secret HERE_API_KEY, injected into the
-// client bundle as the global `__HERE_API_KEY__` via Vite `define`
-// (see vite.config.ts). Nothing is hardcoded.
+// The API key comes from the Lovable secret HERE_API_KEY. Two sources, in order:
+//  1. compile-time constant `__HERE_API_KEY__` (vite.config.ts define) — only
+//     filled when the secret exists in the build environment;
+//  2. runtime fetch of /api/public/here-key, which reads process.env on the
+//     server. This is the reliable path for published builds.
+// Nothing is hardcoded.
 import flexpolyline from "@here/flexpolyline";
 
 declare const __HERE_API_KEY__: string | undefined;
 
-function readKey(): string | undefined {
-  // Vite define replaces the bare identifier at build time.
-  const injected =
-    typeof __HERE_API_KEY__ !== "undefined" ? __HERE_API_KEY__ : undefined;
-  const env = (import.meta as any).env ?? {};
-  const fromEnv = env.VITE_HERE_API_KEY;
-  // Server-side (SSR / server functions) can also read process.env directly.
-  const fromProcess =
-    typeof process !== "undefined" ? process.env?.HERE_API_KEY : undefined;
-  const key = injected || fromEnv || fromProcess;
-  return key && String(key).trim() ? String(key).trim() : undefined;
+function clean(v: unknown): string | undefined {
+  const s = typeof v === "string" ? v.trim() : "";
+  return s ? s : undefined;
 }
 
-/** Single central key constant used by every HERE map/REST call. */
-export const HERE_API_KEY: string | undefined = readKey();
+function readBuildTimeKey(): string | undefined {
+  // Vite `define` replaces the bare identifier at build time.
+  const injected =
+    typeof __HERE_API_KEY__ !== "undefined" ? __HERE_API_KEY__ : undefined;
+  const fromProcess =
+    typeof process !== "undefined" ? process.env?.HERE_API_KEY : undefined;
+  return clean(injected) ?? clean(fromProcess);
+}
 
-export const hasHereKey = () => Boolean(HERE_API_KEY);
+/** Central cached key used by every HERE map/REST call. */
+let keyCache: string | undefined = readBuildTimeKey();
+let keyPromise: Promise<string | undefined> | null = null;
+const listeners = new Set<() => void>();
+
+export const HERE_API_KEY: string | undefined = keyCache;
+
+export const getHereKey = (): string | undefined => keyCache;
+export const hasHereKey = () => Boolean(keyCache);
+
+export function subscribeHereKey(cb: () => void): () => void {
+  listeners.add(cb);
+  return () => listeners.delete(cb);
+}
+
+/** Resolves the key, fetching it from the server once if needed. */
+export function ensureHereKey(): Promise<string | undefined> {
+  if (keyCache) return Promise.resolve(keyCache);
+  if (typeof window === "undefined") return Promise.resolve(undefined);
+  if (!keyPromise) {
+    keyPromise = fetch("/api/public/here-key")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j: { key?: string | null } | null) => {
+        const k = clean(j?.key);
+        if (k) {
+          keyCache = k;
+          listeners.forEach((l) => l());
+        }
+        return keyCache;
+      })
+      .catch(() => undefined);
+  }
+  return keyPromise;
+}
+
+if (typeof window !== "undefined" && !keyCache) void ensureHereKey();
 
 export type LatLng = { lat: number; lng: number };
 
@@ -98,13 +134,14 @@ export type RouteOptions = {
   lang?: string;
 };
 
-function requireKey(): string {
-  if (!HERE_API_KEY) {
+async function requireKey(): Promise<string> {
+  const key = await ensureHereKey();
+  if (!key) {
     throw new Error(
-      "HERE API key ontbreekt. Voeg de secret HERE_API_KEY toe in Project Settings → Secrets en publiceer opnieuw.",
+      "HERE API-sleutel niet beschikbaar. Voeg de secret HERE_API_KEY toe in Project Settings → Secrets en publiceer opnieuw.",
     );
   }
-  return HERE_API_KEY;
+  return key;
 }
 
 // --- Search / geocoding -----------------------------------------------------
@@ -116,7 +153,7 @@ export async function autosuggest(
 ): Promise<HereSuggestion[]> {
   const query = q.trim();
   if (query.length < 2) return [];
-  const key = requireKey();
+  const key = await requireKey();
   const url = new URL("https://autosuggest.search.hereapi.com/v1/autosuggest");
   url.searchParams.set("q", query);
   url.searchParams.set("limit", "7");
@@ -150,7 +187,7 @@ export async function lookupSuggestion(
 ): Promise<LatLng | null> {
   if (hit.position) return hit.position;
   if (!hit.href) return null;
-  const key = requireKey();
+  const key = await requireKey();
   const url = new URL(hit.href);
   url.searchParams.set("apiKey", key);
   const res = await fetch(url, { signal });
@@ -160,7 +197,7 @@ export async function lookupSuggestion(
 }
 
 export async function reverseGeocode(at: LatLng, signal?: AbortSignal): Promise<string> {
-  const key = requireKey();
+  const key = await requireKey();
   const url = new URL("https://revgeocode.search.hereapi.com/v1/revgeocode");
   url.searchParams.set("at", `${at.lat},${at.lng}`);
   url.searchParams.set("lang", "nl");
@@ -196,7 +233,7 @@ function pushVehicleParams(url: URL, t: TruckProfile) {
 }
 
 export async function computeRoutes(opts: RouteOptions, signal?: AbortSignal): Promise<HereRoute[]> {
-  const key = requireKey();
+  const key = await requireKey();
   const url = new URL("https://router.hereapi.com/v8/routes");
   url.searchParams.set("transportMode", opts.transportMode ?? "truck");
   url.searchParams.set("origin", `${opts.origin.lat},${opts.origin.lng}`);
