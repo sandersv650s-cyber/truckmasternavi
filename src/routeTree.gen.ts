@@ -38,6 +38,7 @@ import { Route as KaartRouteImport } from './routes/kaart'
 import { Route as IntegratiesRouteImport } from './routes/integraties'
 import { Route as InstellingenRouteImport } from './routes/instellingen'
 import { Route as GroepenRouteImport } from './routes/groepen'
+import { Route as GeblokkeerdRouteImport } from './routes/geblokkeerd'
 import { Route as FleetRouteImport } from './routes/fleet'
 import { Route as DocumentenRouteImport } from './routes/documenten'
 import { Route as DeelEtaRouteImport } from './routes/deel-eta'
@@ -202,6 +203,11 @@ const GroepenRoute = GroepenRouteImport.update({
   path: '/groepen',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GeblokkeerdRoute = GeblokkeerdRouteImport.update({
+  id: '/geblokkeerd',
+  path: '/geblokkeerd',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FleetRoute = FleetRouteImport.update({
   id: '/fleet',
   path: '/fleet',
@@ -305,6 +311,7 @@ export interface FileRoutesByFullPath {
   '/deel-eta': typeof DeelEtaRoute
   '/documenten': typeof DocumentenRoute
   '/fleet': typeof FleetRoute
+  '/geblokkeerd': typeof GeblokkeerdRoute
   '/groepen': typeof GroepenRouteWithChildren
   '/instellingen': typeof InstellingenRoute
   '/integraties': typeof IntegratiesRoute
@@ -354,6 +361,7 @@ export interface FileRoutesByTo {
   '/deel-eta': typeof DeelEtaRoute
   '/documenten': typeof DocumentenRoute
   '/fleet': typeof FleetRoute
+  '/geblokkeerd': typeof GeblokkeerdRoute
   '/groepen': typeof GroepenRouteWithChildren
   '/instellingen': typeof InstellingenRoute
   '/integraties': typeof IntegratiesRoute
@@ -404,6 +412,7 @@ export interface FileRoutesById {
   '/deel-eta': typeof DeelEtaRoute
   '/documenten': typeof DocumentenRoute
   '/fleet': typeof FleetRoute
+  '/geblokkeerd': typeof GeblokkeerdRoute
   '/groepen': typeof GroepenRouteWithChildren
   '/instellingen': typeof InstellingenRoute
   '/integraties': typeof IntegratiesRoute
@@ -455,6 +464,7 @@ export interface FileRouteTypes {
     | '/deel-eta'
     | '/documenten'
     | '/fleet'
+    | '/geblokkeerd'
     | '/groepen'
     | '/instellingen'
     | '/integraties'
@@ -504,6 +514,7 @@ export interface FileRouteTypes {
     | '/deel-eta'
     | '/documenten'
     | '/fleet'
+    | '/geblokkeerd'
     | '/groepen'
     | '/instellingen'
     | '/integraties'
@@ -553,6 +564,7 @@ export interface FileRouteTypes {
     | '/deel-eta'
     | '/documenten'
     | '/fleet'
+    | '/geblokkeerd'
     | '/groepen'
     | '/instellingen'
     | '/integraties'
@@ -603,6 +615,7 @@ export interface RootRouteChildren {
   DeelEtaRoute: typeof DeelEtaRoute
   DocumentenRoute: typeof DocumentenRoute
   FleetRoute: typeof FleetRoute
+  GeblokkeerdRoute: typeof GeblokkeerdRoute
   GroepenRoute: typeof GroepenRouteWithChildren
   InstellingenRoute: typeof InstellingenRoute
   IntegratiesRoute: typeof IntegratiesRoute
@@ -840,6 +853,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GroepenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/geblokkeerd': {
+      id: '/geblokkeerd'
+      path: '/geblokkeerd'
+      fullPath: '/geblokkeerd'
+      preLoaderRoute: typeof GeblokkeerdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/fleet': {
       id: '/fleet'
       path: '/fleet'
@@ -1047,6 +1067,7 @@ const rootRouteChildren: RootRouteChildren = {
   DeelEtaRoute: DeelEtaRoute,
   DocumentenRoute: DocumentenRoute,
   FleetRoute: FleetRoute,
+  GeblokkeerdRoute: GeblokkeerdRoute,
   GroepenRoute: GroepenRouteWithChildren,
   InstellingenRoute: InstellingenRoute,
   IntegratiesRoute: IntegratiesRoute,
