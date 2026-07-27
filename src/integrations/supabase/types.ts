@@ -404,6 +404,57 @@ export type Database = {
         }
         Relationships: []
       }
+      lzv_segments: {
+        Row: {
+          city: string | null
+          country: string
+          created_at: string
+          dataset_version: string | null
+          direction: string | null
+          geometry: Json | null
+          id: string
+          is_connection_route: boolean
+          is_official: boolean
+          name: string
+          notes: string | null
+          road: string | null
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string
+          created_at?: string
+          dataset_version?: string | null
+          direction?: string | null
+          geometry?: Json | null
+          id?: string
+          is_connection_route?: boolean
+          is_official?: boolean
+          name: string
+          notes?: string | null
+          road?: string | null
+          source?: string
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          country?: string
+          created_at?: string
+          dataset_version?: string | null
+          direction?: string | null
+          geometry?: Json | null
+          id?: string
+          is_connection_route?: boolean
+          is_official?: boolean
+          name?: string
+          notes?: string | null
+          road?: string | null
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           conversation_id: string
@@ -538,9 +589,15 @@ export type Database = {
           username: string | null
           vehicle_axle_count: number | null
           vehicle_axle_weight_kg: number | null
+          vehicle_current_weight_kg: number | null
+          vehicle_exemption_expires: string | null
+          vehicle_exemption_ref: string | null
+          vehicle_has_exemption: boolean
           vehicle_hazardous: boolean
           vehicle_height_cm: number | null
+          vehicle_is_lzv: boolean
           vehicle_length_cm: number | null
+          vehicle_max_permitted_weight_kg: number | null
           vehicle_trailer_count: number | null
           vehicle_type: string | null
           vehicle_weight_kg: number | null
@@ -559,9 +616,15 @@ export type Database = {
           username?: string | null
           vehicle_axle_count?: number | null
           vehicle_axle_weight_kg?: number | null
+          vehicle_current_weight_kg?: number | null
+          vehicle_exemption_expires?: string | null
+          vehicle_exemption_ref?: string | null
+          vehicle_has_exemption?: boolean
           vehicle_hazardous?: boolean
           vehicle_height_cm?: number | null
+          vehicle_is_lzv?: boolean
           vehicle_length_cm?: number | null
+          vehicle_max_permitted_weight_kg?: number | null
           vehicle_trailer_count?: number | null
           vehicle_type?: string | null
           vehicle_weight_kg?: number | null
@@ -580,9 +643,15 @@ export type Database = {
           username?: string | null
           vehicle_axle_count?: number | null
           vehicle_axle_weight_kg?: number | null
+          vehicle_current_weight_kg?: number | null
+          vehicle_exemption_expires?: string | null
+          vehicle_exemption_ref?: string | null
+          vehicle_has_exemption?: boolean
           vehicle_hazardous?: boolean
           vehicle_height_cm?: number | null
+          vehicle_is_lzv?: boolean
           vehicle_length_cm?: number | null
+          vehicle_max_permitted_weight_kg?: number | null
           vehicle_trailer_count?: number | null
           vehicle_type?: string | null
           vehicle_weight_kg?: number | null
@@ -746,10 +815,13 @@ export type Database = {
           distance_m: number | null
           duration_s: number | null
           id: string
+          is_lzv: boolean
+          lzv_verified: boolean
           name: string
           truck_profile: Json | null
           updated_at: string
           user_id: string
+          vehicle_snapshot: Json | null
           waypoints: Json
         }
         Insert: {
@@ -760,10 +832,13 @@ export type Database = {
           distance_m?: number | null
           duration_s?: number | null
           id?: string
+          is_lzv?: boolean
+          lzv_verified?: boolean
           name: string
           truck_profile?: Json | null
           updated_at?: string
           user_id: string
+          vehicle_snapshot?: Json | null
           waypoints?: Json
         }
         Update: {
@@ -774,10 +849,13 @@ export type Database = {
           distance_m?: number | null
           duration_s?: number | null
           id?: string
+          is_lzv?: boolean
+          lzv_verified?: boolean
           name?: string
           truck_profile?: Json | null
           updated_at?: string
           user_id?: string
+          vehicle_snapshot?: Json | null
           waypoints?: Json
         }
         Relationships: []
