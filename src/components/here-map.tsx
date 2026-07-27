@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
-import { HERE_API_KEY, type HereRoute, type LatLng } from "@/lib/here";
+import { type HereRoute, type LatLng } from "@/lib/here";
+import { useHereKey } from "@/lib/use-here-key";
 
 // Dynamically load the HERE Maps JS SDK (v3.1) with UI + events. Cached across
 // mounts so the map component can mount/unmount without re-fetching scripts.
@@ -70,15 +71,16 @@ export function HereMap({
   const selectCbRef = useRef(onSelectRoute);
   clickCbRef.current = onMapClick;
   selectCbRef.current = onSelectRoute;
+  const { key: apiKey, loading: keyLoading } = useHereKey();
 
   useEffect(() => {
     let cancelled = false;
-    if (!HERE_API_KEY) return;
+    if (!apiKey) return;
     loadHereMaps()
       .then((H) => {
         if (cancelled || !containerRef.current || mapRef.current) return;
         hRef.current = H;
-        const platform = new H.service.Platform({ apikey: HERE_API_KEY });
+        const platform = new H.service.Platform({ apikey: apiKey });
         const layers = platform.createDefaultLayers({ pois: true });
         const map = new H.Map(containerRef.current, layers.vector.normal.map, {
           center: { lat: 52.1, lng: 5.3 },
@@ -107,7 +109,7 @@ export function HereMap({
         mapRef.current = null;
       }
     };
-  }, []);
+  }, [apiKey]);
 
   // Draw routes + waypoints
   useEffect(() => {
@@ -180,10 +182,18 @@ export function HereMap({
     }
   }, [currentLocation, heading, followMode]);
 
-  if (!HERE_API_KEY) {
+  if (keyLoading) {
+    return (
+      <div className="grid h-full place-items-center bg-muted text-sm text-muted-foreground">
+        Kaart laden…
+      </div>
+    );
+  }
+  if (!apiKey) {
     return (
       <div className="flex h-full items-center justify-center bg-muted p-6 text-center text-sm text-muted-foreground">
-        HERE-kaart niet beschikbaar — secret <code className="mx-1">HERE_API_KEY</code> ontbreekt.
+        HERE-kaart niet beschikbaar — de kaartsleutel kon niet worden geladen.
+        Probeer te vernieuwen of neem contact op met de beheerder.
       </div>
     );
   }

@@ -29,13 +29,13 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useHereKey } from "@/lib/use-here-key";
 import {
   autosuggest,
   computeRoutes,
   etaString,
   formatDistance,
   formatDuration,
-  hasHereKey,
   lookupSuggestion,
   reverseGeocode,
   type AvoidFeature,
@@ -101,6 +101,7 @@ const AVOID_LABELS: Record<AvoidFeature, string> = {
 
 function RoutePlannerPage() {
   const { user } = useAuth();
+  const here = useHereKey();
   const qc = useQueryClient();
 
   const [waypoints, setWaypoints] = useState<WP[]>([emptyWP(), emptyWP()]);
@@ -199,7 +200,7 @@ function RoutePlannerPage() {
         const { latitude, longitude } = pos.coords;
         setCurrentLoc({ lat: latitude, lng: longitude });
         let label = `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
-        if (hasHereKey()) {
+        if (here.ready) {
           try { label = await reverseGeocode({ lat: latitude, lng: longitude }); } catch { /* keep coords */ }
         }
         setWaypoints((prev) => {
@@ -221,12 +222,12 @@ function RoutePlannerPage() {
   };
 
   const filled = waypoints.filter((w) => w.lat !== 0 || w.lng !== 0);
-  const canRoute = filled.length >= 2 && filled.length === waypoints.length && hasHereKey();
+  const canRoute = filled.length >= 2 && filled.length === waypoints.length && here.ready;
   const selectedRoute =
     routes.find((r) => r.id === selectedRouteId) ?? routes[0] ?? null;
 
   const doCompute = async (opts?: { alternatives?: number }) => {
-    if (!hasHereKey()) {
+    if (!here.ready) {
       toast.error("HERE API-sleutel ontbreekt");
       return;
     }
@@ -376,16 +377,16 @@ function RoutePlannerPage() {
 
   return (
     <AppShell title="Routeplanner">
-      {!hasHereKey() && (
+      {!here.ready && !here.loading && (
         <Card className="mb-3 border-yellow-500/40 bg-yellow-500/10">
           <CardContent className="flex items-start gap-2 p-3 text-xs text-yellow-100">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <div>
               <p className="font-semibold">HERE Maps setup vereist (admin)</p>
               <p>
-                Voeg de secret <code>HERE_API_KEY</code> toe in
-                Project Settings → Secrets en publiceer de app opnieuw. Zonder
-                sleutel werken kaart, adreszoeken en routing niet.
+                De kaartsleutel kon niet worden geladen. Vernieuw de pagina;
+                blijft dit staan, dan moet de beheerder de secret
+                <code className="mx-1">HERE_API_KEY</code> controleren.
               </p>
             </div>
           </CardContent>
@@ -810,9 +811,10 @@ function AddressRow({
   const isEnd = index === total - 1;
   const badge = isStart ? "A" : isEnd ? "B" : String(index);
   const color = isStart ? "bg-green-500" : isEnd ? "bg-red-500" : "bg-blue-500";
+  const hereReady = useHereKey().ready;
 
   useEffect(() => {
-    if (!hasHereKey()) return;
+    if (!hereReady) return;
     if (!value || value.length < 2) {
       setHits([]);
       return;
@@ -833,7 +835,7 @@ function AddressRow({
       clearTimeout(t);
       ac.abort();
     };
-  }, [value, biasAt]);
+  }, [value, biasAt, hereReady]);
 
   const pick = async (h: HereSuggestion) => {
     let pos = h.position ?? null;

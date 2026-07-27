@@ -54,6 +54,7 @@ import { Route as RittenRideIdRouteImport } from './routes/ritten.$rideId'
 import { Route as ProfielUserIdRouteImport } from './routes/profiel.$userId'
 import { Route as GroepenIdRouteImport } from './routes/groepen.$id'
 import { Route as ChatChatIdRouteImport } from './routes/chat.$chatId'
+import { Route as ApiPublicHereKeyRouteImport } from './routes/api/public/here-key'
 
 const ZoekenRoute = ZoekenRouteImport.update({
   id: '/zoeken',
@@ -280,6 +281,11 @@ const ChatChatIdRoute = ChatChatIdRouteImport.update({
   path: '/$chatId',
   getParentRoute: () => ChatRoute,
 } as any)
+const ApiPublicHereKeyRoute = ApiPublicHereKeyRouteImport.update({
+  id: '/api/public/here-key',
+  path: '/api/public/here-key',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -327,6 +333,7 @@ export interface FileRoutesByFullPath {
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
   '/truckstops/$id': typeof TruckstopsIdRoute
+  '/api/public/here-key': typeof ApiPublicHereKeyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -374,6 +381,7 @@ export interface FileRoutesByTo {
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
   '/truckstops/$id': typeof TruckstopsIdRoute
+  '/api/public/here-key': typeof ApiPublicHereKeyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -422,6 +430,7 @@ export interface FileRoutesById {
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
   '/truckstops/$id': typeof TruckstopsIdRoute
+  '/api/public/here-key': typeof ApiPublicHereKeyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -471,6 +480,7 @@ export interface FileRouteTypes {
     | '/profiel/$userId'
     | '/ritten/$rideId'
     | '/truckstops/$id'
+    | '/api/public/here-key'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -518,6 +528,7 @@ export interface FileRouteTypes {
     | '/profiel/$userId'
     | '/ritten/$rideId'
     | '/truckstops/$id'
+    | '/api/public/here-key'
   id:
     | '__root__'
     | '/'
@@ -565,6 +576,7 @@ export interface FileRouteTypes {
     | '/profiel/$userId'
     | '/ritten/$rideId'
     | '/truckstops/$id'
+    | '/api/public/here-key'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -608,6 +620,7 @@ export interface RootRouteChildren {
   VoorwaardenRoute: typeof VoorwaardenRoute
   VoorzieningenRoute: typeof VoorzieningenRoute
   ZoekenRoute: typeof ZoekenRoute
+  ApiPublicHereKeyRoute: typeof ApiPublicHereKeyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -927,6 +940,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatChatIdRouteImport
       parentRoute: typeof ChatRoute
     }
+    '/api/public/here-key': {
+      id: '/api/public/here-key'
+      path: '/api/public/here-key'
+      fullPath: '/api/public/here-key'
+      preLoaderRoute: typeof ApiPublicHereKeyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1026,6 +1046,7 @@ const rootRouteChildren: RootRouteChildren = {
   VoorwaardenRoute: VoorwaardenRoute,
   VoorzieningenRoute: VoorzieningenRoute,
   ZoekenRoute: ZoekenRoute,
+  ApiPublicHereKeyRoute: ApiPublicHereKeyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
