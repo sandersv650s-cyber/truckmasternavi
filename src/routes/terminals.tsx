@@ -121,6 +121,18 @@ function TerminalsPage() {
                       >
                         {open ? "Nu open" : "Gesloten"}
                       </Badge>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggle(t.id);
+                        }}
+                        aria-label={isFav(t.id) ? "Verwijder uit favorieten" : "Voeg toe aan favorieten"}
+                        aria-pressed={isFav(t.id)}
+                        className="shrink-0 rounded p-1 text-muted-foreground hover:text-amber-300"
+                      >
+                        <Star className={`h-4 w-4 ${isFav(t.id) ? "fill-amber-300 text-amber-300" : ""}`} />
+                      </button>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1">
                       <Badge variant="outline" className="text-[10px]">
