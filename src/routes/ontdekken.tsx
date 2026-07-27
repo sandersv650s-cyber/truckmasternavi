@@ -30,7 +30,7 @@ function OntdekkenPage() {
   const activeAlerts = initialAlerts.length;
 
   const cats: {
-    to: "/kaart" | "/zoeken" | "/assistent" | "/truckstops" | "/brandstof" | "/meldingen" | "/voorzieningen" | "/beloningen" | "/meer";
+    to: "/kaart" | "/zoeken" | "/assistent" | "/truckstops" | "/brandstof" | "/terminals" | "/konvooi" | "/meldingen" | "/voorzieningen" | "/beloningen" | "/meer";
     icon: React.ReactNode;
     title: string;
     desc: string;
@@ -76,6 +76,22 @@ function OntdekkenPage() {
       desc: "Tankstations langs je route met AdBlue en truck-support.",
       accent: "from-amber-500/25 to-amber-500/5",
       hint: `Goedkoopst € ${cheapest.dieselPrice.toFixed(3)} — ${cheapest.city}`,
+    },
+    {
+      to: "/terminals",
+      icon: <Building2 className="h-6 w-6" />,
+      title: "DC's & terminals",
+      desc: "Distributiecentra, terminals en havens met openingstijden.",
+      accent: "from-teal-500/25 to-teal-500/5",
+      hint: "Beheerd door TruckMate",
+    },
+    {
+      to: "/konvooi",
+      icon: <Radio className="h-6 w-6" />,
+      title: "Konvooi rijden",
+      desc: "Rijd samen, deel tijdelijk je locatie en chat als groep.",
+      accent: "from-emerald-500/25 to-emerald-500/5",
+      hint: "Opt-in locatie",
     },
     {
       to: "/meldingen",
