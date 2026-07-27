@@ -4,7 +4,8 @@ import { AppShell } from "@/components/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Building2, MapPin } from "lucide-react";
+import { Building2, MapPin, Star } from "lucide-react";
+import { useFavorites } from "@/lib/favorites";
 import {
   fetchHours,
   fetchTerminals,
@@ -35,6 +36,8 @@ function TerminalsPage() {
   const [hours, setHours] = useState<TerminalHour[]>([]);
   const [q, setQ] = useState("");
   const [type, setType] = useState<TerminalType | "all">("all");
+  const [onlyFavs, setOnlyFavs] = useState(false);
+  const { isFav, toggle, count } = useFavorites("terminals");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -54,12 +57,13 @@ function TerminalsPage() {
     return (rows ?? []).filter(
       (t) =>
         (type === "all" || t.type === type) &&
+        (!onlyFavs || isFav(t.id)) &&
         (!needle ||
           t.name.toLowerCase().includes(needle) ||
           (t.city ?? "").toLowerCase().includes(needle) ||
           (t.address ?? "").toLowerCase().includes(needle)),
     );
-  }, [rows, q, type]);
+  }, [rows, q, type, onlyFavs, isFav]);
 
   return (
     <AppShell title="DC's & terminals">
@@ -79,6 +83,13 @@ function TerminalsPage() {
             {t === "all" ? "Alle" : terminalTypes[t]}
           </button>
         ))}
+        <button
+          onClick={() => setOnlyFavs((v) => !v)}
+          aria-pressed={onlyFavs}
+          className={`rounded-full border px-3 py-1 text-xs font-medium ${onlyFavs ? "border-amber-400 bg-amber-400/20 text-amber-300" : "border-border text-muted-foreground"}`}
+        >
+          ★ Favorieten{count ? ` (${count})` : ""}
+        </button>
       </div>
 
       {error && <p className="mb-2 text-xs text-destructive">{error}</p>}
