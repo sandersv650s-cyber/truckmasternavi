@@ -49,6 +49,7 @@ type Tile = {
     | "/konvooi"
     | "/terminals"
     | "/geblokkeerd"
+    | "/mijn-meldingen"
     | "/onderhoud"
     | "/documenten"
     | "/integraties"
@@ -88,6 +89,7 @@ function MeerPage() {
     { to: "/konvooi", icon: <Radio className="h-6 w-6" />, title: "Konvooimodus", desc: "Rijd samen met collega's en deel locatie tijdelijk — standaard uit.", accent: "from-emerald-500/25 to-emerald-500/5", badge: "Privacy-first" },
     { to: "/terminals", icon: <Building2 className="h-6 w-6" />, title: "DC's & terminals", desc: "Adressen, openingstijden en faciliteiten van laad- en losplekken.", accent: "from-sky-500/25 to-sky-500/5" },
     { to: "/geblokkeerd", icon: <ShieldCheck className="h-6 w-6" />, title: "Geblokkeerde gebruikers", desc: "Bekijk en beheer wie je hebt geblokkeerd.", accent: "from-rose-500/25 to-rose-500/5" },
+    { to: "/mijn-meldingen", icon: <ShieldCheck className="h-6 w-6" />, title: "Mijn meldingen", desc: "Status van meldingen die je hebt ingediend.", accent: "from-amber-500/25 to-amber-500/5" },
     { to: "/onderhoud", icon: <Wrench className="h-6 w-6" />, title: "Onderhoudslogboek", desc: "APK, banden, olie, reparaties en kosten op één plek.", accent: "from-amber-500/25 to-amber-500/5" },
     { to: "/documenten", icon: <FileText className="h-6 w-6" />, title: "Documentenkluis", desc: "CMR, vrachtbrief, ADR, voertuigpapieren en bonnetjes.", accent: "from-purple-500/25 to-purple-500/5" },
     { to: "/navigatie-provider", icon: <MapIcon className="h-6 w-6" />, title: "Truck-navigatie", desc: "HERE en TomTom truckroutes — demo met mockberekening.", accent: "from-sky-500/25 to-sky-500/5", badge: "Binnenkort" },

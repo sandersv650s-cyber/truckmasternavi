@@ -620,6 +620,13 @@ export type Database = {
             referencedRelation: "reports"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "report_notes_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports_staff"
+            referencedColumns: ["id"]
+          },
         ]
       }
       reports: {
@@ -1014,7 +1021,57 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      reports_staff: {
+        Row: {
+          action_taken: string | null
+          admin_notes: string | null
+          category: string | null
+          context_id: string | null
+          context_type: string | null
+          created_at: string | null
+          details: string | null
+          handled_at: string | null
+          handled_by: string | null
+          id: string | null
+          reported_user_id: string | null
+          reporter_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          action_taken?: string | null
+          admin_notes?: string | null
+          category?: string | null
+          context_id?: string | null
+          context_type?: string | null
+          created_at?: string | null
+          details?: string | null
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string | null
+          reported_user_id?: string | null
+          reporter_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          action_taken?: string | null
+          admin_notes?: string | null
+          category?: string | null
+          context_id?: string | null
+          context_type?: string | null
+          created_at?: string | null
+          details?: string | null
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string | null
+          reported_user_id?: string | null
+          reporter_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       conversation_has_block: {

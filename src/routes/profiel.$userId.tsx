@@ -1,13 +1,18 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StorageAvatarImage, StorageImg } from "@/lib/storage-image";
-import { Truck, ArrowLeft } from "lucide-react";
+import { Truck, ArrowLeft, MessageSquare, ShieldOff, ShieldCheck, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchProfile, initials, formatDate, type PostRow } from "@/lib/queries";
+import { useAuth } from "@/lib/auth";
+import { blockUser, fetchBlockedIds, unblockUser } from "@/lib/blocks";
+import { getOrCreateDirectConversation } from "@/lib/chat";
+import { ReportDialog } from "@/components/report-dialog";
 
 export const Route = createFileRoute("/profiel/$userId")({
   head: () => ({
@@ -29,9 +34,20 @@ export const Route = createFileRoute("/profiel/$userId")({
 
 function UserProfile() {
   const { userId } = Route.useParams();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const isSelf = user?.id === userId;
   const profQ = useQuery({ queryKey: ["profile", userId], queryFn: () => fetchProfile(userId) });
+  const blockedQ = useQuery({
+    queryKey: ["blocked-ids", user?.id],
+    queryFn: () => fetchBlockedIds(user!.id),
+    enabled: !!user,
+  });
+  const isBlocked = (blockedQ.data ?? []).includes(userId);
   const postsQ = useQuery({
     queryKey: ["profile-posts", userId],
+    enabled: !isBlocked,
     queryFn: async () => {
       const { data, error } = await supabase.from("posts").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(20);
       if (error) throw error;
@@ -69,8 +85,69 @@ function UserProfile() {
             </CardContent>
           </Card>
 
+          {user && !isSelf && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                disabled={isBlocked}
+                onClick={async () => {
+                  try {
+                    const conv = await getOrCreateDirectConversation(user.id, userId);
+                    void navigate({ to: "/chat/$chatId", params: { chatId: conv.id } });
+                  } catch (e) {
+                    toast.error(e instanceof Error ? e.message : "Chat starten mislukt.");
+                  }
+                }}
+              >
+                <MessageSquare className="mr-1 h-4 w-4" /> Bericht sturen
+              </Button>
+              <Button
+                size="sm"
+                variant={isBlocked ? "secondary" : "outline"}
+                onClick={async () => {
+                  try {
+                    if (isBlocked) {
+                      await unblockUser(user.id, userId);
+                      toast.success("Blokkade opgeheven.");
+                    } else {
+                      await blockUser(user.id, userId);
+                      toast.success("Gebruiker geblokkeerd. Jullie kunnen elkaar niet meer berichten.");
+                    }
+                    await qc.invalidateQueries({ queryKey: ["blocked-ids", user.id] });
+                  } catch (e) {
+                    toast.error(e instanceof Error ? e.message : "Actie mislukt.");
+                  }
+                }}
+              >
+                {isBlocked ? (
+                  <>
+                    <ShieldCheck className="mr-1 h-4 w-4" /> Deblokkeren
+                  </>
+                ) : (
+                  <>
+                    <ShieldOff className="mr-1 h-4 w-4" /> Blokkeren
+                  </>
+                )}
+              </Button>
+              <ReportDialog
+                reportedUserId={userId}
+                contextType="profile"
+                contextId={userId}
+                trigger={
+                  <Button size="sm" variant="ghost">
+                    <Flag className="mr-1 h-4 w-4" /> Melden
+                  </Button>
+                }
+              />
+            </div>
+          )}
+
           <h3 className="mb-2 text-sm font-semibold">Recente berichten</h3>
-          {postsQ.isLoading ? (
+          {isBlocked ? (
+            <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+              Er is een blokkade actief tussen jullie. Berichten van deze gebruiker worden verborgen.
+            </p>
+          ) : postsQ.isLoading ? (
             <p className="text-sm text-muted-foreground">Laden…</p>
           ) : (postsQ.data ?? []).length === 0 ? (
             <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">Nog geen berichten.</p>

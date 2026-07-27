@@ -31,6 +31,7 @@ import { Route as OfflineKaartenRouteImport } from './routes/offline-kaarten'
 import { Route as NotificatiesRouteImport } from './routes/notificaties'
 import { Route as NavigatieProviderRouteImport } from './routes/navigatie-provider'
 import { Route as NavigatieRouteImport } from './routes/navigatie'
+import { Route as MijnMeldingenRouteImport } from './routes/mijn-meldingen'
 import { Route as MeldingenRouteImport } from './routes/meldingen'
 import { Route as MeerRouteImport } from './routes/meer'
 import { Route as LoginRouteImport } from './routes/login'
@@ -175,6 +176,11 @@ const NavigatieProviderRoute = NavigatieProviderRouteImport.update({
 const NavigatieRoute = NavigatieRouteImport.update({
   id: '/navigatie',
   path: '/navigatie',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MijnMeldingenRoute = MijnMeldingenRouteImport.update({
+  id: '/mijn-meldingen',
+  path: '/mijn-meldingen',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MeldingenRoute = MeldingenRouteImport.update({
@@ -375,6 +381,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/meer': typeof MeerRoute
   '/meldingen': typeof MeldingenRoute
+  '/mijn-meldingen': typeof MijnMeldingenRoute
   '/navigatie': typeof NavigatieRoute
   '/navigatie-provider': typeof NavigatieProviderRoute
   '/notificaties': typeof NotificatiesRoute
@@ -434,6 +441,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/meer': typeof MeerRoute
   '/meldingen': typeof MeldingenRoute
+  '/mijn-meldingen': typeof MijnMeldingenRoute
   '/navigatie': typeof NavigatieRoute
   '/navigatie-provider': typeof NavigatieProviderRoute
   '/notificaties': typeof NotificatiesRoute
@@ -494,6 +502,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/meer': typeof MeerRoute
   '/meldingen': typeof MeldingenRoute
+  '/mijn-meldingen': typeof MijnMeldingenRoute
   '/navigatie': typeof NavigatieRoute
   '/navigatie-provider': typeof NavigatieProviderRoute
   '/notificaties': typeof NotificatiesRoute
@@ -555,6 +564,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/meer'
     | '/meldingen'
+    | '/mijn-meldingen'
     | '/navigatie'
     | '/navigatie-provider'
     | '/notificaties'
@@ -614,6 +624,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/meer'
     | '/meldingen'
+    | '/mijn-meldingen'
     | '/navigatie'
     | '/navigatie-provider'
     | '/notificaties'
@@ -673,6 +684,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/meer'
     | '/meldingen'
+    | '/mijn-meldingen'
     | '/navigatie'
     | '/navigatie-provider'
     | '/notificaties'
@@ -733,6 +745,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MeerRoute: typeof MeerRoute
   MeldingenRoute: typeof MeldingenRoute
+  MijnMeldingenRoute: typeof MijnMeldingenRoute
   NavigatieRoute: typeof NavigatieRoute
   NavigatieProviderRoute: typeof NavigatieProviderRoute
   NotificatiesRoute: typeof NotificatiesRoute
@@ -912,6 +925,13 @@ declare module '@tanstack/react-router' {
       path: '/navigatie'
       fullPath: '/navigatie'
       preLoaderRoute: typeof NavigatieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mijn-meldingen': {
+      id: '/mijn-meldingen'
+      path: '/mijn-meldingen'
+      fullPath: '/mijn-meldingen'
+      preLoaderRoute: typeof MijnMeldingenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/meldingen': {
@@ -1283,6 +1303,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MeerRoute: MeerRoute,
   MeldingenRoute: MeldingenRoute,
+  MijnMeldingenRoute: MijnMeldingenRoute,
   NavigatieRoute: NavigatieRoute,
   NavigatieProviderRoute: NavigatieProviderRoute,
   NotificatiesRoute: NotificatiesRoute,
