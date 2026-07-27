@@ -103,7 +103,7 @@ function AdminTerminals() {
   };
 
   return (
-    <AdminGuard title="Locaties">
+    <AdminGuard title="Locaties" require="staff">
       <Card className="mb-4">
         <CardContent className="space-y-2 p-4">
           <p className="text-sm font-semibold">{editing ? "Locatie bewerken" : "Nieuwe locatie"}</p>
