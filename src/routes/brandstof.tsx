@@ -16,6 +16,7 @@ import {
   type FuelType,
   type StationWithPrice,
 } from "@/lib/fuel";
+import { getFuelFeedStatus, type FuelFeedStatus } from "@/lib/fuel.functions";
 
 export const Route = createFileRoute("/brandstof")({
   head: () => ({
@@ -44,6 +45,13 @@ function BrandstofPage() {
   const [rows, setRows] = useState<StationWithPrice[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [feed, setFeed] = useState<FuelFeedStatus | null>(null);
+
+  useEffect(() => {
+    getFuelFeedStatus()
+      .then(setFeed)
+      .catch(() => setFeed(null));
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -100,12 +108,19 @@ function BrandstofPage() {
 
   return (
     <AppShell title="Dieselprijzen">
-      <Card className="mb-3 border-amber-500/40 bg-amber-500/5">
+      <Card
+        className={
+          feed?.configured
+            ? "mb-3 border-primary/40 bg-primary/5"
+            : "mb-3 border-amber-500/40 bg-amber-500/5"
+        }
+      >
         <CardContent className="p-3 text-xs text-muted-foreground">
-          Bron: <span className="font-semibold text-foreground">{provider.label}</span> —{" "}
-          {provider.isLive
-            ? "live prijsfeed gekoppeld."
-            : "nog geen live prijsfeed gekoppeld; prijzen zijn referentiewaarden uit de eigen database. De providerlaag is voorbereid om een externe feed in te pluggen."}
+          Bron:{" "}
+          <span className="font-semibold text-foreground">
+            {feed?.configured ? (feed.provider ?? "externe feed") : provider.label}
+          </span>{" "}
+          — {feed?.message ?? "Statuscontrole van de prijsfeed…"}
         </CardContent>
       </Card>
 
