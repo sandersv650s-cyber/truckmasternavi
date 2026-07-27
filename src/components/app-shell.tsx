@@ -2,6 +2,7 @@ import { useEffect, type ReactNode } from "react";
 import { Truck, LogIn } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { BottomNav } from "./bottom-nav";
+import { QuickNav } from "./quick-nav";
 import { NotificationCenter } from "./notification-center";
 import { useAuth } from "@/lib/auth";
 import { Button } from "./ui/button";
@@ -74,6 +75,7 @@ export function AppShell({
             <NotificationCenter />
           </div>
         </div>
+        {user ? <QuickNav /> : null}
       </header>
       <main className="mx-auto max-w-2xl px-4 py-4">
         {demoBanner ? <DemoBanner text={demoBanner} /> : null}
