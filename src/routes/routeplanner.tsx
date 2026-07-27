@@ -53,6 +53,8 @@ const HereNavMode = lazy(() =>
   import("@/components/here-nav-mode").then((m) => ({ default: m.HereNavMode })),
 );
 
+type PlannerSearch = { destLat?: number; destLng?: number; destLabel?: string };
+
 export const Route = createFileRoute("/routeplanner")({
   validateSearch: (raw: Record<string, unknown>): PlannerSearch => {
     const num = (v: unknown) => {
