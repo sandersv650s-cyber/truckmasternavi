@@ -252,7 +252,15 @@ export async function computeRoutes(opts: RouteOptions, signal?: AbortSignal): P
   }
   url.searchParams.set("apiKey", key);
 
-  const res = await fetch(url, { signal });
+  let res: Response;
+  try {
+    res = await fetch(url, { signal });
+  } catch (e) {
+    if ((e as any)?.name === "AbortError") throw e;
+    throw new Error(
+      "Netwerkfout: HERE is niet bereikbaar. Controleer je internetverbinding en probeer opnieuw.",
+    );
+  }
   const j = await res.json().catch(() => ({}));
   if (!res.ok) {
     const msg =
