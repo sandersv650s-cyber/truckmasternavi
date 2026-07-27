@@ -65,6 +65,7 @@ import { Route as BeheerMeldingenRouteImport } from './routes/beheer.meldingen'
 import { Route as BeheerLocatiesRouteImport } from './routes/beheer.locaties'
 import { Route as BeheerGebruikersRouteImport } from './routes/beheer.gebruikers'
 import { Route as BeheerBrandstofRouteImport } from './routes/beheer.brandstof'
+import { Route as BeheerBlokkadesRouteImport } from './routes/beheer.blokkades'
 import { Route as BeheerAuditlogRouteImport } from './routes/beheer.auditlog'
 import { Route as ApiPublicHereKeyRouteImport } from './routes/api/public/here-key'
 
@@ -348,6 +349,11 @@ const BeheerBrandstofRoute = BeheerBrandstofRouteImport.update({
   path: '/brandstof',
   getParentRoute: () => BeheerRoute,
 } as any)
+const BeheerBlokkadesRoute = BeheerBlokkadesRouteImport.update({
+  id: '/blokkades',
+  path: '/blokkades',
+  getParentRoute: () => BeheerRoute,
+} as any)
 const BeheerAuditlogRoute = BeheerAuditlogRouteImport.update({
   id: '/auditlog',
   path: '/auditlog',
@@ -405,6 +411,7 @@ export interface FileRoutesByFullPath {
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
   '/beheer/auditlog': typeof BeheerAuditlogRoute
+  '/beheer/blokkades': typeof BeheerBlokkadesRoute
   '/beheer/brandstof': typeof BeheerBrandstofRoute
   '/beheer/gebruikers': typeof BeheerGebruikersRoute
   '/beheer/locaties': typeof BeheerLocatiesRoute
@@ -465,6 +472,7 @@ export interface FileRoutesByTo {
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
   '/beheer/auditlog': typeof BeheerAuditlogRoute
+  '/beheer/blokkades': typeof BeheerBlokkadesRoute
   '/beheer/brandstof': typeof BeheerBrandstofRoute
   '/beheer/gebruikers': typeof BeheerGebruikersRoute
   '/beheer/locaties': typeof BeheerLocatiesRoute
@@ -526,6 +534,7 @@ export interface FileRoutesById {
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
   '/beheer/auditlog': typeof BeheerAuditlogRoute
+  '/beheer/blokkades': typeof BeheerBlokkadesRoute
   '/beheer/brandstof': typeof BeheerBrandstofRoute
   '/beheer/gebruikers': typeof BeheerGebruikersRoute
   '/beheer/locaties': typeof BeheerLocatiesRoute
@@ -588,6 +597,7 @@ export interface FileRouteTypes {
     | '/voorzieningen'
     | '/zoeken'
     | '/beheer/auditlog'
+    | '/beheer/blokkades'
     | '/beheer/brandstof'
     | '/beheer/gebruikers'
     | '/beheer/locaties'
@@ -648,6 +658,7 @@ export interface FileRouteTypes {
     | '/voorzieningen'
     | '/zoeken'
     | '/beheer/auditlog'
+    | '/beheer/blokkades'
     | '/beheer/brandstof'
     | '/beheer/gebruikers'
     | '/beheer/locaties'
@@ -708,6 +719,7 @@ export interface FileRouteTypes {
     | '/voorzieningen'
     | '/zoeken'
     | '/beheer/auditlog'
+    | '/beheer/blokkades'
     | '/beheer/brandstof'
     | '/beheer/gebruikers'
     | '/beheer/locaties'
@@ -1165,6 +1177,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BeheerBrandstofRouteImport
       parentRoute: typeof BeheerRoute
     }
+    '/beheer/blokkades': {
+      id: '/beheer/blokkades'
+      path: '/blokkades'
+      fullPath: '/beheer/blokkades'
+      preLoaderRoute: typeof BeheerBlokkadesRouteImport
+      parentRoute: typeof BeheerRoute
+    }
     '/beheer/auditlog': {
       id: '/beheer/auditlog'
       path: '/auditlog'
@@ -1184,6 +1203,7 @@ declare module '@tanstack/react-router' {
 
 interface BeheerRouteChildren {
   BeheerAuditlogRoute: typeof BeheerAuditlogRoute
+  BeheerBlokkadesRoute: typeof BeheerBlokkadesRoute
   BeheerBrandstofRoute: typeof BeheerBrandstofRoute
   BeheerGebruikersRoute: typeof BeheerGebruikersRoute
   BeheerLocatiesRoute: typeof BeheerLocatiesRoute
@@ -1193,6 +1213,7 @@ interface BeheerRouteChildren {
 
 const BeheerRouteChildren: BeheerRouteChildren = {
   BeheerAuditlogRoute: BeheerAuditlogRoute,
+  BeheerBlokkadesRoute: BeheerBlokkadesRoute,
   BeheerBrandstofRoute: BeheerBrandstofRoute,
   BeheerGebruikersRoute: BeheerGebruikersRoute,
   BeheerLocatiesRoute: BeheerLocatiesRoute,
