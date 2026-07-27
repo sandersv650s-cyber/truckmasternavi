@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ParkingSquare, Fuel, Megaphone, Search, Trophy, ChevronRight, Map as MapIcon, Sparkles, LayoutGrid } from "lucide-react";
+import { Building2, Radio, ParkingSquare, Fuel, Megaphone, Search, Trophy, ChevronRight, Map as MapIcon, Sparkles, LayoutGrid } from "lucide-react";
 import { truckstops, fuelStations, initialAlerts, amenityCategoryMeta, type AmenityCategory } from "@/lib/discover-data";
 
 export const Route = createFileRoute("/ontdekken")({
