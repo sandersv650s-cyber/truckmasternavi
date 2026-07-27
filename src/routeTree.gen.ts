@@ -14,6 +14,7 @@ import { Route as VoorzieningenRouteImport } from './routes/voorzieningen'
 import { Route as VoorwaardenRouteImport } from './routes/voorwaarden'
 import { Route as VoertuigRouteImport } from './routes/voertuig'
 import { Route as TruckstopsRouteImport } from './routes/truckstops'
+import { Route as TerminalsRouteImport } from './routes/terminals'
 import { Route as RouteplannerRouteImport } from './routes/routeplanner'
 import { Route as RittenRouteImport } from './routes/ritten'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -51,6 +52,7 @@ import { Route as BeloningenRouteImport } from './routes/beloningen'
 import { Route as AssistentRouteImport } from './routes/assistent'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TruckstopsIdRouteImport } from './routes/truckstops.$id'
+import { Route as TerminalsIdRouteImport } from './routes/terminals.$id'
 import { Route as RittenRideIdRouteImport } from './routes/ritten.$rideId'
 import { Route as ProfielUserIdRouteImport } from './routes/profiel.$userId'
 import { Route as KonvooiIdRouteImport } from './routes/konvooi.$id'
@@ -81,6 +83,11 @@ const VoertuigRoute = VoertuigRouteImport.update({
 const TruckstopsRoute = TruckstopsRouteImport.update({
   id: '/truckstops',
   path: '/truckstops',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TerminalsRoute = TerminalsRouteImport.update({
+  id: '/terminals',
+  path: '/terminals',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RouteplannerRoute = RouteplannerRouteImport.update({
@@ -268,6 +275,11 @@ const TruckstopsIdRoute = TruckstopsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => TruckstopsRoute,
 } as any)
+const TerminalsIdRoute = TerminalsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => TerminalsRoute,
+} as any)
 const RittenRideIdRoute = RittenRideIdRouteImport.update({
   id: '/$rideId',
   path: '/$rideId',
@@ -336,6 +348,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/ritten': typeof RittenRouteWithChildren
   '/routeplanner': typeof RouteplannerRoute
+  '/terminals': typeof TerminalsRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/voorwaarden': typeof VoorwaardenRoute
@@ -346,6 +359,7 @@ export interface FileRoutesByFullPath {
   '/konvooi/$id': typeof KonvooiIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
+  '/terminals/$id': typeof TerminalsIdRoute
   '/truckstops/$id': typeof TruckstopsIdRoute
   '/api/public/here-key': typeof ApiPublicHereKeyRoute
 }
@@ -386,6 +400,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/ritten': typeof RittenRouteWithChildren
   '/routeplanner': typeof RouteplannerRoute
+  '/terminals': typeof TerminalsRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/voorwaarden': typeof VoorwaardenRoute
@@ -396,6 +411,7 @@ export interface FileRoutesByTo {
   '/konvooi/$id': typeof KonvooiIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
+  '/terminals/$id': typeof TerminalsIdRoute
   '/truckstops/$id': typeof TruckstopsIdRoute
   '/api/public/here-key': typeof ApiPublicHereKeyRoute
 }
@@ -437,6 +453,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/ritten': typeof RittenRouteWithChildren
   '/routeplanner': typeof RouteplannerRoute
+  '/terminals': typeof TerminalsRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/voorwaarden': typeof VoorwaardenRoute
@@ -447,6 +464,7 @@ export interface FileRoutesById {
   '/konvooi/$id': typeof KonvooiIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
+  '/terminals/$id': typeof TerminalsIdRoute
   '/truckstops/$id': typeof TruckstopsIdRoute
   '/api/public/here-key': typeof ApiPublicHereKeyRoute
 }
@@ -489,6 +507,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/ritten'
     | '/routeplanner'
+    | '/terminals'
     | '/truckstops'
     | '/voertuig'
     | '/voorwaarden'
@@ -499,6 +518,7 @@ export interface FileRouteTypes {
     | '/konvooi/$id'
     | '/profiel/$userId'
     | '/ritten/$rideId'
+    | '/terminals/$id'
     | '/truckstops/$id'
     | '/api/public/here-key'
   fileRoutesByTo: FileRoutesByTo
@@ -539,6 +559,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/ritten'
     | '/routeplanner'
+    | '/terminals'
     | '/truckstops'
     | '/voertuig'
     | '/voorwaarden'
@@ -549,6 +570,7 @@ export interface FileRouteTypes {
     | '/konvooi/$id'
     | '/profiel/$userId'
     | '/ritten/$rideId'
+    | '/terminals/$id'
     | '/truckstops/$id'
     | '/api/public/here-key'
   id:
@@ -589,6 +611,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/ritten'
     | '/routeplanner'
+    | '/terminals'
     | '/truckstops'
     | '/voertuig'
     | '/voorwaarden'
@@ -599,6 +622,7 @@ export interface FileRouteTypes {
     | '/konvooi/$id'
     | '/profiel/$userId'
     | '/ritten/$rideId'
+    | '/terminals/$id'
     | '/truckstops/$id'
     | '/api/public/here-key'
   fileRoutesById: FileRoutesById
@@ -640,6 +664,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   RittenRoute: typeof RittenRouteWithChildren
   RouteplannerRoute: typeof RouteplannerRoute
+  TerminalsRoute: typeof TerminalsRouteWithChildren
   TruckstopsRoute: typeof TruckstopsRouteWithChildren
   VoertuigRoute: typeof VoertuigRoute
   VoorwaardenRoute: typeof VoorwaardenRoute
@@ -683,6 +708,13 @@ declare module '@tanstack/react-router' {
       path: '/truckstops'
       fullPath: '/truckstops'
       preLoaderRoute: typeof TruckstopsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terminals': {
+      id: '/terminals'
+      path: '/terminals'
+      fullPath: '/terminals'
+      preLoaderRoute: typeof TerminalsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/routeplanner': {
@@ -944,6 +976,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TruckstopsIdRouteImport
       parentRoute: typeof TruckstopsRoute
     }
+    '/terminals/$id': {
+      id: '/terminals/$id'
+      path: '/$id'
+      fullPath: '/terminals/$id'
+      preLoaderRoute: typeof TerminalsIdRouteImport
+      parentRoute: typeof TerminalsRoute
+    }
     '/ritten/$rideId': {
       id: '/ritten/$rideId'
       path: '/$rideId'
@@ -1043,6 +1082,18 @@ const RittenRouteChildren: RittenRouteChildren = {
 const RittenRouteWithChildren =
   RittenRoute._addFileChildren(RittenRouteChildren)
 
+interface TerminalsRouteChildren {
+  TerminalsIdRoute: typeof TerminalsIdRoute
+}
+
+const TerminalsRouteChildren: TerminalsRouteChildren = {
+  TerminalsIdRoute: TerminalsIdRoute,
+}
+
+const TerminalsRouteWithChildren = TerminalsRoute._addFileChildren(
+  TerminalsRouteChildren,
+)
+
 interface TruckstopsRouteChildren {
   TruckstopsIdRoute: typeof TruckstopsIdRoute
 }
@@ -1092,6 +1143,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   RittenRoute: RittenRouteWithChildren,
   RouteplannerRoute: RouteplannerRoute,
+  TerminalsRoute: TerminalsRouteWithChildren,
   TruckstopsRoute: TruckstopsRouteWithChildren,
   VoertuigRoute: VoertuigRoute,
   VoorwaardenRoute: VoorwaardenRoute,
