@@ -19,8 +19,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Search, ShieldOff, ShieldCheck, Trash2 } from "lucide-react";
-import { adminDeleteUser, adminListUsers, adminSetSuspended } from "@/lib/admin.functions";
-import { useIsAdmin } from "@/lib/admin";
+import {
+  adminDeleteUser,
+  adminListUsers,
+  adminSetRole,
+  adminSetSuspended,
+} from "@/lib/admin.functions";
+import { appRoleLabels, useMyRoles, type AppRole } from "@/lib/admin";
 
 export const Route = createFileRoute("/beheer/gebruikers")({
   head: () => ({
@@ -37,10 +42,11 @@ export const Route = createFileRoute("/beheer/gebruikers")({
 type Row = Awaited<ReturnType<typeof adminListUsers>>[number];
 
 function AdminUsers() {
-  const { isAdmin, checking } = useIsAdmin();
+  const { isAdmin, isStaff, checking } = useMyRoles();
   const list = useServerFn(adminListUsers);
   const setSuspended = useServerFn(adminSetSuspended);
   const removeUser = useServerFn(adminDeleteUser);
+  const setRole = useServerFn(adminSetRole);
   const [rows, setRows] = useState<Row[] | null>(null);
   const [search, setSearch] = useState("");
   const [confirmEmail, setConfirmEmail] = useState("");
@@ -57,12 +63,17 @@ function AdminUsers() {
   };
 
   useEffect(() => {
-    if (!checking && isAdmin) void load();
+    if (!checking && isStaff) void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checking, isAdmin]);
+  }, [checking, isStaff]);
 
   return (
-    <AdminGuard title="Gebruikers">
+    <AdminGuard title="Gebruikers" require="staff">
+      <p className="mb-3 text-[11px] text-muted-foreground">
+        {isAdmin
+          ? "Als beheerder kun je rollen aanpassen, accounts schorsen en verwijderen."
+          : "Als moderator kun je gewone accounts schorsen. Rollen wijzigen en verwijderen is voorbehouden aan beheerders."}
+      </p>
       <div className="mb-3 flex gap-2">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -88,6 +99,7 @@ function AdminUsers() {
         <div className="space-y-2">
           {rows.map((u) => {
             const suspended = Boolean(u.suspended_at);
+            const targetIsAdmin = u.roles.includes("admin");
             return (
               <Card key={u.id}>
                 <CardContent className="p-3">
@@ -119,6 +131,7 @@ function AdminUsers() {
                       size="sm"
                       variant={suspended ? "secondary" : "outline"}
                       className="flex-1"
+                      disabled={!isAdmin && targetIsAdmin}
                       onClick={async () => {
                         try {
                           await setSuspended({
@@ -145,6 +158,7 @@ function AdminUsers() {
                         </>
                       )}
                     </Button>
+                    {isAdmin && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button size="sm" variant="destructive" onClick={() => setConfirmEmail("")}>
@@ -182,7 +196,37 @@ function AdminUsers() {
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
+                    )}
                   </div>
+                  {isAdmin && (
+                    <div className="mt-2 flex flex-wrap items-center gap-1.5 border-t border-border/60 pt-2">
+                      <span className="text-[10px] uppercase text-muted-foreground">Rollen</span>
+                      {(["admin", "moderator"] as AppRole[]).map((role) => {
+                        const has = u.roles.includes(role);
+                        return (
+                          <Button
+                            key={role}
+                            size="sm"
+                            variant={has ? "secondary" : "outline"}
+                            className="h-7 text-[11px]"
+                            onClick={async () => {
+                              try {
+                                await setRole({ data: { userId: u.id, role, grant: !has } });
+                                toast.success(
+                                  has ? `${appRoleLabels[role]} ingetrokken.` : `${appRoleLabels[role]} toegekend.`,
+                                );
+                                await load(search);
+                              } catch (e) {
+                                toast.error(e instanceof Error ? e.message : "Rol wijzigen mislukt.");
+                              }
+                            }}
+                          >
+                            {has ? `− ${appRoleLabels[role]}` : `+ ${appRoleLabels[role]}`}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             );
