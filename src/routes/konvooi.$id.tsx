@@ -106,11 +106,18 @@ function ConvoyDetail() {
           void fetchConvoyLocations(id).then(setLocations).catch(() => undefined);
         },
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "convoy_members", filter: `convoy_id=eq.${id}` },
+        () => {
+          void load();
+        },
+      )
       .subscribe();
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [id]);
+  }, [id, load]);
 
   // Live locatie delen: alleen zolang de opt-in aan staat en niet verlopen is.
   useEffect(() => {
