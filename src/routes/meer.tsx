@@ -27,6 +27,8 @@ import {
   Bell,
 } from "lucide-react";
 import { APP_VERSION } from "@/lib/app-info";
+import { useIsAdmin } from "@/lib/admin";
+import { ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/meer")({
   head: () => ({
@@ -45,6 +47,8 @@ type Tile = {
     | "/assistent"
     | "/groepen"
     | "/konvooi"
+    | "/terminals"
+    | "/geblokkeerd"
     | "/onderhoud"
     | "/documenten"
     | "/integraties"
@@ -73,6 +77,7 @@ type Tile = {
 };
 
 function MeerPage() {
+  const { isAdmin } = useIsAdmin();
   const tiles: Tile[] = [
     { to: "/premium", icon: <Crown className="h-6 w-6" />, title: "TruckMate Premium", desc: "Free, Driver Pro en Fleet Pro plannen vergelijken.", accent: "from-amber-500/25 to-amber-500/5", badge: "Demo" },
     { to: "/fleet", icon: <Building2 className="h-6 w-6" />, title: "Fleet dashboard", desc: "Voertuigen, chauffeurs en KPI's voor transportbedrijven.", accent: "from-primary/25 to-primary/5", badge: "Fleet Pro" },
@@ -81,6 +86,8 @@ function MeerPage() {
     { to: "/beloningen", icon: <Trophy className="h-6 w-6" />, title: "Beloningen & XP", desc: "Levels, badges, streaks en weekuitdagingen.", accent: "from-yellow-500/25 to-yellow-500/5" },
     { to: "/groepen", icon: <Users className="h-6 w-6" />, title: "Groepen", desc: "Bedrijfs-, regio-, route- en interessegroepen met eigen feed.", accent: "from-sky-500/25 to-sky-500/5", hint: "6 voorbeeldgroepen" },
     { to: "/konvooi", icon: <Radio className="h-6 w-6" />, title: "Konvooimodus", desc: "Rijd samen met collega's en deel locatie tijdelijk — standaard uit.", accent: "from-emerald-500/25 to-emerald-500/5", badge: "Privacy-first" },
+    { to: "/terminals", icon: <Building2 className="h-6 w-6" />, title: "DC's & terminals", desc: "Adressen, openingstijden en faciliteiten van laad- en losplekken.", accent: "from-sky-500/25 to-sky-500/5" },
+    { to: "/geblokkeerd", icon: <ShieldCheck className="h-6 w-6" />, title: "Geblokkeerde gebruikers", desc: "Bekijk en beheer wie je hebt geblokkeerd.", accent: "from-rose-500/25 to-rose-500/5" },
     { to: "/onderhoud", icon: <Wrench className="h-6 w-6" />, title: "Onderhoudslogboek", desc: "APK, banden, olie, reparaties en kosten op één plek.", accent: "from-amber-500/25 to-amber-500/5" },
     { to: "/documenten", icon: <FileText className="h-6 w-6" />, title: "Documentenkluis", desc: "CMR, vrachtbrief, ADR, voertuigpapieren en bonnetjes.", accent: "from-purple-500/25 to-purple-500/5" },
     { to: "/navigatie-provider", icon: <MapIcon className="h-6 w-6" />, title: "Truck-navigatie", desc: "HERE en TomTom truckroutes — demo met mockberekening.", accent: "from-sky-500/25 to-sky-500/5", badge: "Binnenkort" },
@@ -99,6 +106,22 @@ function MeerPage() {
   ];
   return (
     <AppShell title="Meer">
+      {isAdmin && (
+        <Link to="/beheer" className="mb-4 block">
+          <Card className="border-primary/60 bg-primary/10 transition hover:border-primary">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-background/60 text-primary">
+                <ShieldAlert className="h-6 w-6" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold">Beheerpaneel</p>
+                <p className="text-[11px] text-muted-foreground">Gebruikers, meldingen, locaties en auditlog.</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </CardContent>
+          </Card>
+        </Link>
+      )}
       <p className="mb-4 text-sm text-muted-foreground">
         Extra modules die TruckMate onderscheidend maken. Alles hier is een klikbare demo — voertuigdata en integraties zijn nog niet echt gekoppeld.
       </p>
