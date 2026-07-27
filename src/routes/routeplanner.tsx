@@ -72,6 +72,20 @@ export const Route = createFileRoute("/routeplanner")({
   component: RoutePlannerPage,
 });
 
+type PlannerSearch = { destLat?: number; destLng?: number; destLabel?: string };
+
+Route.options.validateSearch = (raw: Record<string, unknown>): PlannerSearch => {
+  const num = (v: unknown) => {
+    const n = Number(v);
+    return Number.isFinite(n) && n !== 0 ? n : undefined;
+  };
+  return {
+    destLat: num(raw.destLat),
+    destLng: num(raw.destLng),
+    destLabel: typeof raw.destLabel === "string" ? raw.destLabel.slice(0, 120) : undefined,
+  };
+};
+
 type WP = { key: string; label: string; lat: number; lng: number };
 const newKey = () => Math.random().toString(36).slice(2, 9);
 const emptyWP = (): WP => ({ key: newKey(), label: "", lat: 0, lng: 0 });
@@ -101,10 +115,25 @@ const AVOID_LABELS: Record<AvoidFeature, string> = {
 
 function RoutePlannerPage() {
   const { user } = useAuth();
+  const search = Route.useSearch() as PlannerSearch;
   const here = useHereKey();
   const qc = useQueryClient();
 
   const [waypoints, setWaypoints] = useState<WP[]>([emptyWP(), emptyWP()]);
+  useEffect(() => {
+    if (search.destLat == null || search.destLng == null) return;
+    setWaypoints((wps) => {
+      const next = [...wps];
+      next[next.length - 1] = {
+        key: newKey(),
+        label: search.destLabel ?? "Bestemming",
+        lat: search.destLat!,
+        lng: search.destLng!,
+      };
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.destLat, search.destLng]);
   const [routes, setRoutes] = useState<HereRoute[]>([]);
   const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
   const [currentLoc, setCurrentLoc] = useState<LatLng | null>(null);
