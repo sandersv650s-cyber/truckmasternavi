@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_id: string
+          created_at: string
+          details: Json | null
+          id: string
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
       alert_votes: {
         Row: {
           alert_id: string
@@ -78,6 +108,327 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      conversation_participants: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          last_read_at: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          last_read_at?: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          last_read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          convoy_id: string | null
+          created_at: string
+          created_by: string
+          id: string
+          kind: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          convoy_id?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          kind?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          convoy_id?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          kind?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_convoy_id_fkey"
+            columns: ["convoy_id"]
+            isOneToOne: false
+            referencedRelation: "convoys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      convoy_locations: {
+        Row: {
+          convoy_id: string
+          created_at: string
+          expires_at: string
+          heading: number | null
+          id: string
+          lat: number
+          lng: number
+          speed_kmh: number | null
+          user_id: string
+        }
+        Insert: {
+          convoy_id: string
+          created_at?: string
+          expires_at: string
+          heading?: number | null
+          id?: string
+          lat: number
+          lng: number
+          speed_kmh?: number | null
+          user_id: string
+        }
+        Update: {
+          convoy_id?: string
+          created_at?: string
+          expires_at?: string
+          heading?: number | null
+          id?: string
+          lat?: number
+          lng?: number
+          speed_kmh?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "convoy_locations_convoy_id_fkey"
+            columns: ["convoy_id"]
+            isOneToOne: false
+            referencedRelation: "convoys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      convoy_members: {
+        Row: {
+          convoy_id: string
+          id: string
+          joined_at: string
+          role: string
+          sharing_location: boolean
+          sharing_until: string | null
+          user_id: string
+        }
+        Insert: {
+          convoy_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          sharing_location?: boolean
+          sharing_until?: string | null
+          user_id: string
+        }
+        Update: {
+          convoy_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          sharing_location?: boolean
+          sharing_until?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "convoy_members_convoy_id_fkey"
+            columns: ["convoy_id"]
+            isOneToOne: false
+            referencedRelation: "convoys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      convoys: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          from_location: string | null
+          id: string
+          invite_code: string
+          leader_id: string
+          name: string
+          planned_route: Json | null
+          starts_at: string | null
+          status: string
+          to_location: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          from_location?: string | null
+          id?: string
+          invite_code?: string
+          leader_id: string
+          name: string
+          planned_route?: Json | null
+          starts_at?: string | null
+          status?: string
+          to_location?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          from_location?: string | null
+          id?: string
+          invite_code?: string
+          leader_id?: string
+          name?: string
+          planned_route?: Json | null
+          starts_at?: string | null
+          status?: string
+          to_location?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fuel_prices: {
+        Row: {
+          created_at: string
+          fuel_type: string
+          id: string
+          is_demo: boolean
+          price_eur: number
+          reported_at: string
+          source: string
+          station_id: string
+        }
+        Insert: {
+          created_at?: string
+          fuel_type?: string
+          id?: string
+          is_demo?: boolean
+          price_eur: number
+          reported_at?: string
+          source?: string
+          station_id: string
+        }
+        Update: {
+          created_at?: string
+          fuel_type?: string
+          id?: string
+          is_demo?: boolean
+          price_eur?: number
+          reported_at?: string
+          source?: string
+          station_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fuel_prices_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "fuel_stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fuel_stations: {
+        Row: {
+          address: string | null
+          brand: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          has_adblue: boolean
+          id: string
+          lat: number | null
+          lng: number | null
+          name: string
+          open_hours: string | null
+          road: string | null
+          truck_suitable: boolean
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          brand?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          has_adblue?: boolean
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          name: string
+          open_hours?: string | null
+          road?: string | null
+          truck_suitable?: boolean
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          brand?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          has_adblue?: boolean
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          open_hours?: string | null
+          road?: string | null
+          truck_suitable?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          sender_id: string
+          text: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          sender_id: string
+          text: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       post_comments: {
         Row: {
@@ -174,6 +525,8 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          suspended_at: string | null
+          suspended_reason: string | null
           truck: string | null
           updated_at: string
           username: string | null
@@ -193,6 +546,8 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          suspended_at?: string | null
+          suspended_reason?: string | null
           truck?: string | null
           updated_at?: string
           username?: string | null
@@ -212,6 +567,8 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          suspended_at?: string | null
+          suspended_reason?: string | null
           truck?: string | null
           updated_at?: string
           username?: string | null
@@ -224,6 +581,54 @@ export type Database = {
           vehicle_type?: string | null
           vehicle_weight_kg?: number | null
           vehicle_width_cm?: number | null
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          admin_notes: string | null
+          category: string
+          context_id: string | null
+          context_type: string | null
+          created_at: string
+          details: string | null
+          handled_at: string | null
+          handled_by: string | null
+          id: string
+          reported_user_id: string | null
+          reporter_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          category: string
+          context_id?: string | null
+          context_type?: string | null
+          created_at?: string
+          details?: string | null
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          reported_user_id?: string | null
+          reporter_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          category?: string
+          context_id?: string | null
+          context_type?: string | null
+          created_at?: string
+          details?: string | null
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          reported_user_id?: string | null
+          reporter_id?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -329,6 +734,122 @@ export type Database = {
         }
         Relationships: []
       }
+      terminal_hours: {
+        Row: {
+          closed: boolean
+          closes: string | null
+          id: string
+          opens: string | null
+          terminal_id: string
+          weekday: number
+        }
+        Insert: {
+          closed?: boolean
+          closes?: string | null
+          id?: string
+          opens?: string | null
+          terminal_id: string
+          weekday: number
+        }
+        Update: {
+          closed?: boolean
+          closes?: string | null
+          id?: string
+          opens?: string | null
+          terminal_id?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "terminal_hours_terminal_id_fkey"
+            columns: ["terminal_id"]
+            isOneToOne: false
+            referencedRelation: "terminals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      terminals: {
+        Row: {
+          address: string | null
+          city: string | null
+          country: string
+          created_at: string
+          email: string | null
+          facilities: string[]
+          id: string
+          lat: number | null
+          lng: number | null
+          name: string
+          notes: string | null
+          phone: string | null
+          postal_code: string | null
+          type: string
+          updated_at: string
+          wait_time_notes: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          country?: string
+          created_at?: string
+          email?: string | null
+          facilities?: string[]
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          type?: string
+          updated_at?: string
+          wait_time_notes?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          country?: string
+          created_at?: string
+          email?: string | null
+          facilities?: string[]
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          type?: string
+          updated_at?: string
+          wait_time_notes?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      user_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -355,6 +876,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      conversation_has_block: {
+        Args: { _conv: string; _uid: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -362,6 +887,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: { _uid: string }; Returns: boolean }
+      is_blocked_pair: { Args: { _a: string; _b: string }; Returns: boolean }
+      is_conversation_participant: {
+        Args: { _conv: string; _uid: string }
+        Returns: boolean
+      }
+      is_convoy_member: {
+        Args: { _convoy: string; _uid: string }
+        Returns: boolean
+      }
+      purge_expired_convoy_locations: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

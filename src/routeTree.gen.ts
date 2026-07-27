@@ -14,6 +14,7 @@ import { Route as VoorzieningenRouteImport } from './routes/voorzieningen'
 import { Route as VoorwaardenRouteImport } from './routes/voorwaarden'
 import { Route as VoertuigRouteImport } from './routes/voertuig'
 import { Route as TruckstopsRouteImport } from './routes/truckstops'
+import { Route as TerminalsRouteImport } from './routes/terminals'
 import { Route as RouteplannerRouteImport } from './routes/routeplanner'
 import { Route as RittenRouteImport } from './routes/ritten'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -38,6 +39,7 @@ import { Route as KaartRouteImport } from './routes/kaart'
 import { Route as IntegratiesRouteImport } from './routes/integraties'
 import { Route as InstellingenRouteImport } from './routes/instellingen'
 import { Route as GroepenRouteImport } from './routes/groepen'
+import { Route as GeblokkeerdRouteImport } from './routes/geblokkeerd'
 import { Route as FleetRouteImport } from './routes/fleet'
 import { Route as DocumentenRouteImport } from './routes/documenten'
 import { Route as DeelEtaRouteImport } from './routes/deel-eta'
@@ -47,13 +49,20 @@ import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CarplayRouteImport } from './routes/carplay'
 import { Route as BrandstofRouteImport } from './routes/brandstof'
 import { Route as BeloningenRouteImport } from './routes/beloningen'
+import { Route as BeheerRouteImport } from './routes/beheer'
 import { Route as AssistentRouteImport } from './routes/assistent'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TruckstopsIdRouteImport } from './routes/truckstops.$id'
+import { Route as TerminalsIdRouteImport } from './routes/terminals.$id'
 import { Route as RittenRideIdRouteImport } from './routes/ritten.$rideId'
 import { Route as ProfielUserIdRouteImport } from './routes/profiel.$userId'
+import { Route as KonvooiIdRouteImport } from './routes/konvooi.$id'
 import { Route as GroepenIdRouteImport } from './routes/groepen.$id'
 import { Route as ChatChatIdRouteImport } from './routes/chat.$chatId'
+import { Route as BeheerMeldingenRouteImport } from './routes/beheer.meldingen'
+import { Route as BeheerLocatiesRouteImport } from './routes/beheer.locaties'
+import { Route as BeheerGebruikersRouteImport } from './routes/beheer.gebruikers'
+import { Route as BeheerAuditlogRouteImport } from './routes/beheer.auditlog'
 import { Route as ApiPublicHereKeyRouteImport } from './routes/api/public/here-key'
 
 const ZoekenRoute = ZoekenRouteImport.update({
@@ -79,6 +88,11 @@ const VoertuigRoute = VoertuigRouteImport.update({
 const TruckstopsRoute = TruckstopsRouteImport.update({
   id: '/truckstops',
   path: '/truckstops',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TerminalsRoute = TerminalsRouteImport.update({
+  id: '/terminals',
+  path: '/terminals',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RouteplannerRoute = RouteplannerRouteImport.update({
@@ -201,6 +215,11 @@ const GroepenRoute = GroepenRouteImport.update({
   path: '/groepen',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GeblokkeerdRoute = GeblokkeerdRouteImport.update({
+  id: '/geblokkeerd',
+  path: '/geblokkeerd',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FleetRoute = FleetRouteImport.update({
   id: '/fleet',
   path: '/fleet',
@@ -246,6 +265,11 @@ const BeloningenRoute = BeloningenRouteImport.update({
   path: '/beloningen',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BeheerRoute = BeheerRouteImport.update({
+  id: '/beheer',
+  path: '/beheer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AssistentRoute = AssistentRouteImport.update({
   id: '/assistent',
   path: '/assistent',
@@ -261,6 +285,11 @@ const TruckstopsIdRoute = TruckstopsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => TruckstopsRoute,
 } as any)
+const TerminalsIdRoute = TerminalsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => TerminalsRoute,
+} as any)
 const RittenRideIdRoute = RittenRideIdRouteImport.update({
   id: '/$rideId',
   path: '/$rideId',
@@ -270,6 +299,11 @@ const ProfielUserIdRoute = ProfielUserIdRouteImport.update({
   id: '/$userId',
   path: '/$userId',
   getParentRoute: () => ProfielRoute,
+} as any)
+const KonvooiIdRoute = KonvooiIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => KonvooiRoute,
 } as any)
 const GroepenIdRoute = GroepenIdRouteImport.update({
   id: '/$id',
@@ -281,6 +315,26 @@ const ChatChatIdRoute = ChatChatIdRouteImport.update({
   path: '/$chatId',
   getParentRoute: () => ChatRoute,
 } as any)
+const BeheerMeldingenRoute = BeheerMeldingenRouteImport.update({
+  id: '/meldingen',
+  path: '/meldingen',
+  getParentRoute: () => BeheerRoute,
+} as any)
+const BeheerLocatiesRoute = BeheerLocatiesRouteImport.update({
+  id: '/locaties',
+  path: '/locaties',
+  getParentRoute: () => BeheerRoute,
+} as any)
+const BeheerGebruikersRoute = BeheerGebruikersRouteImport.update({
+  id: '/gebruikers',
+  path: '/gebruikers',
+  getParentRoute: () => BeheerRoute,
+} as any)
+const BeheerAuditlogRoute = BeheerAuditlogRouteImport.update({
+  id: '/auditlog',
+  path: '/auditlog',
+  getParentRoute: () => BeheerRoute,
+} as any)
 const ApiPublicHereKeyRoute = ApiPublicHereKeyRouteImport.update({
   id: '/api/public/here-key',
   path: '/api/public/here-key',
@@ -290,6 +344,7 @@ const ApiPublicHereKeyRoute = ApiPublicHereKeyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/assistent': typeof AssistentRoute
+  '/beheer': typeof BeheerRouteWithChildren
   '/beloningen': typeof BeloningenRoute
   '/brandstof': typeof BrandstofRoute
   '/carplay': typeof CarplayRoute
@@ -299,11 +354,12 @@ export interface FileRoutesByFullPath {
   '/deel-eta': typeof DeelEtaRoute
   '/documenten': typeof DocumentenRoute
   '/fleet': typeof FleetRoute
+  '/geblokkeerd': typeof GeblokkeerdRoute
   '/groepen': typeof GroepenRouteWithChildren
   '/instellingen': typeof InstellingenRoute
   '/integraties': typeof IntegratiesRoute
   '/kaart': typeof KaartRoute
-  '/konvooi': typeof KonvooiRoute
+  '/konvooi': typeof KonvooiRouteWithChildren
   '/login': typeof LoginRoute
   '/meer': typeof MeerRoute
   '/meldingen': typeof MeldingenRoute
@@ -323,21 +379,29 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/ritten': typeof RittenRouteWithChildren
   '/routeplanner': typeof RouteplannerRoute
+  '/terminals': typeof TerminalsRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/voorwaarden': typeof VoorwaardenRoute
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
+  '/beheer/auditlog': typeof BeheerAuditlogRoute
+  '/beheer/gebruikers': typeof BeheerGebruikersRoute
+  '/beheer/locaties': typeof BeheerLocatiesRoute
+  '/beheer/meldingen': typeof BeheerMeldingenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
+  '/konvooi/$id': typeof KonvooiIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
+  '/terminals/$id': typeof TerminalsIdRoute
   '/truckstops/$id': typeof TruckstopsIdRoute
   '/api/public/here-key': typeof ApiPublicHereKeyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/assistent': typeof AssistentRoute
+  '/beheer': typeof BeheerRouteWithChildren
   '/beloningen': typeof BeloningenRoute
   '/brandstof': typeof BrandstofRoute
   '/carplay': typeof CarplayRoute
@@ -347,11 +411,12 @@ export interface FileRoutesByTo {
   '/deel-eta': typeof DeelEtaRoute
   '/documenten': typeof DocumentenRoute
   '/fleet': typeof FleetRoute
+  '/geblokkeerd': typeof GeblokkeerdRoute
   '/groepen': typeof GroepenRouteWithChildren
   '/instellingen': typeof InstellingenRoute
   '/integraties': typeof IntegratiesRoute
   '/kaart': typeof KaartRoute
-  '/konvooi': typeof KonvooiRoute
+  '/konvooi': typeof KonvooiRouteWithChildren
   '/login': typeof LoginRoute
   '/meer': typeof MeerRoute
   '/meldingen': typeof MeldingenRoute
@@ -371,15 +436,22 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/ritten': typeof RittenRouteWithChildren
   '/routeplanner': typeof RouteplannerRoute
+  '/terminals': typeof TerminalsRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/voorwaarden': typeof VoorwaardenRoute
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
+  '/beheer/auditlog': typeof BeheerAuditlogRoute
+  '/beheer/gebruikers': typeof BeheerGebruikersRoute
+  '/beheer/locaties': typeof BeheerLocatiesRoute
+  '/beheer/meldingen': typeof BeheerMeldingenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
+  '/konvooi/$id': typeof KonvooiIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
+  '/terminals/$id': typeof TerminalsIdRoute
   '/truckstops/$id': typeof TruckstopsIdRoute
   '/api/public/here-key': typeof ApiPublicHereKeyRoute
 }
@@ -387,6 +459,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/assistent': typeof AssistentRoute
+  '/beheer': typeof BeheerRouteWithChildren
   '/beloningen': typeof BeloningenRoute
   '/brandstof': typeof BrandstofRoute
   '/carplay': typeof CarplayRoute
@@ -396,11 +469,12 @@ export interface FileRoutesById {
   '/deel-eta': typeof DeelEtaRoute
   '/documenten': typeof DocumentenRoute
   '/fleet': typeof FleetRoute
+  '/geblokkeerd': typeof GeblokkeerdRoute
   '/groepen': typeof GroepenRouteWithChildren
   '/instellingen': typeof InstellingenRoute
   '/integraties': typeof IntegratiesRoute
   '/kaart': typeof KaartRoute
-  '/konvooi': typeof KonvooiRoute
+  '/konvooi': typeof KonvooiRouteWithChildren
   '/login': typeof LoginRoute
   '/meer': typeof MeerRoute
   '/meldingen': typeof MeldingenRoute
@@ -420,15 +494,22 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/ritten': typeof RittenRouteWithChildren
   '/routeplanner': typeof RouteplannerRoute
+  '/terminals': typeof TerminalsRouteWithChildren
   '/truckstops': typeof TruckstopsRouteWithChildren
   '/voertuig': typeof VoertuigRoute
   '/voorwaarden': typeof VoorwaardenRoute
   '/voorzieningen': typeof VoorzieningenRoute
   '/zoeken': typeof ZoekenRoute
+  '/beheer/auditlog': typeof BeheerAuditlogRoute
+  '/beheer/gebruikers': typeof BeheerGebruikersRoute
+  '/beheer/locaties': typeof BeheerLocatiesRoute
+  '/beheer/meldingen': typeof BeheerMeldingenRoute
   '/chat/$chatId': typeof ChatChatIdRoute
   '/groepen/$id': typeof GroepenIdRoute
+  '/konvooi/$id': typeof KonvooiIdRoute
   '/profiel/$userId': typeof ProfielUserIdRoute
   '/ritten/$rideId': typeof RittenRideIdRoute
+  '/terminals/$id': typeof TerminalsIdRoute
   '/truckstops/$id': typeof TruckstopsIdRoute
   '/api/public/here-key': typeof ApiPublicHereKeyRoute
 }
@@ -437,6 +518,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/assistent'
+    | '/beheer'
     | '/beloningen'
     | '/brandstof'
     | '/carplay'
@@ -446,6 +528,7 @@ export interface FileRouteTypes {
     | '/deel-eta'
     | '/documenten'
     | '/fleet'
+    | '/geblokkeerd'
     | '/groepen'
     | '/instellingen'
     | '/integraties'
@@ -470,21 +553,29 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/ritten'
     | '/routeplanner'
+    | '/terminals'
     | '/truckstops'
     | '/voertuig'
     | '/voorwaarden'
     | '/voorzieningen'
     | '/zoeken'
+    | '/beheer/auditlog'
+    | '/beheer/gebruikers'
+    | '/beheer/locaties'
+    | '/beheer/meldingen'
     | '/chat/$chatId'
     | '/groepen/$id'
+    | '/konvooi/$id'
     | '/profiel/$userId'
     | '/ritten/$rideId'
+    | '/terminals/$id'
     | '/truckstops/$id'
     | '/api/public/here-key'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/assistent'
+    | '/beheer'
     | '/beloningen'
     | '/brandstof'
     | '/carplay'
@@ -494,6 +585,7 @@ export interface FileRouteTypes {
     | '/deel-eta'
     | '/documenten'
     | '/fleet'
+    | '/geblokkeerd'
     | '/groepen'
     | '/instellingen'
     | '/integraties'
@@ -518,21 +610,29 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/ritten'
     | '/routeplanner'
+    | '/terminals'
     | '/truckstops'
     | '/voertuig'
     | '/voorwaarden'
     | '/voorzieningen'
     | '/zoeken'
+    | '/beheer/auditlog'
+    | '/beheer/gebruikers'
+    | '/beheer/locaties'
+    | '/beheer/meldingen'
     | '/chat/$chatId'
     | '/groepen/$id'
+    | '/konvooi/$id'
     | '/profiel/$userId'
     | '/ritten/$rideId'
+    | '/terminals/$id'
     | '/truckstops/$id'
     | '/api/public/here-key'
   id:
     | '__root__'
     | '/'
     | '/assistent'
+    | '/beheer'
     | '/beloningen'
     | '/brandstof'
     | '/carplay'
@@ -542,6 +642,7 @@ export interface FileRouteTypes {
     | '/deel-eta'
     | '/documenten'
     | '/fleet'
+    | '/geblokkeerd'
     | '/groepen'
     | '/instellingen'
     | '/integraties'
@@ -566,15 +667,22 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/ritten'
     | '/routeplanner'
+    | '/terminals'
     | '/truckstops'
     | '/voertuig'
     | '/voorwaarden'
     | '/voorzieningen'
     | '/zoeken'
+    | '/beheer/auditlog'
+    | '/beheer/gebruikers'
+    | '/beheer/locaties'
+    | '/beheer/meldingen'
     | '/chat/$chatId'
     | '/groepen/$id'
+    | '/konvooi/$id'
     | '/profiel/$userId'
     | '/ritten/$rideId'
+    | '/terminals/$id'
     | '/truckstops/$id'
     | '/api/public/here-key'
   fileRoutesById: FileRoutesById
@@ -582,6 +690,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AssistentRoute: typeof AssistentRoute
+  BeheerRoute: typeof BeheerRouteWithChildren
   BeloningenRoute: typeof BeloningenRoute
   BrandstofRoute: typeof BrandstofRoute
   CarplayRoute: typeof CarplayRoute
@@ -591,11 +700,12 @@ export interface RootRouteChildren {
   DeelEtaRoute: typeof DeelEtaRoute
   DocumentenRoute: typeof DocumentenRoute
   FleetRoute: typeof FleetRoute
+  GeblokkeerdRoute: typeof GeblokkeerdRoute
   GroepenRoute: typeof GroepenRouteWithChildren
   InstellingenRoute: typeof InstellingenRoute
   IntegratiesRoute: typeof IntegratiesRoute
   KaartRoute: typeof KaartRoute
-  KonvooiRoute: typeof KonvooiRoute
+  KonvooiRoute: typeof KonvooiRouteWithChildren
   LoginRoute: typeof LoginRoute
   MeerRoute: typeof MeerRoute
   MeldingenRoute: typeof MeldingenRoute
@@ -615,6 +725,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   RittenRoute: typeof RittenRouteWithChildren
   RouteplannerRoute: typeof RouteplannerRoute
+  TerminalsRoute: typeof TerminalsRouteWithChildren
   TruckstopsRoute: typeof TruckstopsRouteWithChildren
   VoertuigRoute: typeof VoertuigRoute
   VoorwaardenRoute: typeof VoorwaardenRoute
@@ -658,6 +769,13 @@ declare module '@tanstack/react-router' {
       path: '/truckstops'
       fullPath: '/truckstops'
       preLoaderRoute: typeof TruckstopsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terminals': {
+      id: '/terminals'
+      path: '/terminals'
+      fullPath: '/terminals'
+      preLoaderRoute: typeof TerminalsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/routeplanner': {
@@ -828,6 +946,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GroepenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/geblokkeerd': {
+      id: '/geblokkeerd'
+      path: '/geblokkeerd'
+      fullPath: '/geblokkeerd'
+      preLoaderRoute: typeof GeblokkeerdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/fleet': {
       id: '/fleet'
       path: '/fleet'
@@ -891,6 +1016,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BeloningenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/beheer': {
+      id: '/beheer'
+      path: '/beheer'
+      fullPath: '/beheer'
+      preLoaderRoute: typeof BeheerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/assistent': {
       id: '/assistent'
       path: '/assistent'
@@ -912,6 +1044,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TruckstopsIdRouteImport
       parentRoute: typeof TruckstopsRoute
     }
+    '/terminals/$id': {
+      id: '/terminals/$id'
+      path: '/$id'
+      fullPath: '/terminals/$id'
+      preLoaderRoute: typeof TerminalsIdRouteImport
+      parentRoute: typeof TerminalsRoute
+    }
     '/ritten/$rideId': {
       id: '/ritten/$rideId'
       path: '/$rideId'
@@ -925,6 +1064,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/profiel/$userId'
       preLoaderRoute: typeof ProfielUserIdRouteImport
       parentRoute: typeof ProfielRoute
+    }
+    '/konvooi/$id': {
+      id: '/konvooi/$id'
+      path: '/$id'
+      fullPath: '/konvooi/$id'
+      preLoaderRoute: typeof KonvooiIdRouteImport
+      parentRoute: typeof KonvooiRoute
     }
     '/groepen/$id': {
       id: '/groepen/$id'
@@ -940,6 +1086,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatChatIdRouteImport
       parentRoute: typeof ChatRoute
     }
+    '/beheer/meldingen': {
+      id: '/beheer/meldingen'
+      path: '/meldingen'
+      fullPath: '/beheer/meldingen'
+      preLoaderRoute: typeof BeheerMeldingenRouteImport
+      parentRoute: typeof BeheerRoute
+    }
+    '/beheer/locaties': {
+      id: '/beheer/locaties'
+      path: '/locaties'
+      fullPath: '/beheer/locaties'
+      preLoaderRoute: typeof BeheerLocatiesRouteImport
+      parentRoute: typeof BeheerRoute
+    }
+    '/beheer/gebruikers': {
+      id: '/beheer/gebruikers'
+      path: '/gebruikers'
+      fullPath: '/beheer/gebruikers'
+      preLoaderRoute: typeof BeheerGebruikersRouteImport
+      parentRoute: typeof BeheerRoute
+    }
+    '/beheer/auditlog': {
+      id: '/beheer/auditlog'
+      path: '/auditlog'
+      fullPath: '/beheer/auditlog'
+      preLoaderRoute: typeof BeheerAuditlogRouteImport
+      parentRoute: typeof BeheerRoute
+    }
     '/api/public/here-key': {
       id: '/api/public/here-key'
       path: '/api/public/here-key'
@@ -949,6 +1123,23 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface BeheerRouteChildren {
+  BeheerAuditlogRoute: typeof BeheerAuditlogRoute
+  BeheerGebruikersRoute: typeof BeheerGebruikersRoute
+  BeheerLocatiesRoute: typeof BeheerLocatiesRoute
+  BeheerMeldingenRoute: typeof BeheerMeldingenRoute
+}
+
+const BeheerRouteChildren: BeheerRouteChildren = {
+  BeheerAuditlogRoute: BeheerAuditlogRoute,
+  BeheerGebruikersRoute: BeheerGebruikersRoute,
+  BeheerLocatiesRoute: BeheerLocatiesRoute,
+  BeheerMeldingenRoute: BeheerMeldingenRoute,
+}
+
+const BeheerRouteWithChildren =
+  BeheerRoute._addFileChildren(BeheerRouteChildren)
 
 interface ChatRouteChildren {
   ChatChatIdRoute: typeof ChatChatIdRoute
@@ -970,6 +1161,17 @@ const GroepenRouteChildren: GroepenRouteChildren = {
 
 const GroepenRouteWithChildren =
   GroepenRoute._addFileChildren(GroepenRouteChildren)
+
+interface KonvooiRouteChildren {
+  KonvooiIdRoute: typeof KonvooiIdRoute
+}
+
+const KonvooiRouteChildren: KonvooiRouteChildren = {
+  KonvooiIdRoute: KonvooiIdRoute,
+}
+
+const KonvooiRouteWithChildren =
+  KonvooiRoute._addFileChildren(KonvooiRouteChildren)
 
 interface ProfielRouteChildren {
   ProfielUserIdRoute: typeof ProfielUserIdRoute
@@ -993,6 +1195,18 @@ const RittenRouteChildren: RittenRouteChildren = {
 const RittenRouteWithChildren =
   RittenRoute._addFileChildren(RittenRouteChildren)
 
+interface TerminalsRouteChildren {
+  TerminalsIdRoute: typeof TerminalsIdRoute
+}
+
+const TerminalsRouteChildren: TerminalsRouteChildren = {
+  TerminalsIdRoute: TerminalsIdRoute,
+}
+
+const TerminalsRouteWithChildren = TerminalsRoute._addFileChildren(
+  TerminalsRouteChildren,
+)
+
 interface TruckstopsRouteChildren {
   TruckstopsIdRoute: typeof TruckstopsIdRoute
 }
@@ -1008,6 +1222,7 @@ const TruckstopsRouteWithChildren = TruckstopsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AssistentRoute: AssistentRoute,
+  BeheerRoute: BeheerRouteWithChildren,
   BeloningenRoute: BeloningenRoute,
   BrandstofRoute: BrandstofRoute,
   CarplayRoute: CarplayRoute,
@@ -1017,11 +1232,12 @@ const rootRouteChildren: RootRouteChildren = {
   DeelEtaRoute: DeelEtaRoute,
   DocumentenRoute: DocumentenRoute,
   FleetRoute: FleetRoute,
+  GeblokkeerdRoute: GeblokkeerdRoute,
   GroepenRoute: GroepenRouteWithChildren,
   InstellingenRoute: InstellingenRoute,
   IntegratiesRoute: IntegratiesRoute,
   KaartRoute: KaartRoute,
-  KonvooiRoute: KonvooiRoute,
+  KonvooiRoute: KonvooiRouteWithChildren,
   LoginRoute: LoginRoute,
   MeerRoute: MeerRoute,
   MeldingenRoute: MeldingenRoute,
@@ -1041,6 +1257,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   RittenRoute: RittenRouteWithChildren,
   RouteplannerRoute: RouteplannerRoute,
+  TerminalsRoute: TerminalsRouteWithChildren,
   TruckstopsRoute: TruckstopsRouteWithChildren,
   VoertuigRoute: VoertuigRoute,
   VoorwaardenRoute: VoorwaardenRoute,
@@ -1051,3 +1268,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

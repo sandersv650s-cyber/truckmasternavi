@@ -22,7 +22,7 @@ const items: NavItem[] = [
     to: "/ontdekken",
     labelKey: "nav.discover",
     icon: Compass,
-    matches: ["/ontdekken", "/truckstops", "/brandstof", "/meldingen", "/voorzieningen", "/beloningen", "/zoeken"],
+    matches: ["/ontdekken", "/truckstops", "/brandstof", "/meldingen", "/voorzieningen", "/beloningen", "/zoeken", "/terminals", "/konvooi"],
   },
   { to: "/community", labelKey: "nav.community", icon: Users },
   { to: "/profiel", labelKey: "nav.profile", icon: User },
