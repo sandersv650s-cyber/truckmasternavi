@@ -311,6 +311,11 @@ function RoutePlannerPage() {
     }
     setComputing(true);
     setComputeError(null);
+    if (transportMode === "truck" && vehicleErrors.length) {
+      toast.warning(
+        `Voertuigprofiel onvolledig: ${vehicleErrors[0].message} HERE rekent verder met de wél ingevulde waarden.`,
+      );
+    }
     if (!navigator.onLine) {
       setComputing(false);
       setComputeError("Geen internetverbinding — routes vereisen HERE online.");
