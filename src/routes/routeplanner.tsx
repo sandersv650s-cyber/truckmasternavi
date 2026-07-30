@@ -464,8 +464,20 @@ function RoutePlannerPage() {
       return;
     }
     setWaypoints(parsed);
-    if (r.truck_profile && typeof r.truck_profile === "object")
-      setTruck(r.truck_profile as TruckProfile);
+    // Transportmodus herstellen: expliciete snapshot wint, anders afleiden
+    // uit de aanwezigheid van een opgeslagen truckprofiel.
+    const snapMode = r.vehicle_snapshot?.transport_mode;
+    const restoredMode: TransportMode =
+      snapMode === "car" || snapMode === "truck"
+        ? snapMode
+        : r.truck_profile && typeof r.truck_profile === "object"
+          ? "truck"
+          : "car";
+    setTransportMode(restoredMode);
+    if (r.truck_profile && typeof r.truck_profile === "object") {
+      const tp = r.truck_profile as TruckProfile;
+      setTruck({ ...tp, is_lzv: tp.is_lzv ?? Boolean(r.is_lzv) });
+    }
     if (Array.isArray(r.avoid_features) && r.avoid_features.length)
       setAvoid(
         r.avoid_features.filter(
