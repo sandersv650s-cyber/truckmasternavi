@@ -354,10 +354,12 @@ function RoutePlannerPage() {
 
   const completeMut = useMutation({
     mutationFn: async (id: string) => {
+      if (!user) throw new Error("Niet ingelogd");
       const { error } = await supabase
         .from("saved_routes" as any)
         .update({ completed: true, completed_at: new Date().toISOString() })
-        .eq("id", id);
+        .eq("id", id)
+        .eq("user_id", user.id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["saved_routes"] }),
@@ -365,10 +367,12 @@ function RoutePlannerPage() {
 
   const renameMut = useMutation({
     mutationFn: async (v: { id: string; name: string }) => {
+      if (!user) throw new Error("Niet ingelogd");
       const { error } = await supabase
         .from("saved_routes" as any)
         .update({ name: v.name })
-        .eq("id", v.id);
+        .eq("id", v.id)
+        .eq("user_id", user.id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["saved_routes"] }),
@@ -376,16 +380,45 @@ function RoutePlannerPage() {
 
   const deleteMut = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("saved_routes" as any).delete().eq("id", id);
+      if (!user) throw new Error("Niet ingelogd");
+      const { error } = await supabase
+        .from("saved_routes" as any)
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user.id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["saved_routes"] }),
   });
 
   const loadRoute = (r: SavedRoute) => {
-    setWaypoints(r.waypoints.map((w) => ({ ...w, key: newKey() })));
-    if (r.truck_profile) setTruck(r.truck_profile);
-    if (r.avoid_features && r.avoid_features.length) setAvoid(r.avoid_features as AvoidFeature[]);
+    const raw = Array.isArray(r.waypoints) ? r.waypoints : [];
+    const parsed: WP[] = [];
+    for (const w of raw) {
+      const lat = Number((w as any)?.lat);
+      const lng = Number((w as any)?.lng);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+      if (lat === 0 && lng === 0) continue;
+      if (lat < -90 || lat > 90 || lng < -180 || lng > 180) continue;
+      const label =
+        typeof (w as any)?.label === "string" && (w as any).label.trim()
+          ? (w as any).label.trim()
+          : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      parsed.push({ key: newKey(), label, lat, lng });
+    }
+    if (parsed.length < 2) {
+      toast.error(
+        `"${r.name}" kon niet worden geladen: de opgeslagen route bevat geen geldige vertrek- en bestemmingslocatie.`,
+      );
+      return;
+    }
+    setWaypoints(parsed);
+    if (r.truck_profile && typeof r.truck_profile === "object")
+      setTruck(r.truck_profile as TruckProfile);
+    if (Array.isArray(r.avoid_features) && r.avoid_features.length)
+      setAvoid(
+        r.avoid_features.filter((f): f is AvoidFeature => typeof f === "string" && f in AVOID_LABELS),
+      );
     setRoutes([]);
     setSelectedRouteId(null);
     toast.success(`"${r.name}" geladen — druk op Bereken`);
