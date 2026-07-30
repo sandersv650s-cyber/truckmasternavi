@@ -167,12 +167,18 @@ function RoutePlannerPage() {
       width_cm: p.vehicle_width_cm,
       length_cm: p.vehicle_length_cm,
       weight_kg: p.vehicle_weight_kg,
+      current_weight_kg: p.vehicle_current_weight_kg,
       axle_weight_kg: p.vehicle_axle_weight_kg,
       axle_count: p.vehicle_axle_count,
       trailer_count: p.vehicle_trailer_count,
       hazardous: p.vehicle_hazardous,
+      tunnel_category: p.vehicle_tunnel_category ?? null,
+      is_lzv: p.vehicle_is_lzv ?? null,
     });
-    if (p.vehicle_type && p.vehicle_type !== "truck") setTransportMode("car");
+    // Terugschakelen naar truck wanneer het profiel weer een vrachtwagen is
+    // (vehicle_type "truck", leeg of niet ingevuld).
+    const vt = typeof p.vehicle_type === "string" ? p.vehicle_type.trim() : "";
+    setTransportMode(!vt || vt === "truck" ? "truck" : "car");
   }, [profileQ.data]);
 
   const savedQ = useQuery({
@@ -184,6 +190,7 @@ function RoutePlannerPage() {
         .select(
           "id,name,waypoints,distance_m,duration_s,truck_profile,avoid_features,completed,completed_at,updated_at",
         )
+        .eq("user_id", user!.id)
         .order("updated_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as unknown as SavedRoute[];
