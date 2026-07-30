@@ -622,6 +622,11 @@ function RoutePlannerPage() {
                   <NumField label="Breedte (cm)" v={truck.width_cm} on={(n) => setTruck({ ...truck, width_cm: n })} />
                   <NumField label="Lengte (cm)" v={truck.length_cm} on={(n) => setTruck({ ...truck, length_cm: n })} />
                   <NumField label="Gewicht (kg)" v={truck.weight_kg} on={(n) => setTruck({ ...truck, weight_kg: n })} />
+                  <NumField
+                    label="Actueel gewicht (kg)"
+                    v={truck.current_weight_kg}
+                    on={(n) => setTruck({ ...truck, current_weight_kg: n })}
+                  />
                   <NumField label="Aslast (kg)" v={truck.axle_weight_kg} on={(n) => setTruck({ ...truck, axle_weight_kg: n })} />
                   <NumField label="Assen" v={truck.axle_count} on={(n) => setTruck({ ...truck, axle_count: n })} />
                   <NumField label="Aanhangers" v={truck.trailer_count} on={(n) => setTruck({ ...truck, trailer_count: n })} />
@@ -650,6 +655,32 @@ function RoutePlannerPage() {
                     />
                     Gevaarlijke lading (ADR)
                   </label>
+                  <label className="col-span-2 flex items-center gap-2 text-sm sm:col-span-3">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4"
+                      checked={Boolean(truck.is_lzv)}
+                      onChange={(e) => setTruck({ ...truck, is_lzv: e.target.checked })}
+                    />
+                    LZV-combinatie (25,25 m / 60 t)
+                  </label>
+                  {(vehicleErrors.length > 0 || vehicleWarnings.length > 0) && (
+                    <div className="col-span-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-2 text-[11px] text-yellow-100 sm:col-span-3">
+                      <p className="font-semibold">
+                        Voertuiggegevens controleren ({vehicleErrors.length} fouten,{" "}
+                        {vehicleWarnings.length} aandachtspunten)
+                      </p>
+                      <ul className="mt-1 list-disc pl-4">
+                        {[...vehicleErrors, ...vehicleWarnings].slice(0, 5).map((i, idx) => (
+                          <li key={`${i.field}-${idx}`}>{i.message}</li>
+                        ))}
+                      </ul>
+                      <p className="mt-1 opacity-80">
+                        Routeberekening blijft mogelijk; HERE gebruikt alleen de ingevulde
+                        waarden.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
               <div>
