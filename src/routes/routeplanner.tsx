@@ -162,6 +162,11 @@ function RoutePlannerPage() {
   });
 
   const [truck, setTruck] = useState<TruckProfile>({});
+  const [vehicleMeta, setVehicleMeta] = useState<{
+    has_exemption: boolean;
+    exemption_ref: string | null;
+    exemption_expires: string | null;
+  }>({ has_exemption: false, exemption_ref: null, exemption_expires: null });
   useEffect(() => {
     if (!profileQ.data) return;
     const p = profileQ.data;
