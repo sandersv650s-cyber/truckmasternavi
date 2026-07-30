@@ -167,12 +167,17 @@ function RoutePlannerPage() {
       width_cm: p.vehicle_width_cm,
       length_cm: p.vehicle_length_cm,
       weight_kg: p.vehicle_weight_kg,
+      current_weight_kg: p.vehicle_current_weight_kg,
       axle_weight_kg: p.vehicle_axle_weight_kg,
       axle_count: p.vehicle_axle_count,
       trailer_count: p.vehicle_trailer_count,
       hazardous: p.vehicle_hazardous,
+      is_lzv: p.vehicle_is_lzv ?? null,
     });
-    if (p.vehicle_type && p.vehicle_type !== "truck") setTransportMode("car");
+    // Terugschakelen naar truck wanneer het profiel weer een vrachtwagen is
+    // (vehicle_type "truck", leeg of niet ingevuld).
+    const vt = typeof p.vehicle_type === "string" ? p.vehicle_type.trim() : "";
+    setTransportMode(!vt || vt === "truck" ? "truck" : "car");
   }, [profileQ.data]);
 
   const savedQ = useQuery({
@@ -184,6 +189,7 @@ function RoutePlannerPage() {
         .select(
           "id,name,waypoints,distance_m,duration_s,truck_profile,avoid_features,completed,completed_at,updated_at",
         )
+        .eq("user_id", user!.id)
         .order("updated_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as unknown as SavedRoute[];
@@ -348,10 +354,12 @@ function RoutePlannerPage() {
 
   const completeMut = useMutation({
     mutationFn: async (id: string) => {
+      if (!user) throw new Error("Niet ingelogd");
       const { error } = await supabase
         .from("saved_routes" as any)
         .update({ completed: true, completed_at: new Date().toISOString() })
-        .eq("id", id);
+        .eq("id", id)
+        .eq("user_id", user.id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["saved_routes"] }),
@@ -359,10 +367,12 @@ function RoutePlannerPage() {
 
   const renameMut = useMutation({
     mutationFn: async (v: { id: string; name: string }) => {
+      if (!user) throw new Error("Niet ingelogd");
       const { error } = await supabase
         .from("saved_routes" as any)
         .update({ name: v.name })
-        .eq("id", v.id);
+        .eq("id", v.id)
+        .eq("user_id", user.id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["saved_routes"] }),
@@ -370,16 +380,48 @@ function RoutePlannerPage() {
 
   const deleteMut = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("saved_routes" as any).delete().eq("id", id);
+      if (!user) throw new Error("Niet ingelogd");
+      const { error } = await supabase
+        .from("saved_routes" as any)
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user.id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["saved_routes"] }),
   });
 
   const loadRoute = (r: SavedRoute) => {
-    setWaypoints(r.waypoints.map((w) => ({ ...w, key: newKey() })));
-    if (r.truck_profile) setTruck(r.truck_profile);
-    if (r.avoid_features && r.avoid_features.length) setAvoid(r.avoid_features as AvoidFeature[]);
+    const raw: unknown[] = Array.isArray(r.waypoints) ? r.waypoints : [];
+    const parsed: WP[] = [];
+    for (const item of raw) {
+      const w = (item ?? {}) as { lat?: unknown; lng?: unknown; label?: unknown };
+      const lat = Number(w.lat);
+      const lng = Number(w.lng);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+      if (lat === 0 && lng === 0) continue;
+      if (lat < -90 || lat > 90 || lng < -180 || lng > 180) continue;
+      const label =
+        typeof w.label === "string" && w.label.trim()
+          ? w.label.trim()
+          : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      parsed.push({ key: newKey(), label, lat, lng });
+    }
+    if (parsed.length < 2) {
+      toast.error(
+        `"${r.name}" kon niet worden geladen: de opgeslagen route bevat geen geldige vertrek- en bestemmingslocatie.`,
+      );
+      return;
+    }
+    setWaypoints(parsed);
+    if (r.truck_profile && typeof r.truck_profile === "object")
+      setTruck(r.truck_profile as TruckProfile);
+    if (Array.isArray(r.avoid_features) && r.avoid_features.length)
+      setAvoid(
+        r.avoid_features.filter(
+          (f): f is AvoidFeature => typeof f === "string" && f in AVOID_LABELS,
+        ),
+      );
     setRoutes([]);
     setSelectedRouteId(null);
     toast.success(`"${r.name}" geladen — druk op Bereken`);
