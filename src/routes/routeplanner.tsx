@@ -392,17 +392,18 @@ function RoutePlannerPage() {
   });
 
   const loadRoute = (r: SavedRoute) => {
-    const raw = Array.isArray(r.waypoints) ? r.waypoints : [];
+    const raw: unknown[] = Array.isArray(r.waypoints) ? r.waypoints : [];
     const parsed: WP[] = [];
-    for (const w of raw) {
-      const lat = Number((w as any)?.lat);
-      const lng = Number((w as any)?.lng);
+    for (const item of raw) {
+      const w = (item ?? {}) as { lat?: unknown; lng?: unknown; label?: unknown };
+      const lat = Number(w.lat);
+      const lng = Number(w.lng);
       if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
       if (lat === 0 && lng === 0) continue;
       if (lat < -90 || lat > 90 || lng < -180 || lng > 180) continue;
       const label =
-        typeof (w as any)?.label === "string" && (w as any).label.trim()
-          ? (w as any).label.trim()
+        typeof w.label === "string" && w.label.trim()
+          ? w.label.trim()
           : `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
       parsed.push({ key: newKey(), label, lat, lng });
     }
@@ -417,7 +418,9 @@ function RoutePlannerPage() {
       setTruck(r.truck_profile as TruckProfile);
     if (Array.isArray(r.avoid_features) && r.avoid_features.length)
       setAvoid(
-        r.avoid_features.filter((f): f is AvoidFeature => typeof f === "string" && f in AVOID_LABELS),
+        r.avoid_features.filter(
+          (f): f is AvoidFeature => typeof f === "string" && f in AVOID_LABELS,
+        ),
       );
     setRoutes([]);
     setSelectedRouteId(null);
