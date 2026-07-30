@@ -43,7 +43,7 @@ export function ensureHereKey(): Promise<string | undefined> {
   if (keyCache) return Promise.resolve(keyCache);
   if (typeof window === "undefined") return Promise.resolve(undefined);
   if (!keyPromise) {
-    keyPromise = fetch("/api/public/here-key")
+    keyPromise = fetch("/api/public/here-key", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((j: { key?: string | null } | null) => {
         const k = clean(j?.key);
@@ -53,7 +53,12 @@ export function ensureHereKey(): Promise<string | undefined> {
         }
         return keyCache;
       })
-      .catch(() => undefined);
+      .catch(() => undefined)
+      .finally(() => {
+        // Een mislukte of lege respons mag niet permanent in het browserproces
+        // blijven hangen. De volgende actie kan de sleutel dan opnieuw ophalen.
+        if (!keyCache) keyPromise = null;
+      });
   }
   return keyPromise;
 }
@@ -67,16 +72,15 @@ export type HereSuggestion = {
   title: string;
   address?: string;
   position?: LatLng;
-  // "houseNumber" | "street" | "locality" | "administrativeArea" | "place" | "categoryQuery"
   resultType?: string;
-  href?: string; // for lookup fallback when position is missing
+  href?: string;
 };
 
 export type HereManeuver = {
   instruction: string;
   distance_m: number;
   duration_s: number;
-  offset: number; // index into polyline
+  offset: number;
 };
 
 export type HereRouteSection = {
@@ -105,14 +109,12 @@ export type TruckProfile = {
   width_cm?: number | null;
   length_cm?: number | null;
   weight_kg?: number | null;
-  /** actueel/beladen gewicht in kg (HERE: vehicle[currentWeight]) */
   current_weight_kg?: number | null;
   axle_weight_kg?: number | null;
   axle_count?: number | null;
   trailer_count?: number | null;
   hazardous?: boolean | null;
   tunnel_category?: "B" | "C" | "D" | "E" | null;
-  /** Lange Zware Voertuigcombinatie */
   is_lzv?: boolean | null;
 };
 
@@ -134,7 +136,7 @@ export type RouteOptions = {
   transportMode?: TransportMode;
   truck?: TruckProfile;
   avoid?: AvoidFeature[];
-  alternatives?: number; // 0..6
+  alternatives?: number;
   lang?: string;
 };
 
@@ -147,8 +149,6 @@ async function requireKey(): Promise<string> {
   }
   return key;
 }
-
-// --- Search / geocoding -----------------------------------------------------
 
 export async function autosuggest(
   q: string,
@@ -212,19 +212,12 @@ export async function reverseGeocode(at: LatLng, signal?: AbortSignal): Promise<
   return j.items?.[0]?.address?.label ?? `${at.lat.toFixed(5)}, ${at.lng.toFixed(5)}`;
 }
 
-// --- Routing ----------------------------------------------------------------
-
 function decodePolyline(encoded: string): LatLng[] {
   const decoded = flexpolyline.decode(encoded) as { polyline: number[][] };
   return decoded.polyline.map(([lat, lng]) => ({ lat, lng }));
 }
 
 function pushVehicleParams(url: URL, t: TruckProfile) {
-  // HERE Routing v8 expects integer centimeters for dimensions and integer
-  // kilograms for weight. Sending meters (e.g. "4.50") yields
-  // "Malformed request" / E605001 and the whole route call fails.
-  // Dimensies, gewichten en assen horen onder vehicle[...]; truck-specifieke
-  // eigenschappen (type, aanhangers, ADR, tunnelcategorie) onder truck[...].
   if (t.height_cm) url.searchParams.set("vehicle[height]", String(Math.round(t.height_cm)));
   if (t.width_cm) url.searchParams.set("vehicle[width]", String(Math.round(t.width_cm)));
   if (t.length_cm) url.searchParams.set("vehicle[length]", String(Math.round(t.length_cm)));
@@ -238,8 +231,6 @@ function pushVehicleParams(url: URL, t: TruckProfile) {
     url.searchParams.set("truck[trailerCount]", String(Math.round(t.trailer_count)));
   if (t.hazardous) url.searchParams.set("truck[shippedHazardousGoods]", "explosive");
   if (t.tunnel_category) url.searchParams.set("truck[tunnelCategory]", t.tunnel_category);
-  // HERE kent geen LZV-categorie; een LZV wordt als tractor-oplegger gerouteerd
-  // met de opgegeven lengte/gewicht. Dit vervangt geen RDW/DWO-controle.
   url.searchParams.set("truck[type]", t.is_lzv || (t.trailer_count ?? 0) > 0 ? "tractor" : "straight");
 }
 
@@ -314,7 +305,6 @@ export async function computeRoutes(opts: RouteOptions, signal?: AbortSignal): P
     const distance = sections.reduce((n, s) => n + s.distance_m, 0);
     const duration = sections.reduce((n, s) => n + s.duration_s, 0);
     const base = sections.reduce((n, s) => n + s.base_duration_s, 0);
-    // flatten maneuvers with polyline offsets adjusted per section
     let offsetBase = 0;
     const all: HereManeuver[] = [];
     const polyAll: LatLng[] = [];
@@ -338,8 +328,6 @@ export async function computeRoutes(opts: RouteOptions, signal?: AbortSignal): P
   });
 }
 
-// --- Formatting -------------------------------------------------------------
-
 export function formatDistance(m: number): string {
   if (m < 1000) return `${Math.round(m)} m`;
   return `${(m / 1000).toFixed(m < 10_000 ? 1 : 0)} km`;
@@ -359,8 +347,6 @@ export function etaString(duration_s: number): string {
   });
 }
 
-// --- Geometry helpers -------------------------------------------------------
-
 export function haversine_m(a: LatLng, b: LatLng): number {
   const R = 6371000;
   const toRad = (x: number) => (x * Math.PI) / 180;
@@ -372,7 +358,6 @@ export function haversine_m(a: LatLng, b: LatLng): number {
   return 2 * R * Math.asin(Math.sqrt(s));
 }
 
-/** Returns nearest polyline point index and its distance in meters. */
 export function nearestOnPolyline(pt: LatLng, poly: LatLng[]): { index: number; distance_m: number } {
   let best = { index: 0, distance_m: Infinity };
   for (let i = 0; i < poly.length; i++) {
@@ -382,7 +367,6 @@ export function nearestOnPolyline(pt: LatLng, poly: LatLng[]): { index: number; 
   return best;
 }
 
-/** Cumulative distance along the polyline from index onward to end (meters). */
 export function remainingAlong(poly: LatLng[], fromIndex: number): number {
   let sum = 0;
   for (let i = Math.max(0, fromIndex); i < poly.length - 1; i++) {
