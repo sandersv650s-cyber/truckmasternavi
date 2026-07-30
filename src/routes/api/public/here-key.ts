@@ -1,10 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-// Serves the HERE Maps JS/REST key to the browser at runtime.
-// Lovable secrets are runtime-only, so the compile-time `define` fallback is
-// empty in published builds; this endpoint is the reliable source. The key is
-// a browser-side Maps key (it ships in the client bundle anyway when the build
-// env has it) — restrict it by domain in the HERE portal.
+// Serves the HERE Maps JS/REST browser key at runtime. This makes deployments
+// independent from build-time key injection. Restrict the key to the allowed
+// production and preview domains in the HERE portal.
 export const Route = createFileRoute("/api/public/here-key")({
   server: {
     handlers: {
