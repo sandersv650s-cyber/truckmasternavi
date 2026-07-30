@@ -169,13 +169,18 @@ function RoutePlannerPage() {
       height_cm: p.vehicle_height_cm,
       width_cm: p.vehicle_width_cm,
       length_cm: p.vehicle_length_cm,
-      weight_kg: p.vehicle_weight_kg,
+      weight_kg: p.vehicle_weight_kg ?? p.vehicle_max_permitted_weight_kg,
       current_weight_kg: p.vehicle_current_weight_kg,
       axle_weight_kg: p.vehicle_axle_weight_kg,
       axle_count: p.vehicle_axle_count,
       trailer_count: p.vehicle_trailer_count,
       hazardous: p.vehicle_hazardous,
       is_lzv: p.vehicle_is_lzv ?? null,
+    });
+    setVehicleMeta({
+      has_exemption: Boolean(p.vehicle_has_exemption),
+      exemption_ref: p.vehicle_exemption_ref ?? null,
+      exemption_expires: p.vehicle_exemption_expires ?? null,
     });
     // Terugschakelen naar truck wanneer het profiel weer een vrachtwagen is
     // (vehicle_type "truck", leeg of niet ingevuld).
@@ -190,7 +195,7 @@ function RoutePlannerPage() {
       const { data, error } = await supabase
         .from("saved_routes" as any)
         .select(
-          "id,name,waypoints,distance_m,duration_s,truck_profile,avoid_features,completed,completed_at,updated_at",
+          "id,name,waypoints,distance_m,duration_s,truck_profile,avoid_features,completed,completed_at,updated_at,is_lzv,vehicle_snapshot",
         )
         .eq("user_id", user!.id)
         .order("updated_at", { ascending: false });
