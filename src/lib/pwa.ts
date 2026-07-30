@@ -1,6 +1,6 @@
 // Guarded service worker registration wrapper.
-// Registers /sw.js only in the published production app — never in Lovable
-// preview, iframe preview, or dev. Supports ?sw=off kill switch.
+// Registers /sw.js only in a top-level production window. Supports ?sw=off
+// as an emergency kill switch for troubleshooting deployments.
 
 function shouldRegister(): boolean {
   if (!import.meta.env.PROD) return false;
@@ -10,11 +10,6 @@ function shouldRegister(): boolean {
   } catch {
     return false;
   }
-  const host = window.location.hostname;
-  if (host.startsWith("id-preview--") || host.startsWith("preview--")) return false;
-  if (host === "lovableproject.com" || host.endsWith(".lovableproject.com")) return false;
-  if (host === "lovableproject-dev.com" || host.endsWith(".lovableproject-dev.com")) return false;
-  if (host === "beta.lovable.dev" || host.endsWith(".beta.lovable.dev")) return false;
   if (new URLSearchParams(window.location.search).get("sw") === "off") return false;
   return true;
 }

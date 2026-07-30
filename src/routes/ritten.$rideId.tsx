@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Clock, Fuel, Gauge, MapPin, Pause } from "lucide-react";
 import { rideById, formatDate, formatDuration } from "@/lib/mock-data";
+import type { Ride } from "@/lib/mock-data";
 import {
   LineChart,
   Line,
@@ -23,7 +24,7 @@ export const Route = createFileRoute("/ritten/$rideId")({
       { property: "og:description", content: "Bekijk je ritdetails in TruckMate." },
     ],
   }),
-  loader: ({ params }) => {
+  loader: ({ params }): Ride => {
     const ride = rideById(params.rideId);
     if (!ride) throw notFound();
     return ride;
@@ -45,8 +46,7 @@ export const Route = createFileRoute("/ritten/$rideId")({
 });
 
 function RideDetail() {
-  const ride = Route.useLoaderData();
-  if (!ride) return null; // loader throws notFound() before this renders
+  const ride = Route.useLoaderData() as Ride;
 
   return (
     <AppShell

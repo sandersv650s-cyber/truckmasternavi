@@ -1,29 +1,72 @@
-# Welcome to your Lovable project
+# TruckMate Connect
 
-This project was built with [Lovable](https://lovable.dev).
+TruckMate Connect is een mobiele webapp voor vrachtwagenchauffeurs met trucknavigatie, voertuigprofielen, ritregistratie en communityfuncties.
 
-## Build with Lovable
+De applicatie draait zelfstandig op basis van open webtechnologie en is niet afhankelijk van Lovable voor ontwikkeling, builds of hosting.
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+## Benodigdheden
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- Node.js 20 of nieuwer
+- npm
+- Een Supabase-project
+- Een HERE API-sleutel voor Maps en Routing
 
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## Lokaal starten
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+git clone https://github.com/sandersv650s-cyber/truckmasternavi.git
+cd truckmasternavi
+git switch demo/functionele-demo
+npm install
+cp .env.example .env.local
 npm run dev
 ```
 
-## Built with
+Vul daarna in `.env.local` minimaal deze waarden in:
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-or-anon-key
+VITE_HERE_API_KEY=your-here-api-key
+```
+
+Plaats nooit een Supabase service-role key of andere geheime beheerderssleutel in een `VITE_*` variabele. `VITE_*` waarden worden naar de browser gestuurd.
+
+## Controle en productiebuild
+
+```sh
+npm run typecheck
+npm run lint
+npm run build
+```
+
+Of voer alles achter elkaar uit:
+
+```sh
+npm run check
+```
+
+De productie-uitvoer wordt door TanStack Start en Nitro opgebouwd in `.output`. De app kan worden uitgerold naar een Node-host of een platform dat Nitro ondersteunt.
+
+## Omgevingsvariabelen
+
+| Variabele | Gebruik |
+| --- | --- |
+| `VITE_SUPABASE_URL` | Publieke URL van het Supabase-project |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Browser-veilige publishable/anon key |
+| `VITE_SUPABASE_ANON_KEY` | Ondersteunde alternatieve naam |
+| `VITE_HERE_API_KEY` | Browser-key voor HERE Maps en Routing |
+| `SUPABASE_URL` | Optionele server-side alias |
+| `SUPABASE_PUBLISHABLE_KEY` | Optionele server-side alias |
+| `HERE_API_KEY` | Optionele server-side alias voor HERE |
+
+## Technologie
 
 - TanStack Start
+- React 19
 - TypeScript
-- React
+- Vite
+- Nitro
 - Tailwind CSS
+- Supabase
+- HERE Technologies
