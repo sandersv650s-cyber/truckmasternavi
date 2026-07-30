@@ -385,6 +385,11 @@ function RoutePlannerPage() {
         duration_s: selectedRoute ? Math.round(selectedRoute.duration_s) : null,
         truck_profile: transportMode === "truck" ? truck : null,
         avoid_features: avoid,
+        is_lzv: transportMode === "truck" ? Boolean(truck.is_lzv) : false,
+        vehicle_snapshot: {
+          transport_mode: transportMode,
+          ...(transportMode === "truck" ? { truck, exemption: vehicleMeta } : {}),
+        },
       };
       const { error } = await supabase.from("saved_routes" as any).insert(payload);
       if (error) throw error;
