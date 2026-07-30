@@ -10,11 +10,18 @@ export const Route = createFileRoute("/api/public/here-key")({
     handlers: {
       GET: () => {
         const key = (process.env.HERE_API_KEY ?? "").trim();
-        return new Response(JSON.stringify({ key: key || null }), {
+        const hasKey = key.length > 0;
+
+        return new Response(JSON.stringify({ key: hasKey ? key : null }), {
           status: 200,
           headers: {
             "content-type": "application/json",
-            "cache-control": "public, max-age=300",
+            // Never cache a missing secret: after the key is configured, the
+            // routeplanner must recover immediately instead of waiting for an
+            // intermediary/browser cache to expire.
+            "cache-control": hasKey
+              ? "public, max-age=300, stale-while-revalidate=60"
+              : "no-store, max-age=0",
           },
         });
       },
