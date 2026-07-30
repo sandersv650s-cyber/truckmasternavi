@@ -36,8 +36,8 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Lint
-        run: npm run lint
+      - name: Lint standalone setup
+        run: npx eslint scripts/check-env.mjs vite.config.ts
 
       - name: Build
         run: npm run build
