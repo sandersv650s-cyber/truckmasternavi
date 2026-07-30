@@ -45,6 +45,7 @@ import {
   type TransportMode,
   type TruckProfile,
 } from "@/lib/here";
+import { validateVehicle, type Issue, type VehicleClass } from "@/lib/lzv";
 
 const HereMap = lazy(() =>
   import("@/components/here-map").then((m) => ({ default: m.HereMap })),
@@ -100,6 +101,8 @@ type SavedRoute = {
   completed: boolean;
   completed_at: string | null;
   updated_at: string;
+  is_lzv?: boolean | null;
+  vehicle_snapshot?: { transport_mode?: string | null } | null;
 };
 
 const AVOID_LABELS: Record<AvoidFeature, string> = {
@@ -159,6 +162,11 @@ function RoutePlannerPage() {
   });
 
   const [truck, setTruck] = useState<TruckProfile>({});
+  const [vehicleMeta, setVehicleMeta] = useState<{
+    has_exemption: boolean;
+    exemption_ref: string | null;
+    exemption_expires: string | null;
+  }>({ has_exemption: false, exemption_ref: null, exemption_expires: null });
   useEffect(() => {
     if (!profileQ.data) return;
     const p = profileQ.data;
@@ -166,13 +174,18 @@ function RoutePlannerPage() {
       height_cm: p.vehicle_height_cm,
       width_cm: p.vehicle_width_cm,
       length_cm: p.vehicle_length_cm,
-      weight_kg: p.vehicle_weight_kg,
+      weight_kg: p.vehicle_weight_kg ?? p.vehicle_max_permitted_weight_kg,
       current_weight_kg: p.vehicle_current_weight_kg,
       axle_weight_kg: p.vehicle_axle_weight_kg,
       axle_count: p.vehicle_axle_count,
       trailer_count: p.vehicle_trailer_count,
       hazardous: p.vehicle_hazardous,
       is_lzv: p.vehicle_is_lzv ?? null,
+    });
+    setVehicleMeta({
+      has_exemption: Boolean(p.vehicle_has_exemption),
+      exemption_ref: p.vehicle_exemption_ref ?? null,
+      exemption_expires: p.vehicle_exemption_expires ?? null,
     });
     // Terugschakelen naar truck wanneer het profiel weer een vrachtwagen is
     // (vehicle_type "truck", leeg of niet ingevuld).
@@ -187,7 +200,7 @@ function RoutePlannerPage() {
       const { data, error } = await supabase
         .from("saved_routes" as any)
         .select(
-          "id,name,waypoints,distance_m,duration_s,truck_profile,avoid_features,completed,completed_at,updated_at",
+          "id,name,waypoints,distance_m,duration_s,truck_profile,avoid_features,completed,completed_at,updated_at,is_lzv,vehicle_snapshot",
         )
         .eq("user_id", user!.id)
         .order("updated_at", { ascending: false });
@@ -257,6 +270,33 @@ function RoutePlannerPage() {
 
   const filled = waypoints.filter((w) => w.lat !== 0 || w.lng !== 0);
   const canRoute = filled.length >= 2 && filled.length === waypoints.length && here.ready;
+
+  // Voertuigvalidatie — informerend, blokkeert de demo niet.
+  const vehicleIssues: Issue[] = useMemo(() => {
+    if (transportMode !== "truck") return [];
+    const vehicleClass: VehicleClass = truck.is_lzv
+      ? "lzv"
+      : vehicleMeta.has_exemption
+        ? "exceptional"
+        : "truck";
+    return validateVehicle({
+      vehicleClass,
+      length_cm: truck.length_cm,
+      width_cm: truck.width_cm,
+      height_cm: truck.height_cm,
+      weight_kg: truck.weight_kg,
+      current_weight_kg: truck.current_weight_kg,
+      axle_weight_kg: truck.axle_weight_kg,
+      axle_count: truck.axle_count,
+      trailer_count: truck.trailer_count,
+      has_exemption: vehicleMeta.has_exemption,
+      exemption_ref: vehicleMeta.exemption_ref,
+      exemption_expires: vehicleMeta.exemption_expires,
+    });
+  }, [transportMode, truck, vehicleMeta]);
+  const vehicleErrors = vehicleIssues.filter((i) => i.level === "error");
+  const vehicleWarnings = vehicleIssues.filter((i) => i.level === "warning");
+
   const selectedRoute =
     routes.find((r) => r.id === selectedRouteId) ?? routes[0] ?? null;
 
@@ -271,6 +311,11 @@ function RoutePlannerPage() {
     }
     setComputing(true);
     setComputeError(null);
+    if (transportMode === "truck" && vehicleErrors.length) {
+      toast.warning(
+        `Voertuigprofiel onvolledig: ${vehicleErrors[0].message} HERE rekent verder met de wél ingevulde waarden.`,
+      );
+    }
     if (!navigator.onLine) {
       setComputing(false);
       setComputeError("Geen internetverbinding — routes vereisen HERE online.");
@@ -340,6 +385,11 @@ function RoutePlannerPage() {
         duration_s: selectedRoute ? Math.round(selectedRoute.duration_s) : null,
         truck_profile: transportMode === "truck" ? truck : null,
         avoid_features: avoid,
+        is_lzv: transportMode === "truck" ? Boolean(truck.is_lzv) : false,
+        vehicle_snapshot: {
+          transport_mode: transportMode,
+          ...(transportMode === "truck" ? { truck, exemption: vehicleMeta } : {}),
+        },
       };
       const { error } = await supabase.from("saved_routes" as any).insert(payload);
       if (error) throw error;
@@ -414,8 +464,20 @@ function RoutePlannerPage() {
       return;
     }
     setWaypoints(parsed);
-    if (r.truck_profile && typeof r.truck_profile === "object")
-      setTruck(r.truck_profile as TruckProfile);
+    // Transportmodus herstellen: expliciete snapshot wint, anders afleiden
+    // uit de aanwezigheid van een opgeslagen truckprofiel.
+    const snapMode = r.vehicle_snapshot?.transport_mode;
+    const restoredMode: TransportMode =
+      snapMode === "car" || snapMode === "truck"
+        ? snapMode
+        : r.truck_profile && typeof r.truck_profile === "object"
+          ? "truck"
+          : "car";
+    setTransportMode(restoredMode);
+    if (r.truck_profile && typeof r.truck_profile === "object") {
+      const tp = r.truck_profile as TruckProfile;
+      setTruck({ ...tp, is_lzv: tp.is_lzv ?? Boolean(r.is_lzv) });
+    }
     if (Array.isArray(r.avoid_features) && r.avoid_features.length)
       setAvoid(
         r.avoid_features.filter(
@@ -560,6 +622,11 @@ function RoutePlannerPage() {
                   <NumField label="Breedte (cm)" v={truck.width_cm} on={(n) => setTruck({ ...truck, width_cm: n })} />
                   <NumField label="Lengte (cm)" v={truck.length_cm} on={(n) => setTruck({ ...truck, length_cm: n })} />
                   <NumField label="Gewicht (kg)" v={truck.weight_kg} on={(n) => setTruck({ ...truck, weight_kg: n })} />
+                  <NumField
+                    label="Actueel gewicht (kg)"
+                    v={truck.current_weight_kg}
+                    on={(n) => setTruck({ ...truck, current_weight_kg: n })}
+                  />
                   <NumField label="Aslast (kg)" v={truck.axle_weight_kg} on={(n) => setTruck({ ...truck, axle_weight_kg: n })} />
                   <NumField label="Assen" v={truck.axle_count} on={(n) => setTruck({ ...truck, axle_count: n })} />
                   <NumField label="Aanhangers" v={truck.trailer_count} on={(n) => setTruck({ ...truck, trailer_count: n })} />
@@ -588,6 +655,32 @@ function RoutePlannerPage() {
                     />
                     Gevaarlijke lading (ADR)
                   </label>
+                  <label className="col-span-2 flex items-center gap-2 text-sm sm:col-span-3">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4"
+                      checked={Boolean(truck.is_lzv)}
+                      onChange={(e) => setTruck({ ...truck, is_lzv: e.target.checked })}
+                    />
+                    LZV-combinatie (25,25 m / 60 t)
+                  </label>
+                  {(vehicleErrors.length > 0 || vehicleWarnings.length > 0) && (
+                    <div className="col-span-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-2 text-[11px] text-yellow-100 sm:col-span-3">
+                      <p className="font-semibold">
+                        Voertuiggegevens controleren ({vehicleErrors.length} fouten,{" "}
+                        {vehicleWarnings.length} aandachtspunten)
+                      </p>
+                      <ul className="mt-1 list-disc pl-4">
+                        {[...vehicleErrors, ...vehicleWarnings].slice(0, 5).map((i, idx) => (
+                          <li key={`${i.field}-${idx}`}>{i.message}</li>
+                        ))}
+                      </ul>
+                      <p className="mt-1 opacity-80">
+                        Routeberekening blijft mogelijk; HERE gebruikt alleen de ingevulde
+                        waarden.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
               <div>
