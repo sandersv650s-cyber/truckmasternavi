@@ -46,7 +46,6 @@ import {
   type TruckProfile,
 } from "@/lib/here";
 import { validateVehicle, type Issue, type VehicleClass } from "@/lib/lzv";
-import { changeRoutePointLabel, validateRoutePoints } from "@/lib/route-input";
 
 const HereMap = lazy(() =>
   import("@/components/here-map").then((m) => ({ default: m.HereMap })),
@@ -188,6 +187,8 @@ function RoutePlannerPage() {
       exemption_ref: p.vehicle_exemption_ref ?? null,
       exemption_expires: p.vehicle_exemption_expires ?? null,
     });
+    // Terugschakelen naar truck wanneer het profiel weer een vrachtwagen is
+    // (vehicle_type "truck", leeg of niet ingevuld).
     const vt = typeof p.vehicle_type === "string" ? p.vehicle_type.trim() : "";
     setTransportMode(!vt || vt === "truck" ? "truck" : "car");
   }, [profileQ.data]);
@@ -208,12 +209,9 @@ function RoutePlannerPage() {
     },
   });
 
+  // --- Waypoint helpers ---
   const setWP = (i: number, patch: Partial<WP>) =>
     setWaypoints((prev) => prev.map((w, idx) => (idx === i ? { ...w, ...patch } : w)));
-  const setWPLabel = (i: number, label: string) =>
-    setWaypoints((prev) =>
-      prev.map((w, idx) => (idx === i ? changeRoutePointLabel(w, label) : w)),
-    );
   const addWP = () =>
     setWaypoints((prev) => {
       const copy = [...prev];
@@ -238,6 +236,7 @@ function RoutePlannerPage() {
     setComputeError(null);
   };
 
+  // --- Current location ---
   const useCurrentAsStart = () => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       toast.error("Geolocatie niet ondersteund op dit apparaat");
@@ -269,9 +268,10 @@ function RoutePlannerPage() {
     );
   };
 
-  const routeIssues = useMemo(() => validateRoutePoints(waypoints), [waypoints]);
-  const canRoute = routeIssues.length === 0 && here.ready;
+  const filled = waypoints.filter((w) => w.lat !== 0 || w.lng !== 0);
+  const canRoute = filled.length >= 2 && filled.length === waypoints.length && here.ready;
 
+  // Voertuigvalidatie — informerend, blokkeert de demo niet.
   const vehicleIssues: Issue[] = useMemo(() => {
     if (transportMode !== "truck") return [];
     const vehicleClass: VehicleClass = truck.is_lzv
@@ -305,9 +305,8 @@ function RoutePlannerPage() {
       toast.error("HERE API-sleutel ontbreekt");
       return;
     }
-    const inputIssues = validateRoutePoints(waypoints);
-    if (inputIssues.length) {
-      toast.error(inputIssues[0].message);
+    if (!canRoute) {
+      toast.error("Vul minstens vertrek en bestemming in");
       return;
     }
     setComputing(true);
@@ -347,6 +346,7 @@ function RoutePlannerPage() {
     }
   };
 
+  // Reroute from a live position (used by nav mode)
   const rerouteFrom = async (from: LatLng): Promise<HereRoute | null> => {
     if (waypoints.length < 2) return null;
     try {
@@ -370,11 +370,11 @@ function RoutePlannerPage() {
     }
   };
 
+  // --- Save ---
   const saveMut = useMutation({
     mutationFn: async () => {
       if (!user) throw new Error("Niet ingelogd");
-      const inputIssues = validateRoutePoints(waypoints);
-      if (inputIssues.length) throw new Error(inputIssues[0].message);
+      if (!canRoute) throw new Error("Onvolledige route");
       const name =
         saveName.trim() || `${waypoints[0].label} → ${waypoints[waypoints.length - 1].label}`;
       const payload = {
@@ -464,6 +464,8 @@ function RoutePlannerPage() {
       return;
     }
     setWaypoints(parsed);
+    // Transportmodus herstellen: expliciete snapshot wint, anders afleiden
+    // uit de aanwezigheid van een opgeslagen truckprofiel.
     const snapMode = r.vehicle_snapshot?.transport_mode;
     const restoredMode: TransportMode =
       snapMode === "car" || snapMode === "truck"
@@ -496,6 +498,7 @@ function RoutePlannerPage() {
     setNavMode(true);
   };
 
+  // Warnings summary
   const warnings = useMemo(() => {
     const w = selectedRoute?.notices ?? [];
     return w.slice(0, 8);
@@ -522,6 +525,7 @@ function RoutePlannerPage() {
         </Card>
       )}
 
+      {/* Map */}
       <Card className="mb-3 overflow-hidden">
         <div className="h-72 w-full bg-muted sm:h-96">
           <Suspense
@@ -544,6 +548,7 @@ function RoutePlannerPage() {
         </div>
       </Card>
 
+      {/* Waypoint editor */}
       <Card className="mb-3">
         <CardContent className="space-y-2 p-4">
           {waypoints.map((w, i) => (
@@ -554,7 +559,7 @@ function RoutePlannerPage() {
               value={w.label}
               biasAt={currentLoc}
               onPick={(pt, label) => setWP(i, { label, lat: pt.lat, lng: pt.lng })}
-              onChangeLabel={(v) => setWPLabel(i, v)}
+              onChangeLabel={(v) => setWP(i, { label: v })}
               onRemove={() => removeWP(i)}
               onMoveUp={() => moveWP(i, -1)}
               onMoveDown={() => moveWP(i, 1)}
@@ -577,6 +582,7 @@ function RoutePlannerPage() {
         </CardContent>
       </Card>
 
+      {/* Truck profile + avoid */}
       <Card className="mb-3">
         <CardContent className="p-4">
           <button
@@ -592,60 +598,274 @@ function RoutePlannerPage() {
             </span>
             <Settings2 className="h-4 w-4 text-muted-foreground" />
           </button>
-          {showProfilePanel && <div />}
-        </CardContent>
-      </Card>
-
-      <Card className="mb-3">
-        <CardContent className="space-y-3 p-4">
-          {routeIssues.length > 0 && (
-            <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm">
-              <p className="font-medium">Controleer de route-invoer</p>
-              <p className="mt-1 text-xs text-muted-foreground">{routeIssues[0].message}</p>
+          {showProfilePanel && (
+            <div className="mt-3 space-y-3">
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant={transportMode === "truck" ? "default" : "outline"}
+                  onClick={() => setTransportMode("truck")}
+                >
+                  Vrachtwagen
+                </Button>
+                <Button
+                  size="sm"
+                  variant={transportMode === "car" ? "default" : "outline"}
+                  onClick={() => setTransportMode("car")}
+                >
+                  Auto/bestelwagen
+                </Button>
+              </div>
+              {transportMode === "truck" && (
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  <NumField label="Hoogte (cm)" v={truck.height_cm} on={(n) => setTruck({ ...truck, height_cm: n })} />
+                  <NumField label="Breedte (cm)" v={truck.width_cm} on={(n) => setTruck({ ...truck, width_cm: n })} />
+                  <NumField label="Lengte (cm)" v={truck.length_cm} on={(n) => setTruck({ ...truck, length_cm: n })} />
+                  <NumField label="Gewicht (kg)" v={truck.weight_kg} on={(n) => setTruck({ ...truck, weight_kg: n })} />
+                  <NumField
+                    label="Actueel gewicht (kg)"
+                    v={truck.current_weight_kg}
+                    on={(n) => setTruck({ ...truck, current_weight_kg: n })}
+                  />
+                  <NumField label="Aslast (kg)" v={truck.axle_weight_kg} on={(n) => setTruck({ ...truck, axle_weight_kg: n })} />
+                  <NumField label="Assen" v={truck.axle_count} on={(n) => setTruck({ ...truck, axle_count: n })} />
+                  <NumField label="Aanhangers" v={truck.trailer_count} on={(n) => setTruck({ ...truck, trailer_count: n })} />
+                  <div>
+                    <Label className="text-xs">Tunnelcategorie</Label>
+                    <select
+                      className="mt-1 block h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+                      value={truck.tunnel_category ?? ""}
+                      onChange={(e) =>
+                        setTruck({ ...truck, tunnel_category: (e.target.value || null) as any })
+                      }
+                    >
+                      <option value="">—</option>
+                      <option value="B">B</option>
+                      <option value="C">C</option>
+                      <option value="D">D</option>
+                      <option value="E">E</option>
+                    </select>
+                  </div>
+                  <label className="col-span-2 flex items-center gap-2 text-sm sm:col-span-3">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4"
+                      checked={Boolean(truck.hazardous)}
+                      onChange={(e) => setTruck({ ...truck, hazardous: e.target.checked })}
+                    />
+                    Gevaarlijke lading (ADR)
+                  </label>
+                  <label className="col-span-2 flex items-center gap-2 text-sm sm:col-span-3">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4"
+                      checked={Boolean(truck.is_lzv)}
+                      onChange={(e) => setTruck({ ...truck, is_lzv: e.target.checked })}
+                    />
+                    LZV-combinatie (25,25 m / 60 t)
+                  </label>
+                  {(vehicleErrors.length > 0 || vehicleWarnings.length > 0) && (
+                    <div className="col-span-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-2 text-[11px] text-yellow-100 sm:col-span-3">
+                      <p className="font-semibold">
+                        Voertuiggegevens controleren ({vehicleErrors.length} fouten,{" "}
+                        {vehicleWarnings.length} aandachtspunten)
+                      </p>
+                      <ul className="mt-1 list-disc pl-4">
+                        {[...vehicleErrors, ...vehicleWarnings].slice(0, 5).map((i, idx) => (
+                          <li key={`${i.field}-${idx}`}>{i.message}</li>
+                        ))}
+                      </ul>
+                      <p className="mt-1 opacity-80">
+                        Routeberekening blijft mogelijk; HERE gebruikt alleen de ingevulde
+                        waarden.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+              <div>
+                <p className="mb-1 text-xs font-semibold text-muted-foreground">Vermijden</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {(Object.keys(AVOID_LABELS) as AvoidFeature[]).map((f) => (
+                    <button
+                      key={f}
+                      type="button"
+                      onClick={() => toggleAvoid(f)}
+                      className={`rounded-full border px-3 py-1 text-xs transition ${
+                        avoid.includes(f)
+                          ? "border-primary bg-primary/15 text-primary"
+                          : "border-border text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {AVOID_LABELS[f]}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={() => void doCompute()} disabled={!canRoute || computing}>
-              {computing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Navigation className="mr-2 h-4 w-4" />}
-              Bereken
-            </Button>
-            <Button variant="outline" onClick={() => void doCompute({ alternatives: 3 })} disabled={!canRoute || computing}>
-              Alternatieven
-            </Button>
-          </div>
-          {computeError && <p className="text-sm text-destructive">{computeError}</p>}
         </CardContent>
       </Card>
 
+      {/* Route actions */}
+      <div className="mb-3 flex flex-wrap gap-2">
+        <Button
+          onClick={() => doCompute()}
+          disabled={computing || !canRoute}
+          className="min-w-[140px] flex-1"
+        >
+          {computing ? (
+            <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+          ) : (
+            <RefreshCw className="mr-1 h-4 w-4" />
+          )}
+          {routes.length ? "Opnieuw berekenen" : "Bereken route"}
+        </Button>
+        <Button
+          variant="default"
+          disabled={!selectedRoute}
+          onClick={startNav}
+          className="min-w-[140px] flex-1"
+        >
+          <Navigation className="mr-1 h-4 w-4" /> Start navigatie
+        </Button>
+      </div>
+
+      {computeError && (
+        <Card className="mb-3 border-destructive/40 bg-destructive/10">
+          <CardContent className="flex items-start gap-2 p-3 text-xs text-destructive-foreground">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{computeError}</span>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Alternatives */}
+      {routes.length > 1 && (
+        <Card className="mb-3">
+          <CardContent className="p-3">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Alternatieven ({routes.length})
+            </p>
+            <div className="flex gap-2 overflow-x-auto">
+              {routes.map((r, i) => {
+                const active = r.id === (selectedRouteId ?? routes[0].id);
+                return (
+                  <button
+                    key={r.id}
+                    onClick={() => setSelectedRouteId(r.id)}
+                    className={`min-w-[130px] rounded-lg border p-2 text-left text-xs ${
+                      active ? "border-primary bg-primary/10" : "border-border"
+                    }`}
+                  >
+                    <p className="font-semibold">Route {i + 1}{i === 0 ? " (snelste)" : ""}</p>
+                    <p>{formatDistance(r.distance_m)} · {formatDuration(r.duration_s)}</p>
+                    {r.traffic_delay_s > 60 && (
+                      <p className="text-yellow-400">+{formatDuration(r.traffic_delay_s)} verkeer</p>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Summary */}
       {selectedRoute && (
         <Card className="mb-3">
-          <CardContent className="space-y-3 p-4">
-            <div className="grid grid-cols-3 gap-3">
+          <CardContent className="p-4">
+            <div className="mb-3 grid grid-cols-4 gap-2 text-center">
               <Stat label="Afstand" value={formatDistance(selectedRoute.distance_m)} />
               <Stat label="Duur" value={formatDuration(selectedRoute.duration_s)} />
               <Stat label="ETA" value={etaString(selectedRoute.duration_s)} />
+              <Stat
+                label="Verkeer"
+                value={
+                  selectedRoute.traffic_delay_s > 60
+                    ? `+${formatDuration(selectedRoute.traffic_delay_s)}`
+                    : "0 min"
+                }
+              />
             </div>
             {warnings.length > 0 && (
-              <ul className="space-y-1 text-xs text-yellow-200">
-                {warnings.map((w, i) => <li key={i}>• {w}</li>)}
-              </ul>
+              <div className="mb-3 rounded-md border border-yellow-500/30 bg-yellow-500/10 p-2 text-xs text-yellow-100">
+                <p className="mb-1 flex items-center gap-1 font-semibold">
+                  <AlertTriangle className="h-3.5 w-3.5" /> Waarschuwingen ({warnings.length})
+                </p>
+                <ul className="list-inside list-disc space-y-0.5">
+                  {warnings.map((n, i) => (
+                    <li key={i}>{n.title}</li>
+                  ))}
+                </ul>
+              </div>
             )}
-            <div className="flex flex-wrap gap-2">
-              <Input value={saveName} onChange={(e) => setSaveName(e.target.value)} placeholder="Naam van route" />
-              <Button onClick={() => saveMut.mutate()} disabled={saveMut.isPending}>
-                <Save className="mr-2 h-4 w-4" /> Opslaan
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Input
+                placeholder="Naam voor deze route"
+                value={saveName}
+                onChange={(e) => setSaveName(e.target.value)}
+              />
+              <Button onClick={() => saveMut.mutate()} disabled={saveMut.isPending || !user}>
+                {saveMut.isPending ? (
+                  <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-1 h-4 w-4" />
+                )}
+                Opslaan
               </Button>
-              <Button variant="outline" onClick={startNav}>
-                <Navigation className="mr-2 h-4 w-4" /> Start navigatie
-              </Button>
-              <Button variant="ghost">
-                <Share2 className="mr-2 h-4 w-4" /> Delen
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  if (!selectedRoute) return;
+                  const wps = waypoints.filter((w) => w.lat !== 0 || w.lng !== 0);
+                  const text = `${wps[0]?.label ?? "Vertrek"} → ${wps[wps.length - 1]?.label ?? "Bestemming"} · ${formatDistance(selectedRoute.distance_m)} · ${formatDuration(selectedRoute.duration_s)} · ETA ${etaString(selectedRoute.duration_s)}`;
+                  try {
+                    if (typeof navigator !== "undefined" && (navigator as any).share) {
+                      await (navigator as any).share({ title: "TruckMate route", text });
+                    } else {
+                      await navigator.clipboard.writeText(text);
+                      toast.success("Route gekopieerd naar klembord");
+                    }
+                  } catch {
+                    /* user cancelled */
+                  }
+                }}
+              >
+                <Share2 className="mr-1 h-4 w-4" /> Delen
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
 
+      {/* Steps */}
+      {selectedRoute && selectedRoute.maneuvers.length > 0 && (
+        <Card className="mb-3">
+          <CardContent className="p-0">
+            <div className="border-b px-4 py-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Route-instructies ({selectedRoute.maneuvers.length})
+            </div>
+            <ol className="max-h-80 divide-y overflow-y-auto">
+              {selectedRoute.maneuvers.map((s, i) => (
+                <li key={i} className="flex items-start gap-3 px-4 py-2 text-sm">
+                  <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary/15 text-xs font-bold text-primary">
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p>{s.instruction}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDistance(s.distance_m)} · {formatDuration(s.duration_s)}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Saved routes */}
       <Card>
         <CardContent className="p-4">
           <h2 className="mb-2 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
@@ -654,7 +874,9 @@ function RoutePlannerPage() {
           {savedQ.isLoading ? (
             <p className="text-sm text-muted-foreground">Laden…</p>
           ) : !savedQ.data || savedQ.data.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nog geen opgeslagen routes.</p>
+            <p className="text-sm text-muted-foreground">
+              Nog geen opgeslagen routes. Bereken een route en druk op Opslaan.
+            </p>
           ) : (
             <ul className="divide-y">
               {savedQ.data.map((r) => (
@@ -669,6 +891,9 @@ function RoutePlannerPage() {
               ))}
             </ul>
           )}
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            Aanbieder: HERE Technologies (Maps + Routing v8). Truck-parameters worden meegestuurd.
+          </p>
         </CardContent>
       </Card>
 
@@ -676,7 +901,9 @@ function RoutePlannerPage() {
         <Suspense fallback={null}>
           <HereNavMode
             route={selectedRoute}
-            waypoints={waypoints.map((w) => ({ lat: w.lat, lng: w.lng, label: w.label }))}
+            waypoints={waypoints
+              .filter((w) => w.lat !== 0 || w.lng !== 0)
+              .map((w) => ({ lat: w.lat, lng: w.lng, label: w.label }))}
             onStop={() => setNavMode(false)}
             onReroute={rerouteFrom}
           />
@@ -687,21 +914,74 @@ function RoutePlannerPage() {
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
-  return <div><p className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</p><p className="text-lg font-bold tabular-nums">{value}</p></div>;
+  return (
+    <div>
+      <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</p>
+      <p className="text-lg font-bold tabular-nums">{value}</p>
+    </div>
+  );
 }
 
-function NumField({ label, v, on }: { label: string; v: number | null | undefined; on: (n: number | null) => void }) {
-  return <div><Label className="text-xs">{label}</Label><Input type="number" value={v ?? ""} onChange={(e) => on(e.target.value ? Number(e.target.value) : null)} /></div>;
+function NumField({
+  label,
+  v,
+  on,
+}: {
+  label: string;
+  v: number | null | undefined;
+  on: (n: number | null) => void;
+}) {
+  return (
+    <div>
+      <Label className="text-xs">{label}</Label>
+      <Input
+        type="number"
+        inputMode="numeric"
+        className="mt-1 h-9"
+        value={v ?? ""}
+        onChange={(e) => on(e.target.value ? Number(e.target.value) : null)}
+      />
+    </div>
+  );
 }
 
-function AddressRow({ index, total, value, biasAt, onPick, onChangeLabel, onRemove, onMoveUp, onMoveDown }: { index: number; total: number; value: string; biasAt: LatLng | null; onPick: (pt: LatLng, label: string) => void; onChangeLabel: (v: string) => void; onRemove: () => void; onMoveUp: () => void; onMoveDown: () => void; }) {
+function AddressRow({
+  index,
+  total,
+  value,
+  biasAt,
+  onPick,
+  onChangeLabel,
+  onRemove,
+  onMoveUp,
+  onMoveDown,
+}: {
+  index: number;
+  total: number;
+  value: string;
+  biasAt: LatLng | null;
+  onPick: (pt: LatLng, label: string) => void;
+  onChangeLabel: (v: string) => void;
+  onRemove: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+}) {
   const [hits, setHits] = useState<HereSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const isStart = index === 0;
+  const isEnd = index === total - 1;
+  const badge = isStart ? "A" : isEnd ? "B" : String(index);
+  const color = isStart ? "bg-green-500" : isEnd ? "bg-red-500" : "bg-blue-500";
   const hereReady = useHereKey().ready;
+
   useEffect(() => {
-    if (!hereReady || !value || value.length < 2) return;
+    if (!hereReady) return;
+    if (!value || value.length < 2) {
+      setHits([]);
+      return;
+    }
     const ac = new AbortController();
     abortRef.current?.abort();
     abortRef.current = ac;
@@ -709,21 +989,170 @@ function AddressRow({ index, total, value, biasAt, onPick, onChangeLabel, onRemo
     const t = setTimeout(() => {
       autosuggest(value, biasAt ?? undefined, ac.signal)
         .then((r) => setHits(r))
-        .catch(() => setHits([]))
+        .catch((e) => {
+          if ((e as Error).name !== "AbortError") setHits([]);
+        })
         .finally(() => setLoading(false));
     }, 300);
-    return () => { clearTimeout(t); ac.abort(); };
+    return () => {
+      clearTimeout(t);
+      ac.abort();
+    };
   }, [value, biasAt, hereReady]);
+
   const pick = async (h: HereSuggestion) => {
     let pos = h.position ?? null;
     if (!pos) pos = await lookupSuggestion(h);
-    if (!pos) return toast.error("Locatie niet gevonden");
+    if (!pos) {
+      toast.error("Locatie niet gevonden");
+      return;
+    }
     onPick(pos, h.address ?? h.title);
     setOpen(false);
   };
-  return <div className="relative"><div className="flex items-center gap-2"><Input value={value} onChange={(e) => { onChangeLabel(e.target.value); setOpen(true); }} onFocus={() => setOpen(true)} />{total > 2 && <><Button variant="ghost" size="icon" onClick={onMoveUp} disabled={index === 0}><ChevronUp className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={onMoveDown} disabled={index === total - 1}><ChevronDown className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={onRemove}><Trash2 className="h-4 w-4" /></Button></>}</div>{open && (hits.length > 0 || loading) && <div className="absolute z-30 mt-1 w-full rounded-md border bg-popover">{loading && <div className="p-2 text-xs">Zoeken…</div>}{hits.map((h) => <button key={h.id} type="button" className="block w-full p-2 text-left" onMouseDown={(e) => { e.preventDefault(); void pick(h); }}><MapPin className="mr-2 inline h-3.5 w-3.5" />{h.title}</button>)}</div>}</div>;
+
+  return (
+    <div className="relative">
+      <div className="flex items-center gap-2">
+        <span
+          className={`grid h-6 w-6 shrink-0 place-items-center rounded-full ${color} text-xs font-bold text-white`}
+        >
+          {badge}
+        </span>
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            className="pl-8"
+            placeholder={isStart ? "Vertrekadres" : isEnd ? "Bestemming" : "Tussenstop"}
+            value={value}
+            onChange={(e) => {
+              onChangeLabel(e.target.value);
+              setOpen(true);
+            }}
+            onFocus={() => setOpen(true)}
+            onBlur={() => setTimeout(() => setOpen(false), 200)}
+          />
+        </div>
+        {total > 2 && (
+          <>
+            <Button variant="ghost" size="icon" onClick={onMoveUp} disabled={index === 0} aria-label="Omhoog">
+              <ChevronUp className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onMoveDown}
+              disabled={index === total - 1}
+              aria-label="Omlaag"
+            >
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={onRemove} aria-label="Verwijderen">
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </>
+        )}
+      </div>
+      {open && (hits.length > 0 || loading) && (
+        <div className="absolute left-8 right-0 top-full z-30 mt-1 max-h-64 overflow-y-auto rounded-md border border-border bg-popover shadow-lg">
+          {loading && (
+            <div className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground">
+              <Loader2 className="h-3 w-3 animate-spin" /> Zoeken…
+            </div>
+          )}
+          {hits.map((h) => (
+            <button
+              key={h.id}
+              type="button"
+              className="flex w-full items-start gap-2 px-3 py-2 text-left text-sm hover:bg-accent"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                void pick(h);
+              }}
+            >
+              <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              <div className="min-w-0">
+                <p className="truncate font-medium">{h.title}</p>
+                {h.address && h.address !== h.title && (
+                  <p className="truncate text-xs text-muted-foreground">{h.address}</p>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
-function SavedItem({ route, onLoad, onRename, onDelete, onComplete }: { route: SavedRoute; onLoad: () => void; onRename: (name: string) => void; onDelete: () => void; onComplete: () => void; }) {
-  return <li className="py-2"><div className="flex items-center gap-2"><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{route.name}</p><p className="text-xs text-muted-foreground">{route.waypoints.length} punten</p></div><Button size="sm" variant="outline" onClick={onLoad}>Laden</Button><Button size="icon" variant="ghost" onClick={() => onRename(route.name)}><RefreshCw className="h-4 w-4" /></Button>{!route.completed && <Button size="icon" variant="ghost" onClick={onComplete}><Save className="h-4 w-4" /></Button>}<Button size="icon" variant="ghost" onClick={onDelete}><Trash2 className="h-4 w-4" /></Button></div></li>;
+function SavedItem({
+  route,
+  onLoad,
+  onRename,
+  onDelete,
+  onComplete,
+}: {
+  route: SavedRoute;
+  onLoad: () => void;
+  onRename: (name: string) => void;
+  onDelete: () => void;
+  onComplete: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(route.name);
+  return (
+    <li className="py-2">
+      <div className="flex items-center gap-2">
+        {editing ? (
+          <>
+            <Input value={name} onChange={(e) => setName(e.target.value)} className="h-8" />
+            <Button
+              size="sm"
+              onClick={() => {
+                onRename(name.trim() || route.name);
+                setEditing(false);
+              }}
+            >
+              Ok
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>
+              Annuleer
+            </Button>
+          </>
+        ) : (
+          <>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium">
+                {route.name}
+                {route.completed && (
+                  <Badge variant="secondary" className="ml-2 text-[10px]">
+                    Voltooid
+                  </Badge>
+                )}
+              </p>
+              <p className="truncate text-xs text-muted-foreground">
+                {route.waypoints.length} punten
+                {route.distance_m ? ` · ${formatDistance(route.distance_m)}` : ""}
+                {route.duration_s ? ` · ${formatDuration(route.duration_s)}` : ""}
+              </p>
+            </div>
+            <Button size="sm" variant="outline" onClick={onLoad}>
+              Laden
+            </Button>
+            <Button size="icon" variant="ghost" onClick={() => setEditing(true)} aria-label="Hernoemen">
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+            {!route.completed && (
+              <Button size="icon" variant="ghost" onClick={onComplete} aria-label="Markeer voltooid">
+                <Save className="h-4 w-4" />
+              </Button>
+            )}
+            <Button size="icon" variant="ghost" onClick={onDelete} aria-label="Verwijderen">
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </>
+        )}
+      </div>
+    </li>
+  );
 }
