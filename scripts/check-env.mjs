@@ -9,9 +9,7 @@ const required = [
   ["VITE_HERE_API_KEY", "HERE_API_KEY"],
 ];
 
-const missing = required.filter(
-  (aliases) => !aliases.some((name) => process.env[name]?.trim()),
-);
+const missing = required.filter((aliases) => !aliases.some((name) => process.env[name]?.trim()));
 
 if (missing.length) {
   console.error("Ontbrekende omgevingsvariabelen:");
