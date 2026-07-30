@@ -172,7 +172,6 @@ function RoutePlannerPage() {
       axle_count: p.vehicle_axle_count,
       trailer_count: p.vehicle_trailer_count,
       hazardous: p.vehicle_hazardous,
-      tunnel_category: p.vehicle_tunnel_category ?? null,
       is_lzv: p.vehicle_is_lzv ?? null,
     });
     // Terugschakelen naar truck wanneer het profiel weer een vrachtwagen is
