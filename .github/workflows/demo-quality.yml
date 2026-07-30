@@ -36,6 +36,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Route input tests
+        run: npm run test
+
       - name: Lint standalone setup
         run: npx eslint scripts/check-env.mjs vite.config.ts
 
