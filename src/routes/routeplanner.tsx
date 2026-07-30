@@ -270,6 +270,33 @@ function RoutePlannerPage() {
 
   const filled = waypoints.filter((w) => w.lat !== 0 || w.lng !== 0);
   const canRoute = filled.length >= 2 && filled.length === waypoints.length && here.ready;
+
+  // Voertuigvalidatie — informerend, blokkeert de demo niet.
+  const vehicleIssues: Issue[] = useMemo(() => {
+    if (transportMode !== "truck") return [];
+    const vehicleClass: VehicleClass = truck.is_lzv
+      ? "lzv"
+      : vehicleMeta.has_exemption
+        ? "exceptional"
+        : "truck";
+    return validateVehicle({
+      vehicleClass,
+      length_cm: truck.length_cm,
+      width_cm: truck.width_cm,
+      height_cm: truck.height_cm,
+      weight_kg: truck.weight_kg,
+      current_weight_kg: truck.current_weight_kg,
+      axle_weight_kg: truck.axle_weight_kg,
+      axle_count: truck.axle_count,
+      trailer_count: truck.trailer_count,
+      has_exemption: vehicleMeta.has_exemption,
+      exemption_ref: vehicleMeta.exemption_ref,
+      exemption_expires: vehicleMeta.exemption_expires,
+    });
+  }, [transportMode, truck, vehicleMeta]);
+  const vehicleErrors = vehicleIssues.filter((i) => i.level === "error");
+  const vehicleWarnings = vehicleIssues.filter((i) => i.level === "warning");
+
   const selectedRoute =
     routes.find((r) => r.id === selectedRouteId) ?? routes[0] ?? null;
 
