@@ -45,6 +45,7 @@ import {
   type TransportMode,
   type TruckProfile,
 } from "@/lib/here";
+import { validateVehicle, type Issue, type VehicleClass } from "@/lib/lzv";
 
 const HereMap = lazy(() =>
   import("@/components/here-map").then((m) => ({ default: m.HereMap })),
@@ -100,6 +101,8 @@ type SavedRoute = {
   completed: boolean;
   completed_at: string | null;
   updated_at: string;
+  is_lzv?: boolean | null;
+  vehicle_snapshot?: { transport_mode?: string | null } | null;
 };
 
 const AVOID_LABELS: Record<AvoidFeature, string> = {
