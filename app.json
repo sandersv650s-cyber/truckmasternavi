@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "Worldchat",
+    "slug": "worldchat",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "worldchat",
+    "userInterfaceStyle": "automatic",
+    "ios": { "supportsTablet": true },
+    "android": { "predictiveBackGestureEnabled": false },
+    "plugins": ["expo-router", "expo-secure-store"],
+    "experiments": { "typedRoutes": true }
+  }
+}
