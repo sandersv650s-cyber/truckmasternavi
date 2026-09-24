@@ -5,6 +5,7 @@ import { Avatar, Button, colors, Field } from '@/components/ui';
 import { requireClient } from '@/lib/supabase';
 import { useSession } from '@/lib/session';
 import type { Profile } from '@/lib/types';
+import { ensureIdentity } from '@/lib/crypto';
 export default function NewConversation() {
   const { session } = useSession(); const [query, setQuery] = useState(''); const [results, setResults] = useState<Profile[]>([]);
   const [selected, setSelected] = useState<Profile[]>([]); const [title, setTitle] = useState(''); const [busy, setBusy] = useState(false);
@@ -23,6 +24,7 @@ export default function NewConversation() {
     if (!session || !selected.length) return;
     setBusy(true);
     try {
+      await ensureIdentity(session.user.id);
       const { data, error } = await requireClient().rpc('start_conversation', { other_ids: selected.map(p => p.id), group_title: selected.length > 1 ? title.trim() || null : null });
       if (error) throw error;
       router.replace({ pathname: '/chat/[id]', params: { id: data as string } });

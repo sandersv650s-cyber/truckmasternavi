@@ -1,44 +1,44 @@
-# Worldchat
+# Worldchat: versleutelde berichten met vertaling op het toestel
 
-Een eerste mobiele berichtenapp voor iPhone en Android: accounts, profielen, zoeken op gebruikersnaam, privé- en groepsgesprekken en vertaling naar de taal van de ontvanger. De originele tekst blijft opvraagbaar. Dit is een MVP, nog geen publieke productieversie.
+Een mobiele MVP voor iPhone en Android: accounts, profielen, zoeken op gebruikersnaam, privé- en groepsgesprekken. Berichten worden **op het toestel versleuteld**, krijgen voor iedere deelnemer een eigen versleutelde kopie en worden pas op het toestel van de ontvanger ontsleuteld. ML Kit vertaalt ze vervolgens lokaal. De server bewaart geen leesbare berichttekst en DeepL wordt niet gebruikt.
 
-## Wat je nodig hebt
+## Installatie op Windows
 
-- Windows, Node.js en npm
-- Expo Go op je iPhone (of Android)
-- Een Supabase-project
-- Een DeepL API-sleutel voor automatische vertaling
+Je hebt Node.js, npm, een Supabase-project en voor een iPhone-ontwikkelbuild een Expo-account en Apple Developer-account nodig. Een eigen ontwikkelbuild is nodig voor de ingebouwde vertaalmodule. Expo Go kan de app wel openen, maar kan niet op het toestel vertalen.
 
-## Stap voor stap
-
-1. Maak een nieuw project op [Supabase](https://supabase.com/). Open **SQL Editor**, plak `supabase/schema.sql` en voer het uit op een leeg project.
-2. Open **Project Settings → API**. Kopieer de project-URL en de **publishable/anon** sleutel. Gebruik hier nooit de service role sleutel.
-3. Kopieer `.env.example` naar `.env` en vervang de twee voorbeeldwaarden. `.env` hoort niet op GitHub.
-4. Installeer [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started), log in en koppel je project:
+1. Maak een **leeg** project op [Supabase](https://supabase.com/). Voer `supabase/schema.sql` uit in **SQL Editor**. Had je al het vorige plaintext schema geïnstalleerd? Gebruik **in plaats daarvan** `supabase/migrations/20260924_e2ee.sql`. Die migratie wist de oude leesbare berichten en vertalingen uit de actieve database; bewaar eerst gegevens die je nodig hebt. Oude backups/logs kunnen nog plaintext bevatten.
+2. Kopieer uit **Project Settings → API** de project-URL en de publishable/anon sleutel. Kopieer `.env.example` naar `.env` en vul de twee waarden in. Plaats nooit een service role sleutel in de app of op GitHub.
+3. Installeer de app en publiceer de serverfunctie:
 
    ```bash
    npm install
    npx supabase login
    npx supabase link --project-ref JOUW_PROJECT_REF
-   npx supabase secrets set DEEPL_AUTH_KEY=JOUW_DEEPL_SLEUTEL
    npx supabase functions deploy send-message
    ```
 
-   De Supabase-omgeving levert `SUPABASE_URL`, `SUPABASE_ANON_KEY` en `SUPABASE_SERVICE_ROLE_KEY` aan de serverfunctie. Gebruik je een betaalde DeepL API-sleutel, zet ook `DEEPL_API_URL=https://api.deepl.com/v2/translate` via `supabase secrets set`. De gratis sleutel gebruikt standaard `api-free.deepl.com`.
-
-5. In Supabase **Authentication → Providers → Email** kun je e-mailbevestiging aan laten staan. Een nieuw account moet dan eerst op de link in de e-mail klikken.
-6. Start de app:
+4. Maak op Windows een iPhone-ontwikkelbuild via Expo's cloudbouw. Volg de stappen voor een Apple-account en registratie van je eigen iPhone die EAS toont:
 
    ```bash
-   npx expo start
+   npx eas-cli login
+   npx eas-cli build:configure
+   npx eas-cli device:create
+   npx eas-cli build --profile development --platform ios
+   npx expo start --dev-client
    ```
 
-7. Scan de QR-code met Expo Go op je iPhone. De pc en telefoon moeten elkaar kunnen bereiken; gebruik zo nodig `npx expo start --tunnel`. Maak twee accounts, stel in **Mijn profiel** voor ieder een andere leestaal in, zoek de andere gebruiker op gebruikersnaam en begin een gesprek.
+   Installeer de voltooide build via de EAS-link op je iPhone en open daarna de ontwikkelserver. Voor Android vervang je `ios` door `android`. Bij native codewijzigingen is opnieuw bouwen nodig.
 
-## Veiligheid en grenzen
+5. Maak twee accounts met verschillende ingestelde talen. Zoek elkaar op gebruikersnaam en stuur een bericht. Taalmodellen worden op het toestel via wifi gedownload; zonder model toont de chat het originele, ontsleutelde bericht en een melding.
 
-- De DeepL-sleutel en service role sleutel staan alleen op de server; nooit in `.env` van de app.
-- Databasebeveiliging beperkt het lezen van gesprekken tot deelnemers. Alleen de serverfunctie kan berichten toevoegen. Gebruikers kunnen anderen blokkeren en rapporteren.
-- Berichten worden als leesbare tekst opgeslagen en naar DeepL verzonden om te vertalen. Dit is geen end-to-end versleutelde messenger. Zet een privacybeleid, moderatieproces, verwijdermogelijkheid en limieten op gebruik en API-kosten op voordat je de app openbaar maakt.
-- De profieltaal is tevens de veronderstelde schrijftaal. Typ je een bericht in een andere taal, dan kan de vertaling onjuist zijn. Een taalwijziging vertaalt oude berichten nog niet opnieuw.
-- Er zijn in deze eerste versie geen foto's, spraakgesprekken, pushberichten of videogesprekken.
+## Wat de versleuteling wel en niet beschermt
+
+- Alleen de telefoons van deelnemers bezitten privésleutels. Supabase en de serverfunctie zien versleutelde tekst, afzender, ontvangers, tijdstip en groepsnaam. Profielen en deelnemerslijsten zijn niet versleuteld.
+- De privésleutel staat in de beveiligde opslag van het toestel. De publieke sleutel wordt bij eerste gebruik vastgelegd in de database en mag daarna niet worden gewijzigd. De app onthoudt de eerste sleutel die hij van een gesprekspartner ziet en stopt bij een onverwachte wijziging. Vergelijk de beveiligingscode **buiten de app om** met die persoon: eerste sleutelcontact is anders gevoelig voor sleutelvervanging door een kwaadwillende server.
+- Dit prototype gebruikt TweetNaCl `box` met vaste sleutels per account. Het heeft **geen forward secrecy, sleutelherstel, multi-device synchronisatie of onafhankelijke beveiligingsaudit**. Wie zijn privésleutel verliest, kan oude berichten niet op een nieuw toestel herstellen. Een gestolen privésleutel kan oude onderschepte berichten ontsleutelen. Voor een publieke messenger is een doorgelicht protocol zoals Signal met veilige sleutelrotatie en herstel nodig.
+- De app kan een melding over een profiel doorgeven, maar de beheerder kan de inhoud van het versleutelde gesprek niet inzien. Werk een moderatie- en misbruikproces uit voor een publieke lancering.
+- Deel geen gevoelige gegevens voordat het native iOS- en Android-gedrag en de databasebeveiliging op echte toestellen zijn getest. Dit project is een bouwbare basis, geen gecertificeerde beveiligde messenger.
+
+## Controle
+
+`npm run check` controleert TypeScript en test lokaal dat alleen de juiste privésleutel de tekst kan ontsleutelen en dat wijzigingen in het versleutelde bericht worden afgewezen. Een bundelcontrole vervangt geen test van de native vertaling, Supabase-migratie of gesprekken tussen echte telefoons.

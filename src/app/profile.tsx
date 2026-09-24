@@ -5,10 +5,14 @@ import { Button, colors, Field } from '@/components/ui';
 import { LANGUAGES } from '@/lib/types';
 import { requireClient } from '@/lib/supabase';
 import { useSession } from '@/lib/session';
+import { ensureIdentity, fingerprint } from '@/lib/crypto';
+import { encode } from '@/lib/crypto-core';
 export default function ProfileScreen() {
   const { session, profile, refresh } = useSession();
   const [username, setUsername] = useState(''); const [name, setName] = useState(''); const [country, setCountry] = useState(''); const [bio, setBio] = useState(''); const [language, setLanguage] = useState('nl'); const [busy, setBusy] = useState(false);
+  const [safetyCode, setSafetyCode] = useState('');
   useEffect(() => { if (profile) { setUsername(profile.username); setName(profile.display_name); setCountry(profile.country ?? ''); setBio(profile.bio ?? ''); setLanguage(profile.language); } }, [profile]);
+  useEffect(() => { if (session) void ensureIdentity(session.user.id).then(async key => setSafetyCode(await fingerprint(encode(key.publicKey)))).catch(() => setSafetyCode('Sleutel ontbreekt op dit toestel')); }, [session?.user.id]);
   async function save() {
     if (!session) return;
     if (!/^[a-z0-9_]{3,24}$/.test(username.toLowerCase()) || !name.trim() || !LANGUAGES[language]) return Alert.alert('Controleer je profiel', 'Gebruikersnaam: 3–24 letters, cijfers of _. Kies ook een naam en taal.');
@@ -22,6 +26,7 @@ export default function ProfileScreen() {
   }
   return <ScrollView contentInsetAdjustmentBehavior="automatic" keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, gap: 14 }}>
     <Text style={{ color: colors.muted }}>Anderen vinden je via je gebruikersnaam. Je taal bepaalt hoe jij berichten van anderen leest.</Text>
+    <Text selectable style={{ color: colors.sea, fontWeight: '700' }}>🔒 Mijn beveiligingscode: {safetyCode || 'Laden…'}</Text>
     <Field value={username} onChangeText={setUsername} placeholder="Gebruikersnaam" autoCapitalize="none" />
     <Field value={name} onChangeText={setName} placeholder="Naam" />
     <Field value={country} onChangeText={setCountry} placeholder="Land (optioneel)" />
